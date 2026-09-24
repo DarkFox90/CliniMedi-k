@@ -16,10 +16,15 @@ En esta versión las pantallas están implementadas a nivel visual con datos de 
 
 ## Estructura
 
-- `main` – versión integrada del proyecto con el tema, los modelos de datos, los datos de prueba y las pantallas terminadas
-- `andres` – configuración inicial del dispositivo y vistas del médico
-- `estuardo` – inicio de recepción, fila, detalle del paciente, búsqueda y resumen del día
-- `carlos` – agenda, nueva cita, registro de pacientes y pantallas de código QR
+- `data/model` – modelos de datos de la app: médicos, pacientes, visitas, citas, recetas, referencias, cobros y documentos
+- `data/fake` – datos de prueba que alimentan las pantallas mientras no hay base de datos
+- `ui/theme` – colores, tipografía y formas basados en Material 3
+- `ui/components` – componentes reutilizables entre pantallas, como la tarjeta de paciente, los chips de estado y la barra de navegación
+- `ui/screens/setup` – configuración inicial del dispositivo: inicio de sesión, selección de rol y médico asignado
+- `ui/screens/recepcion` – vistas de recepción: fila de espera, detalle del paciente, búsqueda, agenda, registro de pacientes, códigos QR y resumen del día
+- `ui/screens/medico` – vistas de solo lectura del médico: su fila, el historial de sus pacientes y su agenda
+
+Cada pantalla se divide en cuatro archivos: `Screen`, que solo dibuja la interfaz y contiene sus previews; `Route`, que obtiene los datos y se los pasa a la `Screen`; `UiState`, con el estado que muestra la pantalla; e `Intent`, con las acciones que puede realizar el usuario.
 
 ## Herramientas
 
