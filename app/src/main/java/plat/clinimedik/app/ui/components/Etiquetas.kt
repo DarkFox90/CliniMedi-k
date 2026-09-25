@@ -3,6 +3,7 @@ package plat.clinimedik.app.ui.components
 import plat.clinimedik.app.data.model.EstadoCivil
 import plat.clinimedik.app.data.model.EstadoConfirmacion
 import plat.clinimedik.app.data.model.EstadoVisita
+import plat.clinimedik.app.data.model.RolDispositivo
 import plat.clinimedik.app.data.model.TipoDocumento
 import plat.clinimedik.app.data.model.TipoPago
 
@@ -38,4 +39,9 @@ fun EstadoCivil.etiqueta(): String = when (this) {
     EstadoCivil.UNION_DE_HECHO -> "Unión de hecho"
     EstadoCivil.DIVORCIADO -> "Divorciado(a)"
     EstadoCivil.VIUDO -> "Viudo(a)"
+}
+
+fun RolDispositivo.etiqueta(): String = when (this) {
+    RolDispositivo.RECEPCION -> "Recepción"
+    RolDispositivo.MEDICO -> "Médico"
 }
