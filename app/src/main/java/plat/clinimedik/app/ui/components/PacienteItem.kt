@@ -27,7 +27,8 @@ fun PacienteItem(
     tiempo: String? = null,
     estado: EstadoVisita? = null,
     esUrgente: Boolean = false,
-    onClick: () -> Unit = {}
+    onClick: () -> Unit = {},
+    accion: (@Composable () -> Unit)? = null
 ) {
     val destacado = esUrgente && estado == EstadoVisita.ESPERANDO
     val fondo = if (destacado) {
@@ -81,6 +82,10 @@ fun PacienteItem(
                         )
                     }
                 }
+            }
+            if (accion != null) {
+                Spacer(modifier = Modifier.width(4.dp))
+                accion()
             }
         }
     }
