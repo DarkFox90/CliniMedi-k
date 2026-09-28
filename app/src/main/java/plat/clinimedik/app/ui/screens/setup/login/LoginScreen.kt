@@ -12,9 +12,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -42,7 +44,7 @@ fun LoginScreen(
                 .padding(horizontal = 24.dp, vertical = 32.dp)
         ) {
             Text(
-                text = state.nombreApp,
+                text = "CliniMedi-k",
                 style = MaterialTheme.typography.displaySmall,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -60,7 +62,23 @@ fun LoginScreen(
                 textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.height(32.dp))
+            if (state.mensajeError != null) {
+                Surface(
+                    color = MaterialTheme.colorScheme.errorContainer,
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                    shape = MaterialTheme.shapes.small,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = state.mensajeError,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(12.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+            }
             BotonGoogle(
+                cargando = state.cargando,
                 onClick = { onIntent(LoginIntent.ContinuarConGoogle) },
                 modifier = Modifier.fillMaxWidth()
             )
@@ -77,25 +95,35 @@ fun LoginScreen(
 
 @Composable
 private fun BotonGoogle(
+    cargando: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     OutlinedButton(
         onClick = onClick,
+        enabled = !cargando,
         colors = ButtonDefaults.outlinedButtonColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
-            contentColor = MaterialTheme.colorScheme.onSurface
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            disabledContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest
         ),
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
         modifier = modifier
     ) {
-        Image(
-            painter = painterResource(id = R.drawable.ic_google),
-            contentDescription = null,
-            modifier = Modifier.size(18.dp)
-        )
+        if (cargando) {
+            CircularProgressIndicator(
+                strokeWidth = 2.dp,
+                modifier = Modifier.size(18.dp)
+            )
+        } else {
+            Image(
+                painter = painterResource(id = R.drawable.ic_google),
+                contentDescription = null,
+                modifier = Modifier.size(18.dp)
+            )
+        }
         Spacer(modifier = Modifier.width(12.dp))
-        Text(text = "Continuar con Google")
+        Text(text = if (cargando) "Iniciando sesión…" else "Continuar con Google")
     }
 }
 
@@ -104,5 +132,26 @@ private fun BotonGoogle(
 private fun LoginNormalPreview() {
     CliniMedikTheme {
         LoginScreen(state = LoginUiState(), onIntent = {})
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+private fun LoginCargandoPreview() {
+    CliniMedikTheme {
+        LoginScreen(state = LoginUiState(cargando = true), onIntent = {})
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+private fun LoginErrorPreview() {
+    CliniMedikTheme {
+        LoginScreen(
+            state = LoginUiState(
+                mensajeError = "No se pudo iniciar sesión con Google. Revisa tu conexión e intenta de nuevo."
+            ),
+            onIntent = {}
+        )
     }
 }
