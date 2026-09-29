@@ -33,6 +33,17 @@ Cada pantalla se divide en cuatro archivos: `Screen`, que solo dibuja la interfa
 - Jetpack Compose
 - Material 3
 
+
+## Ramas
+
+El trabajo se organiza en ramas de feature, una por integrante, que se integran a `main` mediante Pull Request.
+
+- `feature/fila-expediente` – Andrés Castro: base compartida (tema, modelos, datos de prueba, componentes), fila de recepción con marcar urgente, detalle del paciente con receta, referencia, cobro y documentos, e historial del médico
+- `feature/setup-inicio` – Estuardo García: configuración inicial (inicio de sesión, rol, médico asignado), inicio de recepción, búsqueda, resumen del día, fila y pacientes del médico
+- `feature/agenda-registro` – Carlos Pozuelos: agenda de recepción y del médico, nueva cita, registro, cuestionario de ingreso y pantallas de código QR
+
+
+
 **Para ejecutar este proyecto:**
 
 1. Clonar el repositorio.
