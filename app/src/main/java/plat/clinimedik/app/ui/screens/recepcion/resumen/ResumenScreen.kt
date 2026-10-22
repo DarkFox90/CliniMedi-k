@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -46,6 +47,17 @@ fun ResumenScreen(
         },
         modifier = modifier
     ) { innerPadding ->
+        if (state.cargando) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            ) {
+                CircularProgressIndicator()
+            }
+            return@Scaffold
+        }
         Column(
             verticalArrangement = Arrangement.spacedBy(24.dp),
             modifier = Modifier
@@ -284,6 +296,17 @@ private fun TituloSeccion(texto: String) {
         style = MaterialTheme.typography.titleMedium,
         color = MaterialTheme.colorScheme.onSurface
     )
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+private fun ResumenCargandoPreview() {
+    CliniMedikTheme {
+        ResumenScreen(
+            state = ResumenUiState(),
+            onEvent = {}
+        )
+    }
 }
 
 @Preview(showBackground = true, showSystemUi = true)
