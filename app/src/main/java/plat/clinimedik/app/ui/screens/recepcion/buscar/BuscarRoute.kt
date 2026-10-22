@@ -6,6 +6,10 @@ import plat.clinimedik.app.data.fake.FakeDataSource
 import plat.clinimedik.app.data.model.Paciente
 import plat.clinimedik.app.ui.components.ContenedorRecepcion
 import plat.clinimedik.app.ui.components.PestanaRecepcion
+import androidx.navigation.NavController
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.compose.composable
+import plat.clinimedik.app.ui.navigation.Buscar
 
 private val idsRecientes = listOf("pac-005", "pac-004", "pac-002")
 
@@ -36,5 +40,11 @@ fun BuscarRoute() {
     val state = remember { buscarUiStateDePrueba() }
     ContenedorRecepcion(seleccion = PestanaRecepcion.BUSCAR) {
         BuscarScreen(state = state, onEvent = {})
+    }
+}
+
+fun NavGraphBuilder.buscarDestino(navController: NavController) {
+    composable<Buscar> {
+        BuscarRoute()
     }
 }

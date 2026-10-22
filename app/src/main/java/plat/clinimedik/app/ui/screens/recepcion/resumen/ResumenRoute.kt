@@ -14,6 +14,10 @@ import plat.clinimedik.app.ui.components.formatearEspera
 import plat.clinimedik.app.ui.components.formatearFechaLarga
 import plat.clinimedik.app.ui.components.formatearHora
 import plat.clinimedik.app.ui.components.formatearMonto
+import androidx.navigation.NavController
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.compose.composable
+import plat.clinimedik.app.ui.navigation.Resumen
 
 private fun Visita.terminoConsulta(): Boolean =
     estado == EstadoVisita.ATENDIDO || estado == EstadoVisita.REFERIDO
@@ -82,4 +86,10 @@ fun resumenUiStateDePrueba(): ResumenUiState {
 fun ResumenRoute() {
     val state = remember { resumenUiStateDePrueba() }
     ResumenScreen(state = state, onEvent = {})
+}
+
+fun NavGraphBuilder.resumenDestino(navController: NavController) {
+    composable<Resumen> {
+        ResumenRoute()
+    }
 }

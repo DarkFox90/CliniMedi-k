@@ -10,6 +10,10 @@ import plat.clinimedik.app.data.model.Visita
 import plat.clinimedik.app.ui.components.ContenedorMedico
 import plat.clinimedik.app.ui.components.PestanaMedico
 import plat.clinimedik.app.ui.components.formatearFecha
+import androidx.navigation.NavController
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.compose.composable
+import plat.clinimedik.app.ui.navigation.PacientesMedico
 
 private val ordenAlfabetico: Collator = Collator.getInstance(Locale.forLanguageTag("es"))
 
@@ -59,5 +63,11 @@ fun PacientesMedicoRoute() {
     val state = remember { pacientesMedicoUiStateDePrueba() }
     ContenedorMedico(seleccion = PestanaMedico.PACIENTES) {
         PacientesMedicoScreen(state = state, onEvent = {})
+    }
+}
+
+fun NavGraphBuilder.pacientesMedicoDestino(navController: NavController) {
+    composable<PacientesMedico> {
+        PacientesMedicoRoute()
     }
 }

@@ -7,6 +7,10 @@ import plat.clinimedik.app.ui.components.ContenedorRecepcion
 import plat.clinimedik.app.ui.components.PestanaRecepcion
 import plat.clinimedik.app.ui.components.formatearFechaLarga
 import plat.clinimedik.app.ui.components.formatearHora
+import androidx.navigation.NavController
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.compose.composable
+import plat.clinimedik.app.ui.navigation.AgendaRecepcion
 
 fun agendaUiStateDePrueba(): AgendaRecepcionUiState {
     val medico = FakeDataSource.medicoActual
@@ -31,5 +35,11 @@ fun AgendaRecepcionRoute() {
     val state = remember { agendaUiStateDePrueba() }
     ContenedorRecepcion(seleccion = PestanaRecepcion.AGENDA) {
         AgendaRecepcionScreen(state = state, onEvent = {})
+    }
+}
+
+fun NavGraphBuilder.agendaRecepcionDestino(navController: NavController) {
+    composable<AgendaRecepcion> {
+        AgendaRecepcionRoute()
     }
 }

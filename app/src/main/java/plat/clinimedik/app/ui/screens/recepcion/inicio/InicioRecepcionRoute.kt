@@ -13,6 +13,10 @@ import plat.clinimedik.app.ui.components.formatearEspera
 import plat.clinimedik.app.ui.components.formatearFechaLarga
 import plat.clinimedik.app.ui.components.formatearHora
 import plat.clinimedik.app.ui.screens.recepcion.fila.PacienteEnFila
+import androidx.navigation.NavController
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.compose.composable
+import plat.clinimedik.app.ui.navigation.Inicio
 
 private fun Visita.aPacienteEnFila(): PacienteEnFila {
     val nombre = FakeDataSource.paciente(pacienteId)?.nombreCompleto.orEmpty()
@@ -69,5 +73,11 @@ fun InicioRecepcionRoute() {
     val state = remember { inicioRecepcionUiStateDePrueba() }
     ContenedorRecepcion(seleccion = PestanaRecepcion.INICIO) {
         InicioRecepcionScreen(state = state, onEvent = {})
+    }
+}
+
+fun NavGraphBuilder.inicioRecepcionDestino(navController: NavController) {
+    composable<Inicio> {
+        InicioRecepcionRoute()
     }
 }

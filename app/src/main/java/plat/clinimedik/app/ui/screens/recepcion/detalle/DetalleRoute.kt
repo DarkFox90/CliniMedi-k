@@ -5,6 +5,11 @@ import androidx.compose.runtime.remember
 import plat.clinimedik.app.data.fake.FakeDataSource
 import plat.clinimedik.app.ui.components.calcularEdad
 import plat.clinimedik.app.ui.components.formatearFecha
+import androidx.navigation.NavController
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.compose.composable
+import plat.clinimedik.app.ui.navigation.Detalle
+import androidx.navigation.toRoute
 
 fun detalleUiStateDePrueba(
     visitaId: String = "vis-102",
@@ -53,4 +58,10 @@ fun detalleUiStateDePrueba(
 fun DetalleRoute(visitaId: String = "vis-102") {
     val state = remember(visitaId) { detalleUiStateDePrueba(visitaId) }
     DetalleScreen(state = state, onEvent = {})
+}
+
+fun NavGraphBuilder.detalleDestino(navController: NavController) {
+    composable<Detalle> { entrada ->
+        DetalleRoute(visitaId = entrada.toRoute<Detalle>().visitaId)
+    }
 }
