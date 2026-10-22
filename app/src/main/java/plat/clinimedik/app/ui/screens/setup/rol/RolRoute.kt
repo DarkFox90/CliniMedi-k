@@ -4,6 +4,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import plat.clinimedik.app.data.model.RolDispositivo
 import plat.clinimedik.app.ui.components.etiqueta
+import androidx.navigation.NavController
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.compose.composable
+import plat.clinimedik.app.ui.navigation.Rol
 
 private fun RolDispositivo.aOpcionRol(): OpcionRol = OpcionRol(
     rol = this,
@@ -22,5 +26,11 @@ fun rolUiStateDePrueba(rolSeleccionado: RolDispositivo? = null): RolUiState = Ro
 @Composable
 fun RolRoute() {
     val state = remember { rolUiStateDePrueba() }
-    RolScreen(state = state, onIntent = {})
+    RolScreen(state = state, onEvent = {})
+}
+
+fun NavGraphBuilder.rolDestino(navController: NavController) {
+    composable<Rol> {
+        RolRoute()
+    }
 }

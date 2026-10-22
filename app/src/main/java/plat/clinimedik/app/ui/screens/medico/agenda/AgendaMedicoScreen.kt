@@ -26,14 +26,14 @@ import plat.clinimedik.app.ui.theme.CliniMedikTheme
 @Composable
 fun AgendaMedicoScreen(
     state: AgendaMedicoUiState,
-    onIntent: (AgendaMedicoIntent) -> Unit,
+    onEvent: (AgendaMedicoEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
         topBar = {
             BarraSuperior(
                 titulo = state.titulo,
-                onRegresar = { onIntent(AgendaMedicoIntent.Regresar) }
+                onRegresar = { onEvent(AgendaMedicoEvent.Regresar) }
             )
         },
         modifier = modifier
@@ -118,7 +118,7 @@ private fun AgendaMedicoConDatosPreview() {
                     Cita("3", "María Fernanda Pérez", "10:00 a. m.", "Consulta general")
                 )
             ),
-            onIntent = {}
+            onEvent = {}
         )
     }
 }
@@ -129,7 +129,7 @@ private fun AgendaMedicoVaciaPreview() {
     CliniMedikTheme {
         AgendaMedicoScreen(
             state = AgendaMedicoUiState(citas = emptyList()),
-            onIntent = {}
+            onEvent = {}
         )
     }
 }

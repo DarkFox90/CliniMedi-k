@@ -5,6 +5,10 @@ import androidx.compose.runtime.remember
 import plat.clinimedik.app.data.fake.FakeDataSource
 import plat.clinimedik.app.ui.components.calcularEdad
 import plat.clinimedik.app.ui.components.formatearFecha
+import androidx.navigation.NavController
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.compose.composable
+import plat.clinimedik.app.ui.navigation.Resultado
 
 fun resultadoUiStateDePrueba(): ResultadoUiState {
     val paciente = FakeDataSource.paciente("pac-001")
@@ -28,5 +32,11 @@ fun resultadoUiStateDePrueba(): ResultadoUiState {
 @Composable
 fun ResultadoRoute() {
     val state = remember { resultadoUiStateDePrueba() }
-    ResultadoScreen(state = state, onIntent = {})
+    ResultadoScreen(state = state, onEvent = {})
+}
+
+fun NavGraphBuilder.resultadoDestino(navController: NavController) {
+    composable<Resultado> {
+        ResultadoRoute()
+    }
 }

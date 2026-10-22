@@ -36,14 +36,14 @@ import plat.clinimedik.app.ui.theme.CliniMedikTheme
 @Composable
 fun HistorialMedicoScreen(
     state: HistorialMedicoUiState,
-    onIntent: (HistorialMedicoIntent) -> Unit,
+    onEvent: (HistorialMedicoEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
         topBar = {
             BarraSuperior(
                 titulo = "Historial",
-                onRegresar = { onIntent(HistorialMedicoIntent.Regresar) }
+                onRegresar = { onEvent(HistorialMedicoEvent.Regresar) }
             )
         },
         modifier = modifier
@@ -82,7 +82,7 @@ fun HistorialMedicoScreen(
                     TarjetaVisita(
                         visita = visita,
                         expandida = visita.id in state.visitasExpandidas,
-                        onAlternar = { onIntent(HistorialMedicoIntent.AlternarVisita(visita.id)) }
+                        onAlternar = { onEvent(HistorialMedicoEvent.AlternarVisita(visita.id)) }
                     )
                 }
             }
@@ -287,7 +287,7 @@ private fun HistorialCerradoPreview() {
     CliniMedikTheme {
         HistorialMedicoScreen(
             state = historialMedicoUiStateDePrueba(),
-            onIntent = {}
+            onEvent = {}
         )
     }
 }
@@ -298,7 +298,7 @@ private fun HistorialAbiertoPreview() {
     CliniMedikTheme {
         HistorialMedicoScreen(
             state = historialMedicoUiStateDePrueba(visitasExpandidas = setOf("vis-201")),
-            onIntent = {}
+            onEvent = {}
         )
     }
 }
@@ -312,7 +312,7 @@ private fun HistorialConReferenciaPreview() {
                 pacienteId = "pac-004",
                 visitasExpandidas = setOf("vis-105")
             ),
-            onIntent = {}
+            onEvent = {}
         )
     }
 }

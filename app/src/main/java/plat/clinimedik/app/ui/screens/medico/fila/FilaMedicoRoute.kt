@@ -9,6 +9,10 @@ import plat.clinimedik.app.ui.components.ContenedorMedico
 import plat.clinimedik.app.ui.components.PestanaMedico
 import plat.clinimedik.app.ui.components.formatearEspera
 import plat.clinimedik.app.ui.components.formatearHora
+import androidx.navigation.NavController
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.compose.composable
+import plat.clinimedik.app.ui.navigation.FilaMedico
 
 private fun Visita.aPacienteEnFilaMedico(): PacienteEnFilaMedico {
     val nombre = FakeDataSource.paciente(pacienteId)?.nombreCompleto.orEmpty()
@@ -46,6 +50,12 @@ fun filaMedicoUiStateDePrueba(): FilaMedicoUiState {
 fun FilaMedicoRoute() {
     val state = remember { filaMedicoUiStateDePrueba() }
     ContenedorMedico(seleccion = PestanaMedico.FILA) {
-        FilaMedicoScreen(state = state, onIntent = {})
+        FilaMedicoScreen(state = state, onEvent = {})
+    }
+}
+
+fun NavGraphBuilder.filaMedicoDestino(navController: NavController) {
+    composable<FilaMedico> {
+        FilaMedicoRoute()
     }
 }

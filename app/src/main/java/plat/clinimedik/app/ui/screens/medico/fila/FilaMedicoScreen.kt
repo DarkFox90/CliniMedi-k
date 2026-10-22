@@ -29,7 +29,7 @@ import plat.clinimedik.app.ui.theme.CliniMedikTheme
 @Composable
 fun FilaMedicoScreen(
     state: FilaMedicoUiState,
-    onIntent: (FilaMedicoIntent) -> Unit,
+    onEvent: (FilaMedicoEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -65,7 +65,7 @@ fun FilaMedicoScreen(
                             tiempo = paciente.tiempo,
                             estado = paciente.estado,
                             esUrgente = paciente.esUrgente,
-                            onClick = { onIntent(FilaMedicoIntent.AbrirHistorial(paciente.pacienteId)) }
+                            onClick = { onEvent(FilaMedicoEvent.AbrirHistorial(paciente.pacienteId)) }
                         )
                     }
                 }
@@ -128,7 +128,7 @@ private fun FilaMedicoConPacientesPreview() {
         ContenedorMedico(seleccion = PestanaMedico.FILA) {
             FilaMedicoScreen(
                 state = filaMedicoUiStateDePrueba(),
-                onIntent = {}
+                onEvent = {}
             )
         }
     }
@@ -141,7 +141,7 @@ private fun FilaMedicoSinPacientesPreview() {
         ContenedorMedico(seleccion = PestanaMedico.FILA) {
             FilaMedicoScreen(
                 state = filaMedicoUiStateDePrueba().copy(pacientes = emptyList()),
-                onIntent = {}
+                onEvent = {}
             )
         }
     }

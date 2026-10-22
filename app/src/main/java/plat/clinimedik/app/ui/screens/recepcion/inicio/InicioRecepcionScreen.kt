@@ -39,13 +39,13 @@ import plat.clinimedik.app.ui.theme.CliniMedikTheme
 @Composable
 fun InicioRecepcionScreen(
     state: InicioRecepcionUiState,
-    onIntent: (InicioRecepcionIntent) -> Unit,
+    onEvent: (InicioRecepcionEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
         contentWindowInsets = WindowInsets(0),
         floatingActionButton = {
-            BotonNuevoPaciente(onClick = { onIntent(InicioRecepcionIntent.NuevoPaciente) })
+            BotonNuevoPaciente(onClick = { onEvent(InicioRecepcionEvent.NuevoPaciente) })
         },
         modifier = modifier
     ) { innerPadding ->
@@ -69,9 +69,9 @@ fun InicioRecepcionScreen(
                 )
             }
             MetricasFila(state = state)
-            SeccionSiguientePaciente(state = state, onIntent = onIntent)
-            SeccionProximaCita(proximaCita = state.proximaCita, onIntent = onIntent)
-            SeccionAccesosRapidos(onIntent = onIntent)
+            SeccionSiguientePaciente(state = state, onEvent = onEvent)
+            SeccionProximaCita(proximaCita = state.proximaCita, onEvent = onEvent)
+            SeccionAccesosRapidos(onEvent = onEvent)
         }
     }
 }
@@ -102,7 +102,7 @@ private fun MetricasFila(state: InicioRecepcionUiState) {
 @Composable
 private fun SeccionSiguientePaciente(
     state: InicioRecepcionUiState,
-    onIntent: (InicioRecepcionIntent) -> Unit
+    onEvent: (InicioRecepcionEvent) -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         TituloSeccion(texto = "Siguiente en la fila")
@@ -116,7 +116,7 @@ private fun SeccionSiguientePaciente(
                 tiempo = paciente.tiempo,
                 estado = paciente.estado,
                 esUrgente = paciente.esUrgente,
-                onClick = { onIntent(InicioRecepcionIntent.AbrirPaciente(paciente.visitaId)) }
+                onClick = { onEvent(InicioRecepcionEvent.AbrirPaciente(paciente.visitaId)) }
             )
         }
     }
@@ -125,7 +125,7 @@ private fun SeccionSiguientePaciente(
 @Composable
 private fun SeccionProximaCita(
     proximaCita: ProximaCita?,
-    onIntent: (InicioRecepcionIntent) -> Unit
+    onEvent: (InicioRecepcionEvent) -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         TituloSeccion(texto = "Próxima cita")
@@ -137,14 +137,14 @@ private fun SeccionProximaCita(
                 nombrePaciente = proximaCita.nombrePaciente,
                 motivo = proximaCita.motivo,
                 estadoConfirmacion = proximaCita.estadoConfirmacion,
-                onClick = { onIntent(InicioRecepcionIntent.AbrirCita(proximaCita.citaId)) }
+                onClick = { onEvent(InicioRecepcionEvent.AbrirCita(proximaCita.citaId)) }
             )
         }
     }
 }
 
 @Composable
-private fun SeccionAccesosRapidos(onIntent: (InicioRecepcionIntent) -> Unit) {
+private fun SeccionAccesosRapidos(onEvent: (InicioRecepcionEvent) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         TituloSeccion(texto = "Accesos rápidos")
         Row(
@@ -154,7 +154,7 @@ private fun SeccionAccesosRapidos(onIntent: (InicioRecepcionIntent) -> Unit) {
             AccesoRapido(
                 icono = Icons.Filled.Person,
                 texto = "Nuevo paciente",
-                onClick = { onIntent(InicioRecepcionIntent.NuevoPaciente) },
+                onClick = { onEvent(InicioRecepcionEvent.NuevoPaciente) },
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight()
@@ -162,7 +162,7 @@ private fun SeccionAccesosRapidos(onIntent: (InicioRecepcionIntent) -> Unit) {
             AccesoRapido(
                 icono = Icons.Filled.Search,
                 texto = "Escanear QR",
-                onClick = { onIntent(InicioRecepcionIntent.EscanearQr) },
+                onClick = { onEvent(InicioRecepcionEvent.EscanearQr) },
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight()
@@ -170,7 +170,7 @@ private fun SeccionAccesosRapidos(onIntent: (InicioRecepcionIntent) -> Unit) {
             AccesoRapido(
                 icono = Icons.Filled.Info,
                 texto = "Ver resumen",
-                onClick = { onIntent(InicioRecepcionIntent.VerResumen) },
+                onClick = { onEvent(InicioRecepcionEvent.VerResumen) },
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight()
@@ -237,7 +237,7 @@ private fun InicioConPacientesPreview() {
         ContenedorRecepcion(seleccion = PestanaRecepcion.INICIO) {
             InicioRecepcionScreen(
                 state = inicioRecepcionUiStateDePrueba(),
-                onIntent = {}
+                onEvent = {}
             )
         }
     }
@@ -250,7 +250,7 @@ private fun InicioSinPacientesPreview() {
         ContenedorRecepcion(seleccion = PestanaRecepcion.INICIO) {
             InicioRecepcionScreen(
                 state = inicioRecepcionUiStateDePrueba().copy(pacientes = emptyList()),
-                onIntent = {}
+                onEvent = {}
             )
         }
     }

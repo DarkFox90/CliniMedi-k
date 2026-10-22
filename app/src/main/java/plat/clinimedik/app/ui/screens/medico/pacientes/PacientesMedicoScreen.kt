@@ -28,7 +28,7 @@ import plat.clinimedik.app.ui.theme.CliniMedikTheme
 @Composable
 fun PacientesMedicoScreen(
     state: PacientesMedicoUiState,
-    onIntent: (PacientesMedicoIntent) -> Unit,
+    onEvent: (PacientesMedicoEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -47,7 +47,7 @@ fun PacientesMedicoScreen(
             )
             CampoTexto(
                 valor = state.texto,
-                onValorChange = { onIntent(PacientesMedicoIntent.CambiarTexto(it)) },
+                onValorChange = { onEvent(PacientesMedicoEvent.CambiarTexto(it)) },
                 etiqueta = "Buscar",
                 placeholder = "Nombre o teléfono",
                 modifier = Modifier.padding(horizontal = 16.dp)
@@ -74,7 +74,7 @@ fun PacientesMedicoScreen(
                         PacienteItem(
                             nombre = paciente.nombre,
                             detalle = paciente.detalle,
-                            onClick = { onIntent(PacientesMedicoIntent.AbrirHistorial(paciente.pacienteId)) }
+                            onClick = { onEvent(PacientesMedicoEvent.AbrirHistorial(paciente.pacienteId)) }
                         )
                     }
                 }
@@ -108,7 +108,7 @@ private fun PacientesMedicoListaPreview() {
         ContenedorMedico(seleccion = PestanaMedico.PACIENTES) {
             PacientesMedicoScreen(
                 state = pacientesMedicoUiStateDePrueba(),
-                onIntent = {}
+                onEvent = {}
             )
         }
     }
@@ -121,7 +121,7 @@ private fun PacientesMedicoSinResultadosPreview() {
         ContenedorMedico(seleccion = PestanaMedico.PACIENTES) {
             PacientesMedicoScreen(
                 state = pacientesMedicoUiStateDePrueba(texto = "zzz"),
-                onIntent = {}
+                onEvent = {}
             )
         }
     }

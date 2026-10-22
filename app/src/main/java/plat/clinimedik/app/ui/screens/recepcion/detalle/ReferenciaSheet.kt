@@ -13,7 +13,7 @@ import plat.clinimedik.app.ui.components.PanelInferior
 fun ReferenciaContenido(
     nombrePaciente: String,
     formulario: FormularioReferencia,
-    onIntent: (DetalleIntent) -> Unit,
+    onEvent: (DetalleEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -26,21 +26,21 @@ fun ReferenciaContenido(
         )
         CampoTexto(
             valor = formulario.especialidad,
-            onValorChange = { onIntent(DetalleIntent.CambiarEspecialidad(it)) },
+            onValorChange = { onEvent(DetalleEvent.CambiarEspecialidad(it)) },
             etiqueta = "Especialidad",
             placeholder = "Ej. Cardiología",
             mensajeError = formulario.errorEspecialidad
         )
         CampoTexto(
             valor = formulario.destino,
-            onValorChange = { onIntent(DetalleIntent.CambiarDestino(it)) },
+            onValorChange = { onEvent(DetalleEvent.CambiarDestino(it)) },
             etiqueta = "Médico o servicio de destino",
             placeholder = "Ej. Dra. Ana Lucía Paz",
             mensajeError = formulario.errorDestino
         )
         CampoTexto(
             valor = formulario.motivo,
-            onValorChange = { onIntent(DetalleIntent.CambiarMotivoReferencia(it)) },
+            onValorChange = { onEvent(DetalleEvent.CambiarMotivoReferencia(it)) },
             etiqueta = "Motivo de la referencia",
             placeholder = "Ej. Soplo cardíaco, requiere ecocardiograma",
             mensajeError = formulario.errorMotivo,
@@ -48,8 +48,8 @@ fun ReferenciaContenido(
         )
         BotonesPanel(
             textoConfirmar = "Guardar referencia",
-            onConfirmar = { onIntent(DetalleIntent.GuardarReferencia) },
-            onCancelar = { onIntent(DetalleIntent.CerrarPanel) }
+            onConfirmar = { onEvent(DetalleEvent.GuardarReferencia) },
+            onCancelar = { onEvent(DetalleEvent.CerrarPanel) }
         )
     }
 }
@@ -58,13 +58,13 @@ fun ReferenciaContenido(
 fun ReferenciaSheet(
     nombrePaciente: String,
     formulario: FormularioReferencia,
-    onIntent: (DetalleIntent) -> Unit
+    onEvent: (DetalleEvent) -> Unit
 ) {
-    PanelInferior(onDescartar = { onIntent(DetalleIntent.CerrarPanel) }) {
+    PanelInferior(onDescartar = { onEvent(DetalleEvent.CerrarPanel) }) {
         ReferenciaContenido(
             nombrePaciente = nombrePaciente,
             formulario = formulario,
-            onIntent = onIntent
+            onEvent = onEvent
         )
     }
 }
@@ -76,7 +76,7 @@ private fun ReferenciaVaciaPreview() {
         ReferenciaContenido(
             nombrePaciente = "Julio Estrada",
             formulario = FormularioReferencia(),
-            onIntent = {}
+            onEvent = {}
         )
     }
 }
@@ -92,7 +92,7 @@ private fun ReferenciaErrorPreview() {
                 errorDestino = "Este campo es obligatorio",
                 errorMotivo = "Este campo es obligatorio"
             ),
-            onIntent = {}
+            onEvent = {}
         )
     }
 }

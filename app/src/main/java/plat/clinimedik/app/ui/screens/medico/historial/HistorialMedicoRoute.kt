@@ -7,6 +7,11 @@ import plat.clinimedik.app.data.model.EstadoVisita
 import plat.clinimedik.app.ui.components.calcularEdad
 import plat.clinimedik.app.ui.components.formatearFecha
 import plat.clinimedik.app.ui.components.formatearHora
+import androidx.navigation.NavController
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.compose.composable
+import plat.clinimedik.app.ui.navigation.HistorialMedico
+import androidx.navigation.toRoute
 
 fun historialMedicoUiStateDePrueba(
     pacienteId: String = "pac-001",
@@ -50,5 +55,11 @@ fun historialMedicoUiStateDePrueba(
 @Composable
 fun HistorialMedicoRoute(pacienteId: String = "pac-001") {
     val state = remember(pacienteId) { historialMedicoUiStateDePrueba(pacienteId) }
-    HistorialMedicoScreen(state = state, onIntent = {})
+    HistorialMedicoScreen(state = state, onEvent = {})
+}
+
+fun NavGraphBuilder.historialMedicoDestino(navController: NavController) {
+    composable<HistorialMedico> { entrada ->
+        HistorialMedicoRoute(pacienteId = entrada.toRoute<HistorialMedico>().pacienteId)
+    }
 }

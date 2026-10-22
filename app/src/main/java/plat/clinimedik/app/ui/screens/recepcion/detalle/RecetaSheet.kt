@@ -13,7 +13,7 @@ import plat.clinimedik.app.ui.components.PanelInferior
 fun RecetaContenido(
     nombrePaciente: String,
     formulario: FormularioReceta,
-    onIntent: (DetalleIntent) -> Unit,
+    onEvent: (DetalleEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -26,36 +26,36 @@ fun RecetaContenido(
         )
         CampoTexto(
             valor = formulario.medicamento,
-            onValorChange = { onIntent(DetalleIntent.CambiarMedicamento(it)) },
+            onValorChange = { onEvent(DetalleEvent.CambiarMedicamento(it)) },
             etiqueta = "Medicamento",
             placeholder = "Ej. Amoxicilina 500 mg",
             mensajeError = formulario.errorMedicamento
         )
         CampoTexto(
             valor = formulario.dosis,
-            onValorChange = { onIntent(DetalleIntent.CambiarDosis(it)) },
+            onValorChange = { onEvent(DetalleEvent.CambiarDosis(it)) },
             etiqueta = "Dosis",
             placeholder = "Ej. 1 cápsula",
             mensajeError = formulario.errorDosis
         )
         CampoTexto(
             valor = formulario.frecuencia,
-            onValorChange = { onIntent(DetalleIntent.CambiarFrecuencia(it)) },
+            onValorChange = { onEvent(DetalleEvent.CambiarFrecuencia(it)) },
             etiqueta = "Frecuencia",
             placeholder = "Ej. Cada 8 horas",
             mensajeError = formulario.errorFrecuencia
         )
         CampoTexto(
             valor = formulario.duracion,
-            onValorChange = { onIntent(DetalleIntent.CambiarDuracion(it)) },
+            onValorChange = { onEvent(DetalleEvent.CambiarDuracion(it)) },
             etiqueta = "Duración",
             placeholder = "Ej. 7 días",
             mensajeError = formulario.errorDuracion
         )
         BotonesPanel(
             textoConfirmar = "Guardar receta",
-            onConfirmar = { onIntent(DetalleIntent.GuardarReceta) },
-            onCancelar = { onIntent(DetalleIntent.CerrarPanel) }
+            onConfirmar = { onEvent(DetalleEvent.GuardarReceta) },
+            onCancelar = { onEvent(DetalleEvent.CerrarPanel) }
         )
     }
 }
@@ -64,13 +64,13 @@ fun RecetaContenido(
 fun RecetaSheet(
     nombrePaciente: String,
     formulario: FormularioReceta,
-    onIntent: (DetalleIntent) -> Unit
+    onEvent: (DetalleEvent) -> Unit
 ) {
-    PanelInferior(onDescartar = { onIntent(DetalleIntent.CerrarPanel) }) {
+    PanelInferior(onDescartar = { onEvent(DetalleEvent.CerrarPanel) }) {
         RecetaContenido(
             nombrePaciente = nombrePaciente,
             formulario = formulario,
-            onIntent = onIntent
+            onEvent = onEvent
         )
     }
 }
@@ -82,7 +82,7 @@ private fun RecetaVaciaPreview() {
         RecetaContenido(
             nombrePaciente = "Julio Estrada",
             formulario = FormularioReceta(),
-            onIntent = {}
+            onEvent = {}
         )
     }
 }
@@ -99,7 +99,7 @@ private fun RecetaErrorPreview() {
                 errorFrecuencia = "Este campo es obligatorio",
                 errorDuracion = "Este campo es obligatorio"
             ),
-            onIntent = {}
+            onEvent = {}
         )
     }
 }

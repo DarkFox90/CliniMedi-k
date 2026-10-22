@@ -31,14 +31,14 @@ import plat.clinimedik.app.ui.theme.CliniMedikTheme
 @Composable
 fun RegistroScreen(
     state: RegistroUiState,
-    onIntent: (RegistroIntent) -> Unit,
+    onEvent: (RegistroEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
         topBar = {
             BarraSuperior(
                 titulo = state.titulo,
-                onRegresar = { onIntent(RegistroIntent.Regresar) }
+                onRegresar = { onEvent(RegistroEvent.Regresar) }
             )
         },
         modifier = modifier
@@ -66,7 +66,7 @@ fun RegistroScreen(
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { onIntent(RegistroIntent.RegistrarNuevo) }
+                    .clickable { onEvent(RegistroEvent.RegistrarNuevo) }
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -105,7 +105,7 @@ fun RegistroScreen(
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { onIntent(RegistroIntent.EscanearQr) }
+                    .clickable { onEvent(RegistroEvent.EscanearQr) }
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -145,7 +145,7 @@ private fun RegistroPreview() {
     CliniMedikTheme {
         RegistroScreen(
             state = RegistroUiState(),
-            onIntent = {}
+            onEvent = {}
         )
     }
 }

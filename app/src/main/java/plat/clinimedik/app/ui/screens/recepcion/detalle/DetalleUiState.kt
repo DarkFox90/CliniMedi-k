@@ -1,8 +1,14 @@
 package plat.clinimedik.app.ui.screens.recepcion.detalle
 
+import java.time.LocalDate
+import plat.clinimedik.app.data.model.Documento
 import plat.clinimedik.app.data.model.EstadoVisita
 import plat.clinimedik.app.data.model.TipoDocumento
 import plat.clinimedik.app.data.model.TipoPago
+import plat.clinimedik.app.data.model.Visita
+import plat.clinimedik.app.data.model.VisitaConPaciente
+import plat.clinimedik.app.ui.components.calcularEdad
+import plat.clinimedik.app.ui.components.formatearFecha
 
 data class DocumentoDetalle(
     val id: String,
@@ -58,6 +64,7 @@ sealed interface PanelDetalle {
 }
 
 data class DetalleUiState(
+    val cargando: Boolean = true,
     val visitaId: String = "",
     val nombre: String = "",
     val datosContacto: String = "",
@@ -82,4 +89,41 @@ data class DetalleUiState(
 
     val tieneAccionDeEstado: Boolean
         get() = estado == EstadoVisita.ESPERANDO || estado == EstadoVisita.EN_CONSULTA
+}
+
+fun VisitaConPaciente.aDetalleUiState(
+    documentos: List<Documento>,
+    historial: List<Visita>,
+    hoy: LocalDate
+): DetalleUiState {
+    val edad = calcularEdad(paciente.fechaNacimiento, hoy)
+    return DetalleUiState(
+        cargando = false,
+        visitaId = visita.id,
+        nombre = paciente.nombreCompleto,
+        datosContacto = "$edad años · ${paciente.telefono}",
+        motivoConsulta = visita.motivoConsulta,
+        estado = visita.estado,
+        esUrgente = visita.esUrgente,
+        motivoPrioridad = visita.motivoPrioridad,
+        alergias = paciente.alergias,
+        enfermedadesPrevias = paciente.enfermedadesPrevias,
+        documentos = documentos.map { documento ->
+            DocumentoDetalle(
+                id = documento.id,
+                tipo = documento.tipo,
+                fecha = formatearFecha(documento.fecha.toLocalDate())
+            )
+        },
+        visitasAnteriores = historial
+            .filter { it.horaLlegada.toLocalDate().isBefore(hoy) }
+            .map { anterior ->
+                VisitaAnterior(
+                    id = anterior.id,
+                    fecha = formatearFecha(anterior.horaLlegada.toLocalDate()),
+                    motivo = anterior.motivoConsulta,
+                    diagnostico = anterior.diagnostico ?: "Sin diagnóstico registrado"
+                )
+            }
+    )
 }

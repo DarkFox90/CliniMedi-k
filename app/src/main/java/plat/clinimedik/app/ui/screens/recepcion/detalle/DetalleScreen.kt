@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -53,18 +54,29 @@ import plat.clinimedik.app.ui.theme.CliniMedikTheme
 @Composable
 fun DetalleScreen(
     state: DetalleUiState,
-    onIntent: (DetalleIntent) -> Unit,
+    onEvent: (DetalleEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
         topBar = {
             BarraSuperior(
                 titulo = "Expediente",
-                onRegresar = { onIntent(DetalleIntent.Regresar) }
+                onRegresar = { onEvent(DetalleEvent.Regresar) }
             )
         },
         modifier = modifier
     ) { innerPadding ->
+        if (state.cargando) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            ) {
+                CircularProgressIndicator()
+            }
+            return@Scaffold
+        }
         Column(
             verticalArrangement = Arrangement.spacedBy(24.dp),
             modifier = Modifier
@@ -75,10 +87,10 @@ fun DetalleScreen(
         ) {
             EncabezadoPaciente(state = state)
             if (state.tieneAccionDeEstado) {
-                AccionesDeEstado(state = state, onIntent = onIntent)
+                AccionesDeEstado(state = state, onEvent = onEvent)
             }
-            SeccionRegistro(state = state, onIntent = onIntent)
-            SeccionDocumentos(documentos = state.documentos, onIntent = onIntent)
+            SeccionRegistro(state = state, onEvent = onEvent)
+            SeccionDocumentos(documentos = state.documentos, onEvent = onEvent)
             SeccionVisitasAnteriores(visitas = state.visitasAnteriores)
         }
 
@@ -86,25 +98,25 @@ fun DetalleScreen(
             is PanelDetalle.Urgencia -> MarcarUrgenteSheet(
                 nombrePaciente = state.nombre,
                 motivo = panel.motivo,
-                onMotivoChange = { onIntent(DetalleIntent.CambiarMotivoUrgencia(it)) },
-                onConfirmar = { onIntent(DetalleIntent.ConfirmarUrgencia) },
-                onDescartar = { onIntent(DetalleIntent.CerrarPanel) },
+                onMotivoChange = { onEvent(DetalleEvent.CambiarMotivoUrgencia(it)) },
+                onConfirmar = { onEvent(DetalleEvent.ConfirmarUrgencia) },
+                onDescartar = { onEvent(DetalleEvent.CerrarPanel) },
                 mensajeError = panel.mensajeError
             )
             is PanelDetalle.Receta -> RecetaSheet(
                 nombrePaciente = state.nombre,
                 formulario = panel.formulario,
-                onIntent = onIntent
+                onEvent = onEvent
             )
             is PanelDetalle.Referencia -> ReferenciaSheet(
                 nombrePaciente = state.nombre,
                 formulario = panel.formulario,
-                onIntent = onIntent
+                onEvent = onEvent
             )
             is PanelDetalle.Cobro -> CobroSheet(
                 nombrePaciente = state.nombre,
                 formulario = panel.formulario,
-                onIntent = onIntent
+                onEvent = onEvent
             )
             null -> Unit
         }
@@ -200,18 +212,18 @@ private fun DatoClinico(
 @Composable
 private fun AccionesDeEstado(
     state: DetalleUiState,
-    onIntent: (DetalleIntent) -> Unit
+    onEvent: (DetalleEvent) -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         when (state.estado) {
             EstadoVisita.ESPERANDO -> Button(
-                onClick = { onIntent(DetalleIntent.PasarAConsulta) },
+                onClick = { onEvent(DetalleEvent.PasarAConsulta) },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Pasar a consulta")
             }
             EstadoVisita.EN_CONSULTA -> Button(
-                onClick = { onIntent(DetalleIntent.FinalizarConsulta) },
+                onClick = { onEvent(DetalleEvent.FinalizarConsulta) },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Finalizar consulta")
@@ -220,7 +232,7 @@ private fun AccionesDeEstado(
         }
         if (state.puedeMarcarseUrgente) {
             OutlinedButton(
-                onClick = { onIntent(DetalleIntent.SolicitarUrgencia) },
+                onClick = { onEvent(DetalleEvent.SolicitarUrgencia) },
                 colors = ButtonDefaults.outlinedButtonColors(
                     contentColor = MaterialTheme.colorScheme.error
                 ),
@@ -242,7 +254,7 @@ private fun AccionesDeEstado(
 @Composable
 private fun SeccionRegistro(
     state: DetalleUiState,
-    onIntent: (DetalleIntent) -> Unit
+    onEvent: (DetalleEvent) -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         TituloSeccion(texto = "Registro de la visita")
@@ -250,25 +262,25 @@ private fun SeccionRegistro(
             icono = Icons.Filled.Create,
             texto = "Registrar receta",
             habilitada = state.puedeRegistrarConsulta,
-            onClick = { onIntent(DetalleIntent.AbrirReceta) }
+            onClick = { onEvent(DetalleEvent.AbrirReceta) }
         )
         FilaAccion(
             icono = Icons.AutoMirrored.Filled.Send,
             texto = "Registrar referencia",
             habilitada = state.puedeRegistrarConsulta,
-            onClick = { onIntent(DetalleIntent.AbrirReferencia) }
+            onClick = { onEvent(DetalleEvent.AbrirReferencia) }
         )
         FilaAccion(
             icono = Icons.Filled.ShoppingCart,
             texto = "Registrar cobro",
             habilitada = state.puedeRegistrarConsulta,
-            onClick = { onIntent(DetalleIntent.AbrirCobro) }
+            onClick = { onEvent(DetalleEvent.AbrirCobro) }
         )
         FilaAccion(
             icono = Icons.Filled.Add,
             texto = "Adjuntar documento",
             habilitada = true,
-            onClick = { onIntent(DetalleIntent.AdjuntarDocumento) }
+            onClick = { onEvent(DetalleEvent.AdjuntarDocumento) }
         )
         if (!state.puedeRegistrarConsulta) {
             Text(
@@ -329,7 +341,7 @@ private fun FilaAccion(
 @Composable
 private fun SeccionDocumentos(
     documentos: List<DocumentoDetalle>,
-    onIntent: (DetalleIntent) -> Unit
+    onEvent: (DetalleEvent) -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         TituloSeccion(texto = "Documentos adjuntos")
@@ -347,7 +359,7 @@ private fun SeccionDocumentos(
                 documentos.forEach { documento ->
                     TarjetaDocumento(
                         documento = documento,
-                        onClick = { onIntent(DetalleIntent.AbrirDocumento(documento.id)) }
+                        onClick = { onEvent(DetalleEvent.AbrirDocumento(documento.id)) }
                     )
                 }
             }
@@ -461,11 +473,22 @@ private fun TituloSeccion(texto: String) {
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
+private fun DetalleCargandoPreview() {
+    CliniMedikTheme {
+        DetalleScreen(
+            state = DetalleUiState(),
+            onEvent = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
 private fun DetalleEsperandoPreview() {
     CliniMedikTheme {
         DetalleScreen(
             state = detalleUiStateDePrueba(visitaId = "vis-102"),
-            onIntent = {}
+            onEvent = {}
         )
     }
 }
@@ -476,7 +499,7 @@ private fun DetalleUrgenteConDocumentosPreview() {
     CliniMedikTheme {
         DetalleScreen(
             state = detalleUiStateDePrueba(visitaId = "vis-101"),
-            onIntent = {}
+            onEvent = {}
         )
     }
 }
@@ -487,7 +510,7 @@ private fun DetalleEnConsultaPreview() {
     CliniMedikTheme {
         DetalleScreen(
             state = detalleUiStateDePrueba(visitaId = "vis-104"),
-            onIntent = {}
+            onEvent = {}
         )
     }
 }
@@ -498,7 +521,7 @@ private fun DetalleRecetaAbiertaPreview() {
     CliniMedikTheme {
         DetalleScreen(
             state = detalleUiStateDePrueba(visitaId = "vis-104", panel = PanelDetalle.Receta()),
-            onIntent = {}
+            onEvent = {}
         )
     }
 }
@@ -509,7 +532,7 @@ private fun DetalleReferenciaAbiertaPreview() {
     CliniMedikTheme {
         DetalleScreen(
             state = detalleUiStateDePrueba(visitaId = "vis-104", panel = PanelDetalle.Referencia()),
-            onIntent = {}
+            onEvent = {}
         )
     }
 }
@@ -520,7 +543,7 @@ private fun DetalleCobroAbiertoPreview() {
     CliniMedikTheme {
         DetalleScreen(
             state = detalleUiStateDePrueba(visitaId = "vis-104", panel = PanelDetalle.Cobro()),
-            onIntent = {}
+            onEvent = {}
         )
     }
 }

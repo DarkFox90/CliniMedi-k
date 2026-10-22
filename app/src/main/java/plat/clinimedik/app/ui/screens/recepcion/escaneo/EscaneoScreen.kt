@@ -24,14 +24,14 @@ import plat.clinimedik.app.ui.theme.CliniMedikTheme
 @Composable
 fun EscaneoScreen(
     state: EscaneoUiState,
-    onIntent: (EscaneoIntent) -> Unit,
+    onEvent: (EscaneoEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
         topBar = {
             BarraSuperior(
                 titulo = state.titulo,
-                onRegresar = { onIntent(EscaneoIntent.Regresar) }
+                onRegresar = { onEvent(EscaneoEvent.Regresar) }
             )
         },
         modifier = modifier
@@ -74,6 +74,6 @@ fun EscaneoScreen(
 @Composable
 private fun EscaneoPreview() {
     CliniMedikTheme {
-        EscaneoScreen(state = EscaneoUiState(), onIntent = {})
+        EscaneoScreen(state = EscaneoUiState(), onEvent = {})
     }
 }
