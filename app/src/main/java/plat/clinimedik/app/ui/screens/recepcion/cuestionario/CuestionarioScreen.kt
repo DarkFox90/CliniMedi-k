@@ -32,14 +32,14 @@ import plat.clinimedik.app.ui.theme.CliniMedikTheme
 @Composable
 fun CuestionarioScreen(
     state: CuestionarioUiState,
-    onIntent: (CuestionarioIntent) -> Unit,
+    onEvent: (CuestionarioEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
         topBar = {
             BarraSuperior(
                 titulo = "Nuevo paciente",
-                onRegresar = { onIntent(CuestionarioIntent.Regresar) }
+                onRegresar = { onEvent(CuestionarioEvent.Regresar) }
             )
         },
         modifier = modifier
@@ -56,14 +56,14 @@ fun CuestionarioScreen(
 
             CampoTexto(
                 valor = state.nombre,
-                onValorChange = { onIntent(CuestionarioIntent.CambiarNombre(it)) },
+                onValorChange = { onEvent(CuestionarioEvent.CambiarNombre(it)) },
                 etiqueta = "Nombre completo",
                 mensajeError = state.errorNombre,
                 modifier = Modifier.fillMaxWidth()
             )
             CampoTexto(
                 valor = state.fechaNacimiento,
-                onValorChange = { onIntent(CuestionarioIntent.CambiarFechaNacimiento(it)) },
+                onValorChange = { onEvent(CuestionarioEvent.CambiarFechaNacimiento(it)) },
                 etiqueta = "Fecha de nacimiento",
                 placeholder = "dd/mm/aaaa",
                 mensajeError = state.errorFechaNacimiento,
@@ -78,7 +78,7 @@ fun CuestionarioScreen(
                 EstadoCivil.entries.forEach { estado ->
                     FilterChip(
                         selected = state.estadoCivil == estado,
-                        onClick = { onIntent(CuestionarioIntent.SeleccionarEstadoCivil(estado)) },
+                        onClick = { onEvent(CuestionarioEvent.SeleccionarEstadoCivil(estado)) },
                         label = { Text(estado.etiqueta()) }
                     )
                 }
@@ -86,7 +86,7 @@ fun CuestionarioScreen(
 
             CampoTexto(
                 valor = state.ocupacion,
-                onValorChange = { onIntent(CuestionarioIntent.CambiarOcupacion(it)) },
+                onValorChange = { onEvent(CuestionarioEvent.CambiarOcupacion(it)) },
                 etiqueta = "Ocupación",
                 modifier = Modifier.fillMaxWidth()
             )
@@ -96,7 +96,7 @@ fun CuestionarioScreen(
 
             CampoTexto(
                 valor = state.telefono,
-                onValorChange = { onIntent(CuestionarioIntent.CambiarTelefono(it)) },
+                onValorChange = { onEvent(CuestionarioEvent.CambiarTelefono(it)) },
                 etiqueta = "Teléfono",
                 mensajeError = state.errorTelefono,
                 tipoTeclado = KeyboardType.Phone,
@@ -104,7 +104,7 @@ fun CuestionarioScreen(
             )
             CampoTexto(
                 valor = state.correo,
-                onValorChange = { onIntent(CuestionarioIntent.CambiarCorreo(it)) },
+                onValorChange = { onEvent(CuestionarioEvent.CambiarCorreo(it)) },
                 etiqueta = "Correo electrónico",
                 mensajeError = state.errorCorreo,
                 tipoTeclado = KeyboardType.Email,
@@ -116,7 +116,7 @@ fun CuestionarioScreen(
 
             CampoTexto(
                 valor = state.motivo,
-                onValorChange = { onIntent(CuestionarioIntent.CambiarMotivo(it)) },
+                onValorChange = { onEvent(CuestionarioEvent.CambiarMotivo(it)) },
                 etiqueta = "Motivo de consulta",
                 lineas = 3,
                 modifier = Modifier.fillMaxWidth()
@@ -127,28 +127,28 @@ fun CuestionarioScreen(
 
             CampoTexto(
                 valor = state.alergias,
-                onValorChange = { onIntent(CuestionarioIntent.CambiarAlergias(it)) },
+                onValorChange = { onEvent(CuestionarioEvent.CambiarAlergias(it)) },
                 etiqueta = "Alergias",
                 lineas = 2,
                 modifier = Modifier.fillMaxWidth()
             )
             CampoTexto(
                 valor = state.enfermedades,
-                onValorChange = { onIntent(CuestionarioIntent.CambiarEnfermedades(it)) },
+                onValorChange = { onEvent(CuestionarioEvent.CambiarEnfermedades(it)) },
                 etiqueta = "Enfermedades previas",
                 lineas = 2,
                 modifier = Modifier.fillMaxWidth()
             )
             CampoTexto(
                 valor = state.tratamientos,
-                onValorChange = { onIntent(CuestionarioIntent.CambiarTratamientos(it)) },
+                onValorChange = { onEvent(CuestionarioEvent.CambiarTratamientos(it)) },
                 etiqueta = "Tratamientos previos",
                 lineas = 2,
                 modifier = Modifier.fillMaxWidth()
             )
             CampoTexto(
                 valor = state.cirugias,
-                onValorChange = { onIntent(CuestionarioIntent.CambiarCirugias(it)) },
+                onValorChange = { onEvent(CuestionarioEvent.CambiarCirugias(it)) },
                 etiqueta = "Cirugías",
                 lineas = 2,
                 modifier = Modifier.fillMaxWidth()
@@ -156,7 +156,7 @@ fun CuestionarioScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
             Button(
-                onClick = { onIntent(CuestionarioIntent.Guardar) },
+                onClick = { onEvent(CuestionarioEvent.Guardar) },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(text = "Guardar y generar QR")
@@ -169,7 +169,7 @@ fun CuestionarioScreen(
 @Composable
 private fun CuestionarioVacioPreview() {
     CliniMedikTheme {
-        CuestionarioScreen(state = CuestionarioUiState(), onIntent = {})
+        CuestionarioScreen(state = CuestionarioUiState(), onEvent = {})
     }
 }
 
@@ -183,7 +183,7 @@ private fun CuestionarioErrorFaltantesPreview() {
                 errorFechaNacimiento = "La fecha de nacimiento es obligatoria",
                 errorTelefono = "El teléfono es obligatorio"
             ),
-            onIntent = {}
+            onEvent = {}
         )
     }
 }
@@ -200,7 +200,7 @@ private fun CuestionarioErrorInvalidoPreview() {
                 correo = "correo-invalido",
                 errorCorreo = "El formato del correo no es válido"
             ),
-            onIntent = {}
+            onEvent = {}
         )
     }
 }

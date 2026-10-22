@@ -14,5 +14,5 @@ fun AgendaMedicoRoute() {
             )
         )
     }
-    AgendaMedicoScreen(state = state, onIntent = {})
+    AgendaMedicoScreen(state = state, onEvent = {})
 }

@@ -46,6 +46,6 @@ fun filaMedicoUiStateDePrueba(): FilaMedicoUiState {
 fun FilaMedicoRoute() {
     val state = remember { filaMedicoUiStateDePrueba() }
     ContenedorMedico(seleccion = PestanaMedico.FILA) {
-        FilaMedicoScreen(state = state, onIntent = {})
+        FilaMedicoScreen(state = state, onEvent = {})
     }
 }

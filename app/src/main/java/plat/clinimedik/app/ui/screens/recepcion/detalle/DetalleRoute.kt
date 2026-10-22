@@ -52,5 +52,5 @@ fun detalleUiStateDePrueba(
 @Composable
 fun DetalleRoute(visitaId: String = "vis-102") {
     val state = remember(visitaId) { detalleUiStateDePrueba(visitaId) }
-    DetalleScreen(state = state, onIntent = {})
+    DetalleScreen(state = state, onEvent = {})
 }

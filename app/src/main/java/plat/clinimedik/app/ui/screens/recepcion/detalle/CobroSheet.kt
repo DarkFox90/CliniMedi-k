@@ -24,7 +24,7 @@ import plat.clinimedik.app.ui.components.etiqueta
 fun CobroContenido(
     nombrePaciente: String,
     formulario: FormularioCobro,
-    onIntent: (DetalleIntent) -> Unit,
+    onEvent: (DetalleEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -48,7 +48,7 @@ fun CobroContenido(
                 TipoPago.entries.forEach { tipo ->
                     FilterChip(
                         selected = formulario.tipoPago == tipo,
-                        onClick = { onIntent(DetalleIntent.SeleccionarTipoPago(tipo)) },
+                        onClick = { onEvent(DetalleEvent.SeleccionarTipoPago(tipo)) },
                         label = { Text(tipo.etiqueta()) }
                     )
                 }
@@ -63,7 +63,7 @@ fun CobroContenido(
         }
         CampoTexto(
             valor = formulario.monto,
-            onValorChange = { onIntent(DetalleIntent.CambiarMonto(it)) },
+            onValorChange = { onEvent(DetalleEvent.CambiarMonto(it)) },
             etiqueta = "Monto (Q)",
             placeholder = "0.00",
             mensajeError = formulario.errorMonto,
@@ -72,8 +72,8 @@ fun CobroContenido(
         )
         BotonesPanel(
             textoConfirmar = "Guardar cobro",
-            onConfirmar = { onIntent(DetalleIntent.GuardarCobro) },
-            onCancelar = { onIntent(DetalleIntent.CerrarPanel) }
+            onConfirmar = { onEvent(DetalleEvent.GuardarCobro) },
+            onCancelar = { onEvent(DetalleEvent.CerrarPanel) }
         )
     }
 }
@@ -82,13 +82,13 @@ fun CobroContenido(
 fun CobroSheet(
     nombrePaciente: String,
     formulario: FormularioCobro,
-    onIntent: (DetalleIntent) -> Unit
+    onEvent: (DetalleEvent) -> Unit
 ) {
-    PanelInferior(onDescartar = { onIntent(DetalleIntent.CerrarPanel) }) {
+    PanelInferior(onDescartar = { onEvent(DetalleEvent.CerrarPanel) }) {
         CobroContenido(
             nombrePaciente = nombrePaciente,
             formulario = formulario,
-            onIntent = onIntent
+            onEvent = onEvent
         )
     }
 }
@@ -100,7 +100,7 @@ private fun CobroVacioPreview() {
         CobroContenido(
             nombrePaciente = "Julio Estrada",
             formulario = FormularioCobro(),
-            onIntent = {}
+            onEvent = {}
         )
     }
 }
@@ -115,7 +115,7 @@ private fun CobroConTipoPreview() {
                 tipoPago = TipoPago.SEGURO,
                 monto = "300.00"
             ),
-            onIntent = {}
+            onEvent = {}
         )
     }
 }

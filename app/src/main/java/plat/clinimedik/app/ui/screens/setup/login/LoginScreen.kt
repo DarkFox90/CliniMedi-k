@@ -31,7 +31,7 @@ import plat.clinimedik.app.ui.theme.CliniMedikTheme
 @Composable
 fun LoginScreen(
     state: LoginUiState,
-    onIntent: (LoginIntent) -> Unit,
+    onEvent: (LoginEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(modifier = modifier) { innerPadding ->
@@ -79,7 +79,7 @@ fun LoginScreen(
             }
             BotonGoogle(
                 cargando = state.cargando,
-                onClick = { onIntent(LoginIntent.ContinuarConGoogle) },
+                onClick = { onEvent(LoginEvent.ContinuarConGoogle) },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -131,7 +131,7 @@ private fun BotonGoogle(
 @Composable
 private fun LoginNormalPreview() {
     CliniMedikTheme {
-        LoginScreen(state = LoginUiState(), onIntent = {})
+        LoginScreen(state = LoginUiState(), onEvent = {})
     }
 }
 
@@ -139,7 +139,7 @@ private fun LoginNormalPreview() {
 @Composable
 private fun LoginCargandoPreview() {
     CliniMedikTheme {
-        LoginScreen(state = LoginUiState(cargando = true), onIntent = {})
+        LoginScreen(state = LoginUiState(cargando = true), onEvent = {})
     }
 }
 
@@ -151,7 +151,7 @@ private fun LoginErrorPreview() {
             state = LoginUiState(
                 mensajeError = "No se pudo iniciar sesión con Google. Revisa tu conexión e intenta de nuevo."
             ),
-            onIntent = {}
+            onEvent = {}
         )
     }
 }

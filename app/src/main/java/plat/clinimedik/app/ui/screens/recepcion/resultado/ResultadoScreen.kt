@@ -25,14 +25,14 @@ import plat.clinimedik.app.ui.theme.CliniMedikTheme
 @Composable
 fun ResultadoScreen(
     state: ResultadoUiState,
-    onIntent: (ResultadoIntent) -> Unit,
+    onEvent: (ResultadoEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
         topBar = {
             BarraSuperior(
                 titulo = "Paciente encontrado",
-                onRegresar = { onIntent(ResultadoIntent.Regresar) }
+                onRegresar = { onEvent(ResultadoEvent.Regresar) }
             )
         },
         modifier = modifier
@@ -81,14 +81,14 @@ fun ResultadoScreen(
 
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 Button(
-                    onClick = { onIntent(ResultadoIntent.VerHistorial) },
+                    onClick = { onEvent(ResultadoEvent.VerHistorial) },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(text = "Ver historial completo")
                 }
 
                 OutlinedButton(
-                    onClick = { onIntent(ResultadoIntent.EscanearOtro) },
+                    onClick = { onEvent(ResultadoEvent.EscanearOtro) },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(text = "Escanear otro")
@@ -109,7 +109,7 @@ private fun ResultadoPreview() {
                 telefono = "5512-7788",
                 resumenVisitas = "3 visitas anteriores · última: 14 de marzo de 2026"
             ),
-            onIntent = {}
+            onEvent = {}
         )
     }
 }

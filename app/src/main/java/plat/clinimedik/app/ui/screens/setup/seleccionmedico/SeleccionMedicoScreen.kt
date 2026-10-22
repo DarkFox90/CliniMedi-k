@@ -42,7 +42,7 @@ import plat.clinimedik.app.ui.theme.CliniMedikTheme
 @Composable
 fun SeleccionMedicoScreen(
     state: SeleccionMedicoUiState,
-    onIntent: (SeleccionMedicoIntent) -> Unit,
+    onEvent: (SeleccionMedicoEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(modifier = modifier) { innerPadding ->
@@ -78,7 +78,7 @@ fun SeleccionMedicoScreen(
                         TarjetaMedico(
                             medico = medico,
                             seleccionado = medico.id == state.medicoSeleccionadoId,
-                            onClick = { onIntent(SeleccionMedicoIntent.SeleccionarMedico(medico.id)) }
+                            onClick = { onEvent(SeleccionMedicoEvent.SeleccionarMedico(medico.id)) }
                         )
                     }
                 }
@@ -86,7 +86,7 @@ fun SeleccionMedicoScreen(
                 val formulario = state.formulario
                 if (formulario == null) {
                     OutlinedButton(
-                        onClick = { onIntent(SeleccionMedicoIntent.MostrarFormulario) },
+                        onClick = { onEvent(SeleccionMedicoEvent.MostrarFormulario) },
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Icon(
@@ -100,12 +100,12 @@ fun SeleccionMedicoScreen(
                 } else {
                     FormularioMedicoNuevo(
                         formulario = formulario,
-                        onIntent = onIntent
+                        onEvent = onEvent
                     )
                 }
             }
             Button(
-                onClick = { onIntent(SeleccionMedicoIntent.Continuar) },
+                onClick = { onEvent(SeleccionMedicoEvent.Continuar) },
                 enabled = state.puedeContinuar,
                 modifier = Modifier
                     .padding(16.dp)
@@ -187,7 +187,7 @@ private fun TarjetaMedico(
 @Composable
 private fun FormularioMedicoNuevo(
     formulario: FormularioMedico,
-    onIntent: (SeleccionMedicoIntent) -> Unit
+    onEvent: (SeleccionMedicoEvent) -> Unit
 ) {
     Surface(
         color = MaterialTheme.colorScheme.surfaceContainerLowest,
@@ -205,14 +205,14 @@ private fun FormularioMedicoNuevo(
             )
             CampoTexto(
                 valor = formulario.nombre,
-                onValorChange = { onIntent(SeleccionMedicoIntent.CambiarNombre(it)) },
+                onValorChange = { onEvent(SeleccionMedicoEvent.CambiarNombre(it)) },
                 etiqueta = "Nombre del médico",
                 placeholder = "Ej. Dra. María López",
                 mensajeError = formulario.errorNombre
             )
             CampoTexto(
                 valor = formulario.especialidad,
-                onValorChange = { onIntent(SeleccionMedicoIntent.CambiarEspecialidad(it)) },
+                onValorChange = { onEvent(SeleccionMedicoEvent.CambiarEspecialidad(it)) },
                 etiqueta = "Especialidad",
                 placeholder = "Ej. Pediatría",
                 mensajeError = formulario.errorEspecialidad
@@ -229,7 +229,7 @@ private fun SeleccionMedicoListaPreview() {
             state = seleccionMedicoUiStateDePrueba(
                 eleccion = MedicoElegido.Existente(medicoId = "med-001")
             ),
-            onIntent = {}
+            onEvent = {}
         )
     }
 }
@@ -242,7 +242,7 @@ private fun SeleccionMedicoFormularioPreview() {
             state = seleccionMedicoUiStateDePrueba(
                 eleccion = MedicoElegido.Nuevo()
             ),
-            onIntent = {}
+            onEvent = {}
         )
     }
 }
@@ -260,7 +260,7 @@ private fun SeleccionMedicoErrorPreview() {
                     )
                 )
             ),
-            onIntent = {}
+            onEvent = {}
         )
     }
 }

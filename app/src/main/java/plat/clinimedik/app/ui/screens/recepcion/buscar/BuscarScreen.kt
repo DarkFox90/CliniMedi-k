@@ -29,13 +29,13 @@ import plat.clinimedik.app.ui.theme.CliniMedikTheme
 @Composable
 fun BuscarScreen(
     state: BuscarUiState,
-    onIntent: (BuscarIntent) -> Unit,
+    onEvent: (BuscarEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
         contentWindowInsets = WindowInsets(0),
         floatingActionButton = {
-            BotonNuevoPaciente(onClick = { onIntent(BuscarIntent.NuevoPaciente) })
+            BotonNuevoPaciente(onClick = { onEvent(BuscarEvent.NuevoPaciente) })
         },
         modifier = modifier
     ) { innerPadding ->
@@ -51,7 +51,7 @@ fun BuscarScreen(
             )
             CampoTexto(
                 valor = state.texto,
-                onValorChange = { onIntent(BuscarIntent.CambiarTexto(it)) },
+                onValorChange = { onEvent(BuscarEvent.CambiarTexto(it)) },
                 etiqueta = "Buscar",
                 placeholder = "Nombre o teléfono",
                 modifier = Modifier.padding(horizontal = 16.dp)
@@ -78,7 +78,7 @@ fun BuscarScreen(
                         PacienteItem(
                             nombre = paciente.nombre,
                             detalle = paciente.telefono,
-                            onClick = { onIntent(BuscarIntent.AbrirPaciente(paciente.pacienteId)) }
+                            onClick = { onEvent(BuscarEvent.AbrirPaciente(paciente.pacienteId)) }
                         )
                     }
                 }
@@ -112,7 +112,7 @@ private fun BuscarRecientesPreview() {
         ContenedorRecepcion(seleccion = PestanaRecepcion.BUSCAR) {
             BuscarScreen(
                 state = buscarUiStateDePrueba(),
-                onIntent = {}
+                onEvent = {}
             )
         }
     }
@@ -125,7 +125,7 @@ private fun BuscarConResultadosPreview() {
         ContenedorRecepcion(seleccion = PestanaRecepcion.BUSCAR) {
             BuscarScreen(
                 state = buscarUiStateDePrueba(texto = "mar"),
-                onIntent = {}
+                onEvent = {}
             )
         }
     }
@@ -138,7 +138,7 @@ private fun BuscarSinResultadosPreview() {
         ContenedorRecepcion(seleccion = PestanaRecepcion.BUSCAR) {
             BuscarScreen(
                 state = buscarUiStateDePrueba(texto = "zzz"),
-                onIntent = {}
+                onEvent = {}
             )
         }
     }

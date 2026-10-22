@@ -30,14 +30,14 @@ import plat.clinimedik.app.ui.theme.CliniMedikTheme
 @Composable
 fun AgendaRecepcionScreen(
     state: AgendaRecepcionUiState,
-    onIntent: (AgendaRecepcionIntent) -> Unit,
+    onEvent: (AgendaRecepcionEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
         contentWindowInsets = WindowInsets(0),
         floatingActionButton = {
             ExtendedFloatingActionButton(
-                onClick = { onIntent(AgendaRecepcionIntent.NuevaCita) },
+                onClick = { onEvent(AgendaRecepcionEvent.NuevaCita) },
                 icon = { Icon(Icons.Filled.Add, contentDescription = null) },
                 text = { Text("Nueva cita") }
             )
@@ -77,7 +77,7 @@ fun AgendaRecepcionScreen(
                             motivo = elemento.motivo,
                             estadoConfirmacion = elemento.estadoConfirmacion,
                             recordatorioEnviado = elemento.recordatorioEnviado,
-                            onClick = { onIntent(AgendaRecepcionIntent.AbrirCita(elemento.citaId)) }
+                            onClick = { onEvent(AgendaRecepcionEvent.AbrirCita(elemento.citaId)) }
                         )
                     }
                 }
@@ -91,7 +91,7 @@ fun AgendaRecepcionScreen(
 private fun AgendaConDatosPreview() {
     CliniMedikTheme {
         ContenedorRecepcion(seleccion = PestanaRecepcion.AGENDA) {
-            AgendaRecepcionScreen(state = agendaUiStateDePrueba(), onIntent = {})
+            AgendaRecepcionScreen(state = agendaUiStateDePrueba(), onEvent = {})
         }
     }
 }
@@ -105,7 +105,7 @@ private fun AgendaVaciaPreview() {
                 state = AgendaRecepcionUiState(
                     subtitulo = "Jueves, 24 de septiembre"
                 ),
-                onIntent = {}
+                onEvent = {}
             )
         }
     }

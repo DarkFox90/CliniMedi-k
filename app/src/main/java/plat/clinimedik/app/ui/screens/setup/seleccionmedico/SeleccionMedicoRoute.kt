@@ -13,5 +13,5 @@ fun seleccionMedicoUiStateDePrueba(eleccion: MedicoElegido? = null): SeleccionMe
 @Composable
 fun SeleccionMedicoRoute() {
     val state = remember { seleccionMedicoUiStateDePrueba() }
-    SeleccionMedicoScreen(state = state, onIntent = {})
+    SeleccionMedicoScreen(state = state, onEvent = {})
 }

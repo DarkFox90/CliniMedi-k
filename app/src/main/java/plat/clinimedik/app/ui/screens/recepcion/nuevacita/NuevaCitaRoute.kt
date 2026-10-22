@@ -6,5 +6,5 @@ import androidx.compose.runtime.remember
 @Composable
 fun NuevaCitaRoute() {
     val state = remember { NuevaCitaUiState() }
-    NuevaCitaScreen(state = state, onIntent = {})
+    NuevaCitaScreen(state = state, onEvent = {})
 }

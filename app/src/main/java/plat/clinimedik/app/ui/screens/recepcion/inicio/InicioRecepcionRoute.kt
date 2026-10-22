@@ -68,6 +68,6 @@ fun inicioRecepcionUiStateDePrueba(): InicioRecepcionUiState {
 fun InicioRecepcionRoute() {
     val state = remember { inicioRecepcionUiStateDePrueba() }
     ContenedorRecepcion(seleccion = PestanaRecepcion.INICIO) {
-        InicioRecepcionScreen(state = state, onIntent = {})
+        InicioRecepcionScreen(state = state, onEvent = {})
     }
 }

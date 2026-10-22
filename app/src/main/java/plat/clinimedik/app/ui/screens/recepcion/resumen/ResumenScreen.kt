@@ -34,14 +34,14 @@ import plat.clinimedik.app.ui.theme.CliniMedikTheme
 @Composable
 fun ResumenScreen(
     state: ResumenUiState,
-    onIntent: (ResumenIntent) -> Unit,
+    onEvent: (ResumenEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
         topBar = {
             BarraSuperior(
                 titulo = "Resumen del día",
-                onRegresar = { onIntent(ResumenIntent.Regresar) }
+                onRegresar = { onEvent(ResumenEvent.Regresar) }
             )
         },
         modifier = modifier
@@ -292,7 +292,7 @@ private fun ResumenNormalPreview() {
     CliniMedikTheme {
         ResumenScreen(
             state = resumenUiStateDePrueba(),
-            onIntent = {}
+            onEvent = {}
         )
     }
 }

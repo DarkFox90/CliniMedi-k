@@ -30,6 +30,6 @@ fun agendaUiStateDePrueba(): AgendaRecepcionUiState {
 fun AgendaRecepcionRoute() {
     val state = remember { agendaUiStateDePrueba() }
     ContenedorRecepcion(seleccion = PestanaRecepcion.AGENDA) {
-        AgendaRecepcionScreen(state = state, onIntent = {})
+        AgendaRecepcionScreen(state = state, onEvent = {})
     }
 }

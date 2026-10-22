@@ -48,6 +48,6 @@ fun filaRecepcionUiStateDePrueba(filtro: FiltroFila = FiltroFila.TODOS): FilaRec
 fun FilaRecepcionRoute() {
     val state = remember { filaRecepcionUiStateDePrueba() }
     ContenedorRecepcion(seleccion = PestanaRecepcion.FILA) {
-        FilaRecepcionScreen(state = state, onIntent = {})
+        FilaRecepcionScreen(state = state, onEvent = {})
     }
 }

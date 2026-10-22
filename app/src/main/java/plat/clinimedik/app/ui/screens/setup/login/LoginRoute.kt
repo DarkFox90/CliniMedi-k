@@ -6,5 +6,5 @@ import androidx.compose.runtime.remember
 @Composable
 fun LoginRoute() {
     val state = remember { LoginUiState() }
-    LoginScreen(state = state, onIntent = {})
+    LoginScreen(state = state, onEvent = {})
 }

@@ -50,5 +50,5 @@ fun historialMedicoUiStateDePrueba(
 @Composable
 fun HistorialMedicoRoute(pacienteId: String = "pac-001") {
     val state = remember(pacienteId) { historialMedicoUiStateDePrueba(pacienteId) }
-    HistorialMedicoScreen(state = state, onIntent = {})
+    HistorialMedicoScreen(state = state, onEvent = {})
 }

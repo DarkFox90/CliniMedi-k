@@ -28,5 +28,5 @@ fun resultadoUiStateDePrueba(): ResultadoUiState {
 @Composable
 fun ResultadoRoute() {
     val state = remember { resultadoUiStateDePrueba() }
-    ResultadoScreen(state = state, onIntent = {})
+    ResultadoScreen(state = state, onEvent = {})
 }

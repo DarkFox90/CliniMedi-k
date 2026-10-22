@@ -6,5 +6,5 @@ import androidx.compose.runtime.remember
 @Composable
 fun RegistroRoute() {
     val state = remember { RegistroUiState() }
-    RegistroScreen(state = state, onIntent = {})
+    RegistroScreen(state = state, onEvent = {})
 }

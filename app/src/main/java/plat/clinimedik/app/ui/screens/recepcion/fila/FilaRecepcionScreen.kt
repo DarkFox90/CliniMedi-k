@@ -35,13 +35,13 @@ import plat.clinimedik.app.ui.theme.CliniMedikTheme
 @Composable
 fun FilaRecepcionScreen(
     state: FilaRecepcionUiState,
-    onIntent: (FilaRecepcionIntent) -> Unit,
+    onEvent: (FilaRecepcionEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
         contentWindowInsets = WindowInsets(0),
         floatingActionButton = {
-            BotonNuevoPaciente(onClick = { onIntent(FilaRecepcionIntent.NuevoPaciente) })
+            BotonNuevoPaciente(onClick = { onEvent(FilaRecepcionEvent.NuevoPaciente) })
         },
         modifier = modifier
     ) { innerPadding ->
@@ -57,7 +57,7 @@ fun FilaRecepcionScreen(
             )
             FiltrosFila(
                 filtroActual = state.filtro,
-                onSeleccionar = { onIntent(FilaRecepcionIntent.SeleccionarFiltro(it)) }
+                onSeleccionar = { onEvent(FilaRecepcionEvent.SeleccionarFiltro(it)) }
             )
             if (state.pacientes.isEmpty()) {
                 FilaVacia(
@@ -77,11 +77,11 @@ fun FilaRecepcionScreen(
                             tiempo = paciente.tiempo,
                             estado = paciente.estado,
                             esUrgente = paciente.esUrgente,
-                            onClick = { onIntent(FilaRecepcionIntent.AbrirPaciente(paciente.visitaId)) },
+                            onClick = { onEvent(FilaRecepcionEvent.AbrirPaciente(paciente.visitaId)) },
                             accion = if (paciente.puedeMarcarseUrgente) {
                                 {
                                     BotonMarcarUrgente(
-                                        onClick = { onIntent(FilaRecepcionIntent.SolicitarUrgencia(paciente.visitaId)) }
+                                        onClick = { onEvent(FilaRecepcionEvent.SolicitarUrgencia(paciente.visitaId)) }
                                     )
                                 }
                             } else {
@@ -97,9 +97,9 @@ fun FilaRecepcionScreen(
             MarcarUrgenteSheet(
                 nombrePaciente = urgencia.nombrePaciente,
                 motivo = urgencia.motivo,
-                onMotivoChange = { onIntent(FilaRecepcionIntent.CambiarMotivoUrgencia(it)) },
-                onConfirmar = { onIntent(FilaRecepcionIntent.ConfirmarUrgencia) },
-                onDescartar = { onIntent(FilaRecepcionIntent.CancelarUrgencia) },
+                onMotivoChange = { onEvent(FilaRecepcionEvent.CambiarMotivoUrgencia(it)) },
+                onConfirmar = { onEvent(FilaRecepcionEvent.ConfirmarUrgencia) },
+                onDescartar = { onEvent(FilaRecepcionEvent.CancelarUrgencia) },
                 mensajeError = urgencia.mensajeError
             )
         }
@@ -161,7 +161,7 @@ private fun FilaConPacientesPreview() {
         ContenedorRecepcion(seleccion = PestanaRecepcion.FILA) {
             FilaRecepcionScreen(
                 state = filaRecepcionUiStateDePrueba(),
-                onIntent = {}
+                onEvent = {}
             )
         }
     }
@@ -174,7 +174,7 @@ private fun FilaConFiltroPreview() {
         ContenedorRecepcion(seleccion = PestanaRecepcion.FILA) {
             FilaRecepcionScreen(
                 state = filaRecepcionUiStateDePrueba(filtro = FiltroFila.ESPERANDO),
-                onIntent = {}
+                onEvent = {}
             )
         }
     }
@@ -190,7 +190,7 @@ private fun FilaSinResultadosPreview() {
                     filtro = FiltroFila.URGENTES,
                     pacientes = emptyList()
                 ),
-                onIntent = {}
+                onEvent = {}
             )
         }
     }
@@ -208,7 +208,7 @@ private fun FilaMarcarUrgenteVacioPreview() {
                         nombrePaciente = "Marta Ríos"
                     )
                 ),
-                onIntent = {}
+                onEvent = {}
             )
         }
     }
@@ -227,7 +227,7 @@ private fun FilaMarcarUrgenteConMotivoPreview() {
                         motivo = "Presión arterial de 180/110 con dolor de cabeza intenso"
                     )
                 ),
-                onIntent = {}
+                onEvent = {}
             )
         }
     }

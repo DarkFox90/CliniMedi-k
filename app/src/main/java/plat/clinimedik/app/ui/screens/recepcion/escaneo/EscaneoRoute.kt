@@ -6,5 +6,5 @@ import androidx.compose.runtime.remember
 @Composable
 fun EscaneoRoute() {
     val state = remember { EscaneoUiState() }
-    EscaneoScreen(state = state, onIntent = {})
+    EscaneoScreen(state = state, onEvent = {})
 }

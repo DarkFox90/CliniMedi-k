@@ -29,14 +29,14 @@ import plat.clinimedik.app.ui.theme.CliniMedikTheme
 @Composable
 fun CodigoQrScreen(
     state: CodigoQrUiState,
-    onIntent: (CodigoQrIntent) -> Unit,
+    onEvent: (CodigoQrEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
         topBar = {
             BarraSuperior(
                 titulo = "Código generado",
-                onRegresar = { onIntent(CodigoQrIntent.Regresar) }
+                onRegresar = { onEvent(CodigoQrEvent.Regresar) }
             )
         },
         modifier = modifier
@@ -87,14 +87,14 @@ fun CodigoQrScreen(
 
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 Button(
-                    onClick = { onIntent(CodigoQrIntent.EnviarPorWhatsApp) },
+                    onClick = { onEvent(CodigoQrEvent.EnviarPorWhatsApp) },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(text = "Enviar por WhatsApp")
                 }
 
                 OutlinedButton(
-                    onClick = { onIntent(CodigoQrIntent.Imprimir) },
+                    onClick = { onEvent(CodigoQrEvent.Imprimir) },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(text = "Imprimir código")
@@ -110,7 +110,7 @@ private fun CodigoQrPreview() {
     CliniMedikTheme {
         CodigoQrScreen(
             state = CodigoQrUiState(nombrePaciente = "Lucía Ajú"),
-            onIntent = {}
+            onEvent = {}
         )
     }
 }

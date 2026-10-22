@@ -35,6 +35,6 @@ fun buscarUiStateDePrueba(texto: String = ""): BuscarUiState {
 fun BuscarRoute() {
     val state = remember { buscarUiStateDePrueba() }
     ContenedorRecepcion(seleccion = PestanaRecepcion.BUSCAR) {
-        BuscarScreen(state = state, onIntent = {})
+        BuscarScreen(state = state, onEvent = {})
     }
 }

@@ -25,14 +25,14 @@ import plat.clinimedik.app.ui.theme.CliniMedikTheme
 @Composable
 fun NuevaCitaScreen(
     state: NuevaCitaUiState,
-    onIntent: (NuevaCitaIntent) -> Unit,
+    onEvent: (NuevaCitaEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
         topBar = {
             BarraSuperior(
                 titulo = "Nueva cita",
-                onRegresar = { onIntent(NuevaCitaIntent.Regresar) }
+                onRegresar = { onEvent(NuevaCitaEvent.Regresar) }
             )
         },
         modifier = modifier
@@ -47,7 +47,7 @@ fun NuevaCitaScreen(
         ) {
             CampoTexto(
                 valor = state.paciente,
-                onValorChange = { onIntent(NuevaCitaIntent.CambiarPaciente(it)) },
+                onValorChange = { onEvent(NuevaCitaEvent.CambiarPaciente(it)) },
                 etiqueta = "Paciente",
                 mensajeError = state.errorPaciente,
                 modifier = Modifier.fillMaxWidth()
@@ -55,7 +55,7 @@ fun NuevaCitaScreen(
 
             CampoTexto(
                 valor = state.correo,
-                onValorChange = { onIntent(NuevaCitaIntent.CambiarCorreo(it)) },
+                onValorChange = { onEvent(NuevaCitaEvent.CambiarCorreo(it)) },
                 etiqueta = "Correo electrónico",
                 placeholder = "Obligatorio si no está registrado",
                 mensajeError = state.errorCorreo,
@@ -65,7 +65,7 @@ fun NuevaCitaScreen(
 
             CampoTexto(
                 valor = state.fecha,
-                onValorChange = { onIntent(NuevaCitaIntent.CambiarFecha(it)) },
+                onValorChange = { onEvent(NuevaCitaEvent.CambiarFecha(it)) },
                 etiqueta = "Fecha",
                 placeholder = "dd/mm/aaaa",
                 mensajeError = state.errorFecha,
@@ -74,7 +74,7 @@ fun NuevaCitaScreen(
 
             CampoTexto(
                 valor = state.hora,
-                onValorChange = { onIntent(NuevaCitaIntent.CambiarHora(it)) },
+                onValorChange = { onEvent(NuevaCitaEvent.CambiarHora(it)) },
                 etiqueta = "Hora",
                 placeholder = "9:30 a. m.",
                 mensajeError = state.errorHora,
@@ -89,7 +89,7 @@ fun NuevaCitaScreen(
 
             CampoTexto(
                 valor = state.motivo,
-                onValorChange = { onIntent(NuevaCitaIntent.CambiarMotivo(it)) },
+                onValorChange = { onEvent(NuevaCitaEvent.CambiarMotivo(it)) },
                 etiqueta = "Motivo de la cita",
                 mensajeError = state.errorMotivo,
                 lineas = 3,
@@ -99,7 +99,7 @@ fun NuevaCitaScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             Button(
-                onClick = { onIntent(NuevaCitaIntent.Guardar) },
+                onClick = { onEvent(NuevaCitaEvent.Guardar) },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(text = "Guardar cita")
@@ -112,7 +112,7 @@ fun NuevaCitaScreen(
 @Composable
 private fun NuevaCitaVaciaPreview() {
     CliniMedikTheme {
-        NuevaCitaScreen(state = NuevaCitaUiState(), onIntent = {})
+        NuevaCitaScreen(state = NuevaCitaUiState(), onEvent = {})
     }
 }
 
@@ -126,7 +126,7 @@ private fun NuevaCitaErrorCamposPreview() {
                 errorFecha = "La fecha es obligatoria",
                 errorHora = "La hora es obligatoria"
             ),
-            onIntent = {}
+            onEvent = {}
         )
     }
 }
@@ -143,7 +143,7 @@ private fun NuevaCitaConflictoPreview() {
                 motivo = "Control de rutina",
                 errorHora = "El Dr. Roberto Sical ya tiene una cita a las 9:30 a. m."
             ),
-            onIntent = {}
+            onEvent = {}
         )
     }
 }

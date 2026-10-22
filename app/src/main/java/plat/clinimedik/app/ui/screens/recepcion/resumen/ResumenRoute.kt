@@ -81,5 +81,5 @@ fun resumenUiStateDePrueba(): ResumenUiState {
 @Composable
 fun ResumenRoute() {
     val state = remember { resumenUiStateDePrueba() }
-    ResumenScreen(state = state, onIntent = {})
+    ResumenScreen(state = state, onEvent = {})
 }

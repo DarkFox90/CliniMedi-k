@@ -22,5 +22,5 @@ fun rolUiStateDePrueba(rolSeleccionado: RolDispositivo? = null): RolUiState = Ro
 @Composable
 fun RolRoute() {
     val state = remember { rolUiStateDePrueba() }
-    RolScreen(state = state, onIntent = {})
+    RolScreen(state = state, onEvent = {})
 }

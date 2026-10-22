@@ -13,5 +13,5 @@ fun CodigoQrRoute() {
         )
     }
 
-    CodigoQrScreen(state = state, onIntent = {})
+    CodigoQrScreen(state = state, onEvent = {})
 }

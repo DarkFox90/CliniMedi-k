@@ -58,6 +58,6 @@ fun pacientesMedicoUiStateDePrueba(texto: String = ""): PacientesMedicoUiState {
 fun PacientesMedicoRoute() {
     val state = remember { pacientesMedicoUiStateDePrueba() }
     ContenedorMedico(seleccion = PestanaMedico.PACIENTES) {
-        PacientesMedicoScreen(state = state, onIntent = {})
+        PacientesMedicoScreen(state = state, onEvent = {})
     }
 }

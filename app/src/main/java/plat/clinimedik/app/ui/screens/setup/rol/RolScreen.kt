@@ -33,7 +33,7 @@ import plat.clinimedik.app.ui.theme.CliniMedikTheme
 @Composable
 fun RolScreen(
     state: RolUiState,
-    onIntent: (RolIntent) -> Unit,
+    onEvent: (RolEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(modifier = modifier) { innerPadding ->
@@ -62,14 +62,14 @@ fun RolScreen(
                     TarjetaRol(
                         opcion = opcion,
                         seleccionada = opcion.rol == state.rolSeleccionado,
-                        onClick = { onIntent(RolIntent.SeleccionarRol(opcion.rol)) }
+                        onClick = { onEvent(RolEvent.SeleccionarRol(opcion.rol)) }
                     )
                 }
             }
             Spacer(modifier = Modifier.weight(1f))
             Spacer(modifier = Modifier.height(16.dp))
             Button(
-                onClick = { onIntent(RolIntent.Continuar) },
+                onClick = { onEvent(RolEvent.Continuar) },
                 enabled = state.puedeContinuar,
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -153,7 +153,7 @@ private fun RolRecepcionSeleccionadaPreview() {
     CliniMedikTheme {
         RolScreen(
             state = rolUiStateDePrueba(rolSeleccionado = RolDispositivo.RECEPCION),
-            onIntent = {}
+            onEvent = {}
         )
     }
 }
@@ -164,7 +164,7 @@ private fun RolMedicoSeleccionadoPreview() {
     CliniMedikTheme {
         RolScreen(
             state = rolUiStateDePrueba(rolSeleccionado = RolDispositivo.MEDICO),
-            onIntent = {}
+            onEvent = {}
         )
     }
 }
