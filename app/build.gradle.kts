@@ -58,7 +58,6 @@ dependencies {
     implementation(libs.androidx.compose.material.icons.core)
     implementation(libs.androidx.room3.runtime)
     ksp(libs.androidx.room3.compiler)
-    implementation(libs.androidx.sqlite.bundled)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.lifecycle.viewmodel.compose)

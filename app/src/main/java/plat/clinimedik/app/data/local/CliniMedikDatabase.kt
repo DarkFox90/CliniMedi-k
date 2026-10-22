@@ -5,7 +5,6 @@ import androidx.room3.ColumnTypeConverters
 import androidx.room3.Database
 import androidx.room3.Room
 import androidx.room3.RoomDatabase
-import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import kotlinx.coroutines.Dispatchers
 import plat.clinimedik.app.data.local.dao.CitaDao
 import plat.clinimedik.app.data.local.dao.CobroDao
@@ -51,7 +50,6 @@ abstract class CliniMedikDatabase : RoomDatabase() {
         fun crear(context: Context): CliniMedikDatabase =
             Room.databaseBuilder<CliniMedikDatabase>(context, "clinimedik.db")
                 .setQueryCoroutineContext(Dispatchers.IO)
-                .setDriver(BundledSQLiteDriver())
                 .build()
     }
 }
