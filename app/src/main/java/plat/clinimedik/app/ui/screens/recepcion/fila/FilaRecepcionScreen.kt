@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -59,7 +60,14 @@ fun FilaRecepcionScreen(
                 filtroActual = state.filtro,
                 onSeleccionar = { onEvent(FilaRecepcionEvent.SeleccionarFiltro(it)) }
             )
-            if (state.pacientes.isEmpty()) {
+            if (state.cargando) {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    CircularProgressIndicator()
+                }
+            } else if (state.pacientesVisibles.isEmpty()) {
                 FilaVacia(
                     mensaje = state.filtro.mensajeVacio,
                     modifier = Modifier.fillMaxSize()
@@ -70,7 +78,7 @@ fun FilaRecepcionScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    items(state.pacientes, key = { it.visitaId }) { paciente ->
+                    items(state.pacientesVisibles, key = { it.visitaId }) { paciente ->
                         PacienteItem(
                             nombre = paciente.nombre,
                             detalle = paciente.detalle,
@@ -161,6 +169,19 @@ private fun FilaConPacientesPreview() {
         ContenedorRecepcion(seleccion = PestanaRecepcion.FILA) {
             FilaRecepcionScreen(
                 state = filaRecepcionUiStateDePrueba(),
+                onEvent = {}
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+private fun FilaCargandoPreview() {
+    CliniMedikTheme {
+        ContenedorRecepcion(seleccion = PestanaRecepcion.FILA) {
+            FilaRecepcionScreen(
+                state = FilaRecepcionUiState(),
                 onEvent = {}
             )
         }

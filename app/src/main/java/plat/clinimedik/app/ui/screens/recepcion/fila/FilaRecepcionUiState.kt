@@ -1,6 +1,10 @@
 package plat.clinimedik.app.ui.screens.recepcion.fila
 
+import java.time.LocalDateTime
 import plat.clinimedik.app.data.model.EstadoVisita
+import plat.clinimedik.app.data.model.VisitaConPaciente
+import plat.clinimedik.app.ui.components.formatearEspera
+import plat.clinimedik.app.ui.components.formatearHora
 
 enum class FiltroFila(val etiqueta: String, val mensajeVacio: String) {
     TODOS("Todos", "No hay pacientes en la fila"),
@@ -38,8 +42,33 @@ data class SolicitudUrgencia(
 )
 
 data class FilaRecepcionUiState(
+    val cargando: Boolean = true,
     val subtitulo: String = "",
     val filtro: FiltroFila = FiltroFila.TODOS,
     val pacientes: List<PacienteEnFila> = emptyList(),
     val urgencia: SolicitudUrgencia? = null
-)
+) {
+    val pacientesVisibles: List<PacienteEnFila>
+        get() = pacientes.filter { filtro.incluye(it) }
+}
+
+fun VisitaConPaciente.aPacienteEnFila(ahora: LocalDateTime): PacienteEnFila {
+    val detalle = if (visita.esUrgente && visita.estado == EstadoVisita.ESPERANDO) {
+        visita.motivoPrioridad ?: visita.motivoConsulta
+    } else {
+        visita.motivoConsulta
+    }
+    val tiempo = when (visita.estado) {
+        EstadoVisita.ESPERANDO -> formatearEspera(visita.horaLlegada, ahora)
+        EstadoVisita.EN_CONSULTA -> "Desde ${formatearHora(visita.horaInicioConsulta ?: visita.horaLlegada)}"
+        EstadoVisita.ATENDIDO, EstadoVisita.REFERIDO -> "Salió ${formatearHora(visita.horaFin ?: visita.horaLlegada)}"
+    }
+    return PacienteEnFila(
+        visitaId = visita.id,
+        nombre = paciente.nombreCompleto,
+        detalle = detalle,
+        tiempo = tiempo,
+        estado = visita.estado,
+        esUrgente = visita.esUrgente
+    )
+}
