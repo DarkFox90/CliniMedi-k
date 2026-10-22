@@ -7,5 +7,5 @@ import java.time.LocalDate
 @Entity(tableName = "metadato")
 data class MetadatoEntity(
     @PrimaryKey val id: Int = 1,
-    val fechaSemilla: LocalDate
+    val fechaCarga: LocalDate
 )
