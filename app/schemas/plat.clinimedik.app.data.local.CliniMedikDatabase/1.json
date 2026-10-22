@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "df819e67e7b1f54a276972a61f43ef20",
+    "identityHash": "5849393e3fef63c65f4bce8e766622c8",
     "entities": [
       {
         "tableName": "medico",
@@ -512,7 +512,7 @@
       },
       {
         "tableName": "metadato",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `fechaSemilla` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `fechaCarga` TEXT NOT NULL, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -521,8 +521,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "fechaSemilla",
-            "columnName": "fechaSemilla",
+            "fieldPath": "fechaCarga",
+            "columnName": "fechaCarga",
             "affinity": "TEXT",
             "notNull": true
           }
@@ -537,7 +537,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'df819e67e7b1f54a276972a61f43ef20')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '5849393e3fef63c65f4bce8e766622c8')"
     ]
   }
 }
