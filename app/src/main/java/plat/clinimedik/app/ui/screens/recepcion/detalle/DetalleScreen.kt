@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -65,6 +66,17 @@ fun DetalleScreen(
         },
         modifier = modifier
     ) { innerPadding ->
+        if (state.cargando) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            ) {
+                CircularProgressIndicator()
+            }
+            return@Scaffold
+        }
         Column(
             verticalArrangement = Arrangement.spacedBy(24.dp),
             modifier = Modifier
@@ -457,6 +469,17 @@ private fun TituloSeccion(texto: String) {
         style = MaterialTheme.typography.titleMedium,
         color = MaterialTheme.colorScheme.onSurface
     )
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+private fun DetalleCargandoPreview() {
+    CliniMedikTheme {
+        DetalleScreen(
+            state = DetalleUiState(),
+            onEvent = {}
+        )
+    }
 }
 
 @Preview(showBackground = true, showSystemUi = true)
