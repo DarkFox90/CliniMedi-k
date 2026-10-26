@@ -1,0 +1,63 @@
+{
+  "project_info": {
+    "project_number": "690816020489",
+    "project_id": "clinimedi-k",
+    "storage_bucket": "clinimedi-k.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:690816020489:android:0c84999f49751487bb88d8",
+        "android_client_info": {
+          "package_name": "plat.clinimedik.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "690816020489-35b0m8d6768ukvfhm0ds5b16af1jvnqj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "plat.clinimedik.app",
+            "certificate_hash": "1a97e738b5fb4398437135805087b9f82a18ad54"
+          }
+        },
+        {
+          "client_id": "690816020489-4ar3k4f572ahecfgfhs16fosia35srrq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "plat.clinimedik.app",
+            "certificate_hash": "bdb04917e7f6c5ec620b5f3d1866e042fadd530d"
+          }
+        },
+        {
+          "client_id": "690816020489-jskj18memhqqaj32qiu7ke14c31se298.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "plat.clinimedik.app",
+            "certificate_hash": "2fae429e4a659bc000c8459941993b33ea5e5275"
+          }
+        },
+        {
+          "client_id": "690816020489-uphduklg2qoak1jalt10cu79vt609ird.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDy_LWHkd3g-pDkNk-TCbDTNiaWlsuyDVU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "690816020489-uphduklg2qoak1jalt10cu79vt609ird.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
