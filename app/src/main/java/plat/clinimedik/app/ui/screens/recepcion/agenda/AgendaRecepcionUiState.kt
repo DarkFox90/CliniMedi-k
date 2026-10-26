@@ -12,6 +12,7 @@ data class ElementoCita(
 )
 
 data class AgendaRecepcionUiState(
+    val cargando: Boolean = true,
     val subtitulo: String = "",
     val elementos: List<ElementoCita> = emptyList()
 )
