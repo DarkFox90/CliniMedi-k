@@ -16,6 +16,8 @@ sealed interface MedicoElegido {
 }
 
 data class SeleccionMedicoUiState(
+    val cargando: Boolean = true,
+    val guardando: Boolean = false,
     val medicos: List<Medico> = emptyList(),
     val eleccion: MedicoElegido? = null
 ) {
@@ -26,5 +28,5 @@ data class SeleccionMedicoUiState(
         get() = (eleccion as? MedicoElegido.Nuevo)?.formulario
 
     val puedeContinuar: Boolean
-        get() = eleccion != null
+        get() = eleccion != null && !guardando
 }

@@ -1,22 +1,16 @@
 package plat.clinimedik.app.ui.screens.setup.rol
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import plat.clinimedik.app.data.model.RolDispositivo
-import plat.clinimedik.app.ui.components.etiqueta
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import plat.clinimedik.app.data.model.RolDispositivo
 import plat.clinimedik.app.ui.navigation.Rol
-
-private fun RolDispositivo.aOpcionRol(): OpcionRol = OpcionRol(
-    rol = this,
-    titulo = etiqueta(),
-    descripcion = when (this) {
-        RolDispositivo.RECEPCION -> "Registra pacientes y administra la fila, las citas y los cobros"
-        RolDispositivo.MEDICO -> "Consulta la fila, la agenda y el historial de tus pacientes, en modo de solo lectura"
-    }
-)
+import plat.clinimedik.app.ui.navigation.SeleccionMedico
 
 fun rolUiStateDePrueba(rolSeleccionado: RolDispositivo? = null): RolUiState = RolUiState(
     opciones = RolDispositivo.entries.map { it.aOpcionRol() },
@@ -24,13 +18,25 @@ fun rolUiStateDePrueba(rolSeleccionado: RolDispositivo? = null): RolUiState = Ro
 )
 
 @Composable
-fun RolRoute() {
-    val state = remember { rolUiStateDePrueba() }
-    RolScreen(state = state, onEvent = {})
+fun RolRoute(
+    onContinuar: (RolDispositivo) -> Unit,
+    viewModel: RolViewModel = viewModel(factory = RolViewModel.Factory)
+) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    LaunchedEffect(viewModel) {
+        viewModel.efectos.collect { efecto ->
+            when (efecto) {
+                is RolEfecto.IrASeleccionMedico -> onContinuar(efecto.rol)
+            }
+        }
+    }
+    RolScreen(state = state, onEvent = viewModel::onEvent)
 }
 
 fun NavGraphBuilder.rolDestino(navController: NavController) {
     composable<Rol> {
-        RolRoute()
+        RolRoute(
+            onContinuar = { rol -> navController.navigate(SeleccionMedico(rol.name)) }
+        )
     }
 }
