@@ -21,6 +21,10 @@ import androidx.compose.ui.unit.dp
 import plat.clinimedik.app.ui.components.AvatarIniciales
 import plat.clinimedik.app.ui.components.BarraSuperior
 import plat.clinimedik.app.ui.theme.CliniMedikTheme
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextButton
 
 @Composable
 fun ResultadoScreen(
@@ -44,6 +48,19 @@ fun ResultadoScreen(
                 .padding(innerPadding)
                 .padding(24.dp)
         ) {
+            if (state.cargando) {
+                CircularProgressIndicator()
+                return@Column
+            }
+
+            if (state.mensajeError != null && state.nombre.isBlank()) {
+                Text(
+                    text = state.mensajeError,
+                    color = MaterialTheme.colorScheme.error
+                )
+                return@Column
+            }
+
             Spacer(modifier = Modifier.height(32.dp))
 
             AvatarIniciales(
@@ -81,20 +98,81 @@ fun ResultadoScreen(
 
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 Button(
-                    onClick = { onEvent(ResultadoEvent.VerHistorial) },
+                    onClick = { onEvent(ResultadoEvent.AgregarAFila) },
+                    enabled = !state.guardando,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(text = "Ver historial completo")
+                    Text("Agregar a la fila")
+                }
+
+                OutlinedButton(
+                    onClick = { onEvent(ResultadoEvent.VerHistorial) },
+                    enabled = state.tieneHistorial,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Ver historial completo")
                 }
 
                 OutlinedButton(
                     onClick = { onEvent(ResultadoEvent.EscanearOtro) },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(text = "Escanear otro")
+                    Text("Escanear otro")
                 }
             }
         }
+    }
+
+    if (state.mostrarFormulario) {
+        AlertDialog(
+            onDismissRequest = {
+                if (!state.guardando) {
+                    onEvent(ResultadoEvent.CancelarAgregarAFila)
+                }
+            },
+            title = { Text("Agregar a la fila") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(
+                        value = state.motivo,
+                        onValueChange = {
+                            onEvent(ResultadoEvent.CambiarMotivo(it))
+                        },
+                        label = { Text("Motivo de consulta") },
+                        enabled = !state.guardando,
+                        isError = state.mensajeError != null,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    if (state.mensajeError != null) {
+                        Text(
+                            text = state.mensajeError,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onEvent(ResultadoEvent.ConfirmarAgregarAFila)
+                    },
+                    enabled = !state.guardando
+                ) {
+                    Text(if (state.guardando) "Guardando..." else "Confirmar")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        onEvent(ResultadoEvent.CancelarAgregarAFila)
+                    },
+                    enabled = !state.guardando
+                ) {
+                    Text("Cancelar")
+                }
+            }
+        )
     }
 }
 
@@ -104,10 +182,12 @@ private fun ResultadoPreview() {
     CliniMedikTheme {
         ResultadoScreen(
             state = ResultadoUiState(
+                cargando = false,
                 nombre = "Álvaro Chacón",
                 edad = "42",
                 telefono = "5512-7788",
-                resumenVisitas = "3 visitas anteriores · última: 14 de marzo de 2026"
+                resumenVisitas = "3 visitas anteriores · última: 14 de marzo de 2026",
+                tieneHistorial = true
             ),
             onEvent = {}
         )

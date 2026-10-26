@@ -26,6 +26,7 @@ import plat.clinimedik.app.ui.components.ContenedorRecepcion
 import plat.clinimedik.app.ui.components.EncabezadoPantalla
 import plat.clinimedik.app.ui.components.PestanaRecepcion
 import plat.clinimedik.app.ui.theme.CliniMedikTheme
+import androidx.compose.material3.CircularProgressIndicator
 
 @Composable
 fun AgendaRecepcionScreen(
@@ -54,7 +55,14 @@ fun AgendaRecepcionScreen(
                 subtitulo = state.subtitulo,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
             )
-            if (state.elementos.isEmpty()) {
+            if (state.cargando) {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    CircularProgressIndicator()
+                }
+            } else if (state.elementos.isEmpty()) {
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier.fillMaxSize()
@@ -67,7 +75,11 @@ fun AgendaRecepcionScreen(
                 }
             } else {
                 LazyColumn(
-                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 96.dp),
+                    contentPadding = PaddingValues(
+                        start = 16.dp,
+                        end = 16.dp,
+                        bottom = 96.dp
+                    ),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(state.elementos, key = { it.citaId }) { elemento ->
@@ -77,7 +89,7 @@ fun AgendaRecepcionScreen(
                             motivo = elemento.motivo,
                             estadoConfirmacion = elemento.estadoConfirmacion,
                             recordatorioEnviado = elemento.recordatorioEnviado,
-                            onClick = { onEvent(AgendaRecepcionEvent.AbrirCita(elemento.citaId)) }
+                            onClick = {}
                         )
                     }
                 }
@@ -103,7 +115,8 @@ private fun AgendaVaciaPreview() {
         ContenedorRecepcion(seleccion = PestanaRecepcion.AGENDA) {
             AgendaRecepcionScreen(
                 state = AgendaRecepcionUiState(
-                    subtitulo = "Jueves, 24 de septiembre"
+                    subtitulo = "Jueves, 24 de septiembre",
+                    cargando = false
                 ),
                 onEvent = {}
             )

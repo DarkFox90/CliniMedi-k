@@ -20,6 +20,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import plat.clinimedik.app.ui.components.BarraSuperior
 import plat.clinimedik.app.ui.theme.CliniMedikTheme
+import androidx.compose.material3.Button
+import androidx.compose.foundation.layout.fillMaxWidth
 
 @Composable
 fun EscaneoScreen(
@@ -65,6 +67,17 @@ fun EscaneoScreen(
                     textAlign = TextAlign.Center,
                     modifier = Modifier.padding(horizontal = 32.dp)
                 )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Button(
+                    onClick = { onEvent(EscaneoEvent.SimularLectura) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 32.dp)
+                ) {
+                    Text("Simular lectura")
+                }
             }
         }
     }

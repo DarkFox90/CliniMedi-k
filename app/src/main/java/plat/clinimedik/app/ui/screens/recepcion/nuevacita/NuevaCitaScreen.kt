@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import plat.clinimedik.app.ui.components.BarraSuperior
 import plat.clinimedik.app.ui.components.CampoTexto
 import plat.clinimedik.app.ui.theme.CliniMedikTheme
+import androidx.compose.material3.CircularProgressIndicator
 
 @Composable
 fun NuevaCitaScreen(
@@ -76,7 +77,7 @@ fun NuevaCitaScreen(
                 valor = state.hora,
                 onValorChange = { onEvent(NuevaCitaEvent.CambiarHora(it)) },
                 etiqueta = "Hora",
-                placeholder = "9:30 a. m.",
+                placeholder = "9:30 (formato de 24 horas)",
                 mensajeError = state.errorHora,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -100,9 +101,17 @@ fun NuevaCitaScreen(
 
             Button(
                 onClick = { onEvent(NuevaCitaEvent.Guardar) },
+                enabled = !state.guardando,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(text = "Guardar cita")
+                if (state.guardando) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.height(24.dp),
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Text(text = "Guardar cita")
+                }
             }
         }
     }

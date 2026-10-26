@@ -10,5 +10,6 @@ data class NuevaCitaUiState(
     val hora: String = "",
     val errorHora: String? = null,
     val motivo: String = "",
-    val errorMotivo: String? = null
+    val errorMotivo: String? = null,
+    val guardando: Boolean = false
 )
