@@ -78,15 +78,6 @@ Versiones tomadas de `gradle/libs.versions.toml`:
 | Google ID (`googleid`) | 1.2.1 | Opción de inicio de sesión con Google para Credential Manager |
 | Google Services (plugin de Gradle) | 4.5.0 | Lee `google-services.json` para configurar Firebase |
 
-Librerías previstas para siguientes fases: ZXing core (generar el código QR), Google Code Scanner (leer el código QR) y Retrofit u OkHttp (llamar al servicio de correo).
-
-## Alcance de esta entrega
-
-- El código QR que se muestra tras registrar a un paciente es una imagen de muestra. Lo que sí se genera es el texto del código (`clinimedik:<id del paciente>`), que se comparte con "Enviar por WhatsApp". "Imprimir código" muestra el aviso "Disponible en la siguiente fase".
-- "Escanear QR" no usa la cámara: el botón "Simular lectura" devuelve un paciente de los datos de prueba.
-- El inicio de sesión con Google requiere que el SHA-1 de la llave de firma esté registrado en Firebase. Si no funciona en un dispositivo, "Continuar sin cuenta" permite revisar toda la app.
-- Los datos de prueba no se sincronizan entre dispositivos; cada teléfono usa su propia base de datos local.
-
 ## Estructura
 
 - `data/model`: modelos de la app: médicos, pacientes, visitas, citas, recetas, referencias, cobros y documentos.
@@ -112,7 +103,7 @@ Quinto Entregable:
 - `feature/login-configuracion` – Estuardo García: inicio de sesión con Firebase, arranque, rol, médico asignado, inicio de recepción, búsqueda y pantallas del médico.
 - `feature/navegacion-registro` – Carlos Pozuelos: navegación y barras inferiores, agenda de recepción, nueva cita, registro, cuestionario, código QR, escaneo y paciente encontrado.
 
-Cuarto Entregable (historial):
+Cuarto Entregable:
 
 - `feature/fila-expediente` – Andrés Castro: base compartida (tema, modelos, datos de prueba, componentes), fila de recepción, detalle del paciente e historial del médico.
 - `feature/setup-inicio` – Estuardo García: configuración inicial, inicio de recepción, búsqueda, resumen del día, fila y pacientes del médico.
