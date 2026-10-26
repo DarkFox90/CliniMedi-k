@@ -33,9 +33,11 @@ fun agendaUiStateDePrueba(): AgendaRecepcionUiState {
 @Composable
 fun AgendaRecepcionRoute() {
     val state = remember { agendaUiStateDePrueba() }
-    ContenedorRecepcion(seleccion = PestanaRecepcion.AGENDA) {
-        AgendaRecepcionScreen(state = state, onEvent = {})
-    }
+
+    AgendaRecepcionScreen(
+        state = state, onEvent = {}
+    )
+
 }
 
 fun NavGraphBuilder.agendaRecepcionDestino(navController: NavController) {

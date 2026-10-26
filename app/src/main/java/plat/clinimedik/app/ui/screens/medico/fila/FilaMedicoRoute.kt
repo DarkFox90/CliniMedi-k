@@ -49,9 +49,7 @@ fun filaMedicoUiStateDePrueba(): FilaMedicoUiState {
 @Composable
 fun FilaMedicoRoute() {
     val state = remember { filaMedicoUiStateDePrueba() }
-    ContenedorMedico(seleccion = PestanaMedico.FILA) {
-        FilaMedicoScreen(state = state, onEvent = {})
-    }
+    FilaMedicoScreen(state = state, onEvent = {})
 }
 
 fun NavGraphBuilder.filaMedicoDestino(navController: NavController) {

@@ -61,9 +61,7 @@ fun pacientesMedicoUiStateDePrueba(texto: String = ""): PacientesMedicoUiState {
 @Composable
 fun PacientesMedicoRoute() {
     val state = remember { pacientesMedicoUiStateDePrueba() }
-    ContenedorMedico(seleccion = PestanaMedico.PACIENTES) {
-        PacientesMedicoScreen(state = state, onEvent = {})
-    }
+    PacientesMedicoScreen(state = state, onEvent = {})
 }
 
 fun NavGraphBuilder.pacientesMedicoDestino(navController: NavController) {
