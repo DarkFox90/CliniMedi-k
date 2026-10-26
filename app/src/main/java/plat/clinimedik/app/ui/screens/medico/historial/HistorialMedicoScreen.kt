@@ -2,6 +2,7 @@ package plat.clinimedik.app.ui.screens.medico.historial
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
@@ -16,6 +17,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -48,42 +50,53 @@ fun HistorialMedicoScreen(
         },
         modifier = modifier
     ) { innerPadding ->
-        LazyColumn(
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-        ) {
-            item {
-                EncabezadoHistorial(state = state)
+        if (state.cargando) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            ) {
+                CircularProgressIndicator()
             }
-            item {
-                AvisoSoloLectura(ultimaActualizacion = state.ultimaActualizacion)
-            }
-            item {
-                Text(
-                    text = "Visitas",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
-            }
-            if (state.visitas.isEmpty()) {
+        } else {
+            LazyColumn(
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            ) {
+                item {
+                    EncabezadoHistorial(state = state)
+                }
+                item {
+                    AvisoSoloLectura(ultimaActualizacion = state.ultimaActualizacion)
+                }
                 item {
                     Text(
-                        text = "El paciente no tiene visitas terminadas",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        text = "Visitas",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.padding(top = 8.dp)
                     )
                 }
-            } else {
-                items(state.visitas, key = { it.id }) { visita ->
-                    TarjetaVisita(
-                        visita = visita,
-                        expandida = visita.id in state.visitasExpandidas,
-                        onAlternar = { onEvent(HistorialMedicoEvent.AlternarVisita(visita.id)) }
-                    )
+                if (state.visitas.isEmpty()) {
+                    item {
+                        Text(
+                            text = "El paciente no tiene visitas terminadas",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                } else {
+                    items(state.visitas, key = { it.id }) { visita ->
+                        TarjetaVisita(
+                            visita = visita,
+                            expandida = visita.id in state.visitasExpandidas,
+                            onAlternar = { onEvent(HistorialMedicoEvent.AlternarVisita(visita.id)) }
+                        )
+                    }
                 }
             }
         }
@@ -278,6 +291,17 @@ private fun SeccionVisita(
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         contenido()
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+private fun HistorialCargandoPreview() {
+    CliniMedikTheme {
+        HistorialMedicoScreen(
+            state = HistorialMedicoUiState(),
+            onEvent = {}
+        )
     }
 }
 

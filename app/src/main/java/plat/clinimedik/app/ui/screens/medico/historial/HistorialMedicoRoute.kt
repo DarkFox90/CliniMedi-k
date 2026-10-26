@@ -1,65 +1,48 @@
 package plat.clinimedik.app.ui.screens.medico.historial
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import plat.clinimedik.app.data.fake.FakeDataSource
-import plat.clinimedik.app.data.model.EstadoVisita
-import plat.clinimedik.app.ui.components.calcularEdad
-import plat.clinimedik.app.ui.components.formatearFecha
-import plat.clinimedik.app.ui.components.formatearHora
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import plat.clinimedik.app.data.fake.FakeDataSource
 import plat.clinimedik.app.ui.navigation.HistorialMedico
-import androidx.navigation.toRoute
 
 fun historialMedicoUiStateDePrueba(
     pacienteId: String = "pac-001",
     visitasExpandidas: Set<String> = emptySet()
 ): HistorialMedicoUiState {
-    val paciente = FakeDataSource.paciente(pacienteId) ?: return HistorialMedicoUiState()
-    val edad = calcularEdad(paciente.fechaNacimiento, FakeDataSource.hoy)
-
-    val visitas = FakeDataSource.historialDe(paciente.id)
-        .filter { it.estado == EstadoVisita.ATENDIDO || it.estado == EstadoVisita.REFERIDO }
-        .map { visita ->
-            val referencia = FakeDataSource.referenciaDe(visita.id)
-            VisitaHistorial(
-                id = visita.id,
-                fecha = formatearFecha(visita.horaLlegada.toLocalDate()),
-                motivo = visita.motivoConsulta,
-                estado = visita.estado,
-                diagnostico = visita.diagnostico ?: "Sin diagnóstico registrado",
-                recetas = FakeDataSource.recetasDe(visita.id).map { receta ->
-                    RecetaHistorial(
-                        medicamento = receta.medicamento,
-                        indicaciones = "${receta.dosis} · ${receta.frecuencia} · ${receta.duracion}"
-                    )
-                },
-                referencia = referencia?.let { "${it.especialidad} con ${it.destino}. ${it.motivo}." },
-                notas = visita.notas
-            )
-        }
-
-    return HistorialMedicoUiState(
-        nombre = paciente.nombreCompleto,
-        datosPaciente = "$edad años · ${paciente.telefono}",
-        alergias = paciente.alergias,
-        enfermedadesPrevias = paciente.enfermedadesPrevias,
-        ultimaActualizacion = "Última actualización: ${formatearHora(FakeDataSource.ahora)}",
-        visitas = visitas,
-        visitasExpandidas = visitasExpandidas
-    )
+    val paciente = FakeDataSource.paciente(pacienteId) ?: return HistorialMedicoUiState(cargando = false)
+    return calcularHistorial(
+        paciente = paciente,
+        historial = FakeDataSource.historialDe(pacienteId),
+        recetas = FakeDataSource.recetas,
+        referencias = FakeDataSource.referencias,
+        ahora = FakeDataSource.ahora
+    ).copy(visitasExpandidas = visitasExpandidas)
 }
 
 @Composable
-fun HistorialMedicoRoute(pacienteId: String = "pac-001") {
-    val state = remember(pacienteId) { historialMedicoUiStateDePrueba(pacienteId) }
-    HistorialMedicoScreen(state = state, onEvent = {})
+fun HistorialMedicoRoute(
+    onRegresar: () -> Unit,
+    viewModel: HistorialMedicoViewModel = viewModel(factory = HistorialMedicoViewModel.Factory)
+) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    LaunchedEffect(viewModel) {
+        viewModel.efectos.collect { efecto ->
+            when (efecto) {
+                HistorialMedicoEfecto.Regresar -> onRegresar()
+            }
+        }
+    }
+    HistorialMedicoScreen(state = state, onEvent = viewModel::onEvent)
 }
 
 fun NavGraphBuilder.historialMedicoDestino(navController: NavController) {
-    composable<HistorialMedico> { entrada ->
-        HistorialMedicoRoute(pacienteId = entrada.toRoute<HistorialMedico>().pacienteId)
+    composable<HistorialMedico> {
+        HistorialMedicoRoute(onRegresar = { navController.popBackStack() })
     }
 }
