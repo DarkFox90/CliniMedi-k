@@ -1,6 +1,7 @@
 package plat.clinimedik.app.ui.screens.recepcion.inicio
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -15,7 +16,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -49,29 +53,52 @@ fun InicioRecepcionScreen(
         },
         modifier = modifier
     ) { innerPadding ->
-        Column(
-            verticalArrangement = Arrangement.spacedBy(24.dp),
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .verticalScroll(rememberScrollState())
-                .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 96.dp)
-        ) {
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                EncabezadoPantalla(
-                    titulo = state.saludo,
-                    subtitulo = state.fecha
-                )
-                Text(
-                    text = state.medicoYRol,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+        if (state.cargando) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            ) {
+                CircularProgressIndicator()
             }
-            MetricasFila(state = state)
-            SeccionSiguientePaciente(state = state, onEvent = onEvent)
-            SeccionProximaCita(proximaCita = state.proximaCita, onEvent = onEvent)
-            SeccionAccesosRapidos(onEvent = onEvent)
+        } else {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(24.dp),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .verticalScroll(rememberScrollState())
+                    .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 96.dp)
+            ) {
+                Row(verticalAlignment = Alignment.Top) {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        EncabezadoPantalla(
+                            titulo = state.saludo,
+                            subtitulo = state.fecha
+                        )
+                        Text(
+                            text = state.medicoYRol,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    IconButton(onClick = { onEvent(InicioRecepcionEvent.CambiarConfiguracion) }) {
+                        Icon(
+                            imageVector = Icons.Filled.Settings,
+                            contentDescription = "Cambiar configuración",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+                MetricasFila(state = state)
+                SeccionSiguientePaciente(state = state, onEvent = onEvent)
+                SeccionProximaCita(proximaCita = state.proximaCita, onEvent = onEvent)
+                SeccionAccesosRapidos(onEvent = onEvent)
+            }
         }
     }
 }
@@ -228,6 +255,19 @@ private fun TextoVacio(texto: String) {
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant
     )
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+private fun InicioCargandoPreview() {
+    CliniMedikTheme {
+        ContenedorRecepcion(seleccion = PestanaRecepcion.INICIO) {
+            InicioRecepcionScreen(
+                state = InicioRecepcionUiState(),
+                onEvent = {}
+            )
+        }
+    }
 }
 
 @Preview(showBackground = true, showSystemUi = true)
