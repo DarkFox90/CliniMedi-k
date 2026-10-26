@@ -1,5 +1,9 @@
 package plat.clinimedik.app.ui.screens.recepcion.buscar
 
+import plat.clinimedik.app.data.model.Paciente
+
+val idsRecientes = listOf("pac-005", "pac-004", "pac-002")
+
 data class PacienteEncontrado(
     val pacienteId: String,
     val nombre: String,
@@ -7,6 +11,7 @@ data class PacienteEncontrado(
 )
 
 data class BuscarUiState(
+    val cargando: Boolean = true,
     val texto: String = "",
     val recientes: List<PacienteEncontrado> = emptyList(),
     val resultados: List<PacienteEncontrado> = emptyList()
@@ -31,3 +36,9 @@ data class BuscarUiState(
             "No hay búsquedas recientes"
         }
 }
+
+fun Paciente.aPacienteEncontrado(): PacienteEncontrado = PacienteEncontrado(
+    pacienteId = id,
+    nombre = nombreCompleto,
+    telefono = telefono
+)

@@ -1,23 +1,20 @@
 package plat.clinimedik.app.ui.screens.recepcion.buscar
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import plat.clinimedik.app.data.fake.FakeDataSource
-import plat.clinimedik.app.data.model.Paciente
-import plat.clinimedik.app.ui.components.ContenedorRecepcion
-import plat.clinimedik.app.ui.components.PestanaRecepcion
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import plat.clinimedik.app.data.fake.FakeDataSource
 import plat.clinimedik.app.ui.navigation.Buscar
-
-private val idsRecientes = listOf("pac-005", "pac-004", "pac-002")
-
-private fun Paciente.aPacienteEncontrado(): PacienteEncontrado = PacienteEncontrado(
-    pacienteId = id,
-    nombre = nombreCompleto,
-    telefono = telefono
-)
+import plat.clinimedik.app.ui.navigation.Inicio
+import plat.clinimedik.app.ui.navigation.Registro
+import plat.clinimedik.app.ui.navigation.Resultado
+import plat.clinimedik.app.ui.navigation.irAPestana
 
 fun buscarUiStateDePrueba(texto: String = ""): BuscarUiState {
     val recientes = idsRecientes
@@ -29,6 +26,7 @@ fun buscarUiStateDePrueba(texto: String = ""): BuscarUiState {
         FakeDataSource.buscarPacientes(texto).map { it.aPacienteEncontrado() }
     }
     return BuscarUiState(
+        cargando = false,
         texto = texto,
         recientes = recientes,
         resultados = resultados
@@ -36,15 +34,29 @@ fun buscarUiStateDePrueba(texto: String = ""): BuscarUiState {
 }
 
 @Composable
-fun BuscarRoute() {
-    val state = remember { buscarUiStateDePrueba() }
-    ContenedorRecepcion(seleccion = PestanaRecepcion.BUSCAR) {
-        BuscarScreen(state = state, onEvent = {})
+fun BuscarRoute(
+    onAbrirResultado: (String) -> Unit,
+    onNuevoPaciente: () -> Unit,
+    viewModel: BuscarViewModel = viewModel(factory = BuscarViewModel.Factory)
+) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    LaunchedEffect(viewModel) {
+        viewModel.efectos.collect { efecto ->
+            when (efecto) {
+                is BuscarEfecto.AbrirResultado -> onAbrirResultado(efecto.pacienteId)
+                BuscarEfecto.IrARegistro -> onNuevoPaciente()
+            }
+        }
     }
+    BuscarScreen(state = state, onEvent = viewModel::onEvent)
 }
 
 fun NavGraphBuilder.buscarDestino(navController: NavController) {
     composable<Buscar> {
-        BuscarRoute()
+        BackHandler { navController.irAPestana(Inicio) }
+        BuscarRoute(
+            onAbrirResultado = { pacienteId -> navController.navigate(Resultado(pacienteId)) },
+            onNuevoPaciente = { navController.navigate(Registro) }
+        )
     }
 }
