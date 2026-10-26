@@ -27,6 +27,8 @@ import plat.clinimedik.app.ui.components.BarraSuperior
 import plat.clinimedik.app.ui.components.CampoTexto
 import plat.clinimedik.app.ui.components.etiqueta
 import plat.clinimedik.app.ui.theme.CliniMedikTheme
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.ui.Alignment
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -119,7 +121,8 @@ fun CuestionarioScreen(
                 onValorChange = { onEvent(CuestionarioEvent.CambiarMotivo(it)) },
                 etiqueta = "Motivo de consulta",
                 lineas = 3,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                mensajeError = state.errorMotivo,
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -155,11 +158,27 @@ fun CuestionarioScreen(
             )
 
             Spacer(modifier = Modifier.height(16.dp))
+
+            if (state.mensajeError != null) {
+                Text(
+                    text = state.mensajeError,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+
             Button(
                 onClick = { onEvent(CuestionarioEvent.Guardar) },
+                enabled = !state.guardando,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(text = "Guardar y generar QR")
+                if (state.guardando) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.height(24.dp),
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Text(text = "Guardar y generar QR")
+                }
             }
         }
     }
