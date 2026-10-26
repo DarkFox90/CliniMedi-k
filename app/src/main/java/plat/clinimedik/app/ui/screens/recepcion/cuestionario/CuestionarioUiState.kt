@@ -14,8 +14,11 @@ data class CuestionarioUiState(
     val correo: String = "",
     val errorCorreo: String? = null,
     val motivo: String = "",
+    val errorMotivo: String? = null,
     val alergias: String = "",
     val enfermedades: String = "",
     val tratamientos: String = "",
-    val cirugias: String = ""
+    val cirugias: String = "",
+    val guardando: Boolean = false,
+    val mensajeError: String? = null
 )

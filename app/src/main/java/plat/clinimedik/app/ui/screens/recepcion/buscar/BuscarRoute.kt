@@ -38,9 +38,7 @@ fun buscarUiStateDePrueba(texto: String = ""): BuscarUiState {
 @Composable
 fun BuscarRoute() {
     val state = remember { buscarUiStateDePrueba() }
-    ContenedorRecepcion(seleccion = PestanaRecepcion.BUSCAR) {
-        BuscarScreen(state = state, onEvent = {})
-    }
+    BuscarScreen(state = state, onEvent = {})
 }
 
 fun NavGraphBuilder.buscarDestino(navController: NavController) {

@@ -71,9 +71,7 @@ fun inicioRecepcionUiStateDePrueba(): InicioRecepcionUiState {
 @Composable
 fun InicioRecepcionRoute() {
     val state = remember { inicioRecepcionUiStateDePrueba() }
-    ContenedorRecepcion(seleccion = PestanaRecepcion.INICIO) {
-        InicioRecepcionScreen(state = state, onEvent = {})
-    }
+    InicioRecepcionScreen(state = state, onEvent = {})
 }
 
 fun NavGraphBuilder.inicioRecepcionDestino(navController: NavController) {

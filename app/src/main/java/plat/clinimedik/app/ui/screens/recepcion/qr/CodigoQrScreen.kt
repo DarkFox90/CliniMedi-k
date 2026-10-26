@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import plat.clinimedik.app.R
 import plat.clinimedik.app.ui.components.BarraSuperior
 import plat.clinimedik.app.ui.theme.CliniMedikTheme
+import androidx.compose.material3.CircularProgressIndicator
 
 @Composable
 fun CodigoQrScreen(
@@ -48,6 +49,21 @@ fun CodigoQrScreen(
                 .padding(innerPadding)
                 .padding(24.dp)
         ) {
+            if (state.cargando) {
+                CircularProgressIndicator(
+                    modifier = Modifier.padding(16.dp)
+                )
+                return@Column
+            }
+
+            if (state.mensajeError != null) {
+                Text(
+                    text = state.mensajeError,
+                    color = MaterialTheme.colorScheme.error
+                )
+                return@Column
+            }
+
             Text(
                 text = state.nombrePaciente,
                 style = MaterialTheme.typography.headlineSmall,
@@ -109,7 +125,11 @@ fun CodigoQrScreen(
 private fun CodigoQrPreview() {
     CliniMedikTheme {
         CodigoQrScreen(
-            state = CodigoQrUiState(nombrePaciente = "Lucía Ajú"),
+            state = CodigoQrUiState(
+                cargando = false,
+                nombrePaciente = "Lucía Ajú",
+                pacienteId = "pac-006"
+            ),
             onEvent = {}
         )
     }
