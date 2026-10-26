@@ -18,6 +18,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -82,7 +83,14 @@ fun LoginScreen(
                 onClick = { onEvent(LoginEvent.ContinuarConGoogle) },
                 modifier = Modifier.fillMaxWidth()
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
+            TextButton(
+                onClick = { onEvent(LoginEvent.ContinuarSinCuenta) },
+                enabled = !state.cargando
+            ) {
+                Text(text = "Continuar sin cuenta")
+            }
+            Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "La configuración se realiza una sola vez por dispositivo",
                 style = MaterialTheme.typography.bodySmall,
@@ -149,7 +157,7 @@ private fun LoginErrorPreview() {
     CliniMedikTheme {
         LoginScreen(
             state = LoginUiState(
-                mensajeError = "No se pudo iniciar sesión con Google. Revisa tu conexión e intenta de nuevo."
+                mensajeError = MENSAJE_ERROR_LOGIN
             ),
             onEvent = {}
         )
