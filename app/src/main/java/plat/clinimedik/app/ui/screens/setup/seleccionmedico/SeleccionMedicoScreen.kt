@@ -2,6 +2,7 @@ package plat.clinimedik.app.ui.screens.setup.seleccionmedico
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -21,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -70,16 +72,27 @@ fun SeleccionMedicoScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(modifier = Modifier.height(24.dp))
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = Modifier.selectableGroup()
-                ) {
-                    state.medicos.forEach { medico ->
-                        TarjetaMedico(
-                            medico = medico,
-                            seleccionado = medico.id == state.medicoSeleccionadoId,
-                            onClick = { onEvent(SeleccionMedicoEvent.SeleccionarMedico(medico.id)) }
-                        )
+                if (state.cargando) {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 32.dp)
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                } else {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        modifier = Modifier.selectableGroup()
+                    ) {
+                        state.medicos.forEach { medico ->
+                            TarjetaMedico(
+                                medico = medico,
+                                seleccionado = medico.id == state.medicoSeleccionadoId,
+                                onClick = { onEvent(SeleccionMedicoEvent.SeleccionarMedico(medico.id)) }
+                            )
+                        }
                     }
                 }
                 Spacer(modifier = Modifier.height(16.dp))
@@ -218,6 +231,17 @@ private fun FormularioMedicoNuevo(
                 mensajeError = formulario.errorEspecialidad
             )
         }
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+private fun SeleccionMedicoCargandoPreview() {
+    CliniMedikTheme {
+        SeleccionMedicoScreen(
+            state = SeleccionMedicoUiState(),
+            onEvent = {}
+        )
     }
 }
 
