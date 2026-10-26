@@ -28,10 +28,13 @@ class LoginViewModel(
     fun onEvent(event: LoginEvent) {
         when (event) {
             LoginEvent.ContinuarConGoogle -> {
-                _state.update { it.copy(cargando = true, mensajeError = null) }
+                _state.update { it.copy(mensajeError = null) }
                 enviar(LoginEfecto.AbrirSelectorGoogle)
             }
-            is LoginEvent.TokenRecibido -> iniciarSesion(event.idToken)
+            is LoginEvent.TokenRecibido -> {
+                _state.update { it.copy(cargando = true) }
+                iniciarSesion(event.idToken)
+            }
             is LoginEvent.ErrorGoogle -> mostrarError(event.mensaje)
             LoginEvent.ContinuarSinCuenta -> enviar(LoginEfecto.IrARol)
         }

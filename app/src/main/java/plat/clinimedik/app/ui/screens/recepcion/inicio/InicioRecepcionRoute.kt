@@ -1,81 +1,67 @@
 package plat.clinimedik.app.ui.screens.recepcion.inicio
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import java.time.LocalDateTime
-import plat.clinimedik.app.data.fake.FakeDataSource
-import plat.clinimedik.app.data.model.Cita
-import plat.clinimedik.app.data.model.EstadoVisita
-import plat.clinimedik.app.data.model.Visita
-import plat.clinimedik.app.ui.components.ContenedorRecepcion
-import plat.clinimedik.app.ui.components.PestanaRecepcion
-import plat.clinimedik.app.ui.components.formatearEspera
-import plat.clinimedik.app.ui.components.formatearFechaLarga
-import plat.clinimedik.app.ui.components.formatearHora
-import plat.clinimedik.app.ui.screens.recepcion.fila.PacienteEnFila
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import plat.clinimedik.app.data.fake.FakeDataSource
+import plat.clinimedik.app.data.model.VisitaConPaciente
+import plat.clinimedik.app.ui.navigation.AgendaRecepcion
+import plat.clinimedik.app.ui.navigation.Detalle
+import plat.clinimedik.app.ui.navigation.Escaneo
 import plat.clinimedik.app.ui.navigation.Inicio
-
-private fun Visita.aPacienteEnFila(): PacienteEnFila {
-    val nombre = FakeDataSource.paciente(pacienteId)?.nombreCompleto.orEmpty()
-    val detalle = if (esUrgente && estado == EstadoVisita.ESPERANDO) {
-        motivoPrioridad ?: motivoConsulta
-    } else {
-        motivoConsulta
-    }
-    val tiempo = when (estado) {
-        EstadoVisita.ESPERANDO -> formatearEspera(horaLlegada, FakeDataSource.ahora)
-        EstadoVisita.EN_CONSULTA -> "Desde ${formatearHora(horaInicioConsulta ?: horaLlegada)}"
-        EstadoVisita.ATENDIDO, EstadoVisita.REFERIDO -> "Salió ${formatearHora(horaFin ?: horaLlegada)}"
-    }
-    return PacienteEnFila(
-        visitaId = id,
-        nombre = nombre,
-        detalle = detalle,
-        tiempo = tiempo,
-        estado = estado,
-        esUrgente = esUrgente
-    )
-}
-
-private fun Cita.aProximaCita(): ProximaCita = ProximaCita(
-    citaId = id,
-    hora = formatearHora(fechaHora),
-    nombrePaciente = nombrePaciente,
-    motivo = motivo,
-    estadoConfirmacion = estadoConfirmacion
-)
-
-private fun saludoPara(momento: LocalDateTime): String = when (momento.hour) {
-    in 0..11 -> "Buenos días"
-    in 12..18 -> "Buenas tardes"
-    else -> "Buenas noches"
-}
+import plat.clinimedik.app.ui.navigation.Registro
+import plat.clinimedik.app.ui.navigation.Resumen
+import plat.clinimedik.app.ui.navigation.Rol
+import plat.clinimedik.app.ui.navigation.irAPestana
 
 fun inicioRecepcionUiStateDePrueba(): InicioRecepcionUiState {
     val medico = FakeDataSource.medicoActual
-    val ahora = FakeDataSource.ahora
-    return InicioRecepcionUiState(
-        fecha = formatearFechaLarga(FakeDataSource.hoy),
-        saludo = saludoPara(ahora),
-        medicoYRol = "${medico.nombre} · Recepción",
-        pacientes = FakeDataSource.filaDeHoy(medico.id).map { it.aPacienteEnFila() },
-        proximaCita = FakeDataSource.citasDelDia(medico.id)
-            .firstOrNull { it.fechaHora.isAfter(ahora) }
-            ?.aProximaCita()
-    )
+    val fila = FakeDataSource.filaDeHoy(medico.id).mapNotNull { visita ->
+        FakeDataSource.paciente(visita.pacienteId)?.let { paciente -> VisitaConPaciente(visita, paciente) }
+    }
+    return calcularInicio(fila, FakeDataSource.citasDelDia(medico.id), medico.nombre, FakeDataSource.ahora)
 }
 
 @Composable
-fun InicioRecepcionRoute() {
-    val state = remember { inicioRecepcionUiStateDePrueba() }
-    InicioRecepcionScreen(state = state, onEvent = {})
+fun InicioRecepcionRoute(
+    onAbrirDetalle: (String) -> Unit,
+    onNuevoPaciente: () -> Unit,
+    onEscanearQr: () -> Unit,
+    onVerResumen: () -> Unit,
+    onVerAgenda: () -> Unit,
+    onCambiarConfiguracion: () -> Unit,
+    viewModel: InicioRecepcionViewModel = viewModel(factory = InicioRecepcionViewModel.Factory)
+) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    LaunchedEffect(viewModel) {
+        viewModel.efectos.collect { efecto ->
+            when (efecto) {
+                is InicioRecepcionEfecto.AbrirDetalle -> onAbrirDetalle(efecto.visitaId)
+                InicioRecepcionEfecto.IrARegistro -> onNuevoPaciente()
+                InicioRecepcionEfecto.IrAEscaneo -> onEscanearQr()
+                InicioRecepcionEfecto.IrAResumen -> onVerResumen()
+                InicioRecepcionEfecto.IrAAgenda -> onVerAgenda()
+                InicioRecepcionEfecto.IrARol -> onCambiarConfiguracion()
+            }
+        }
+    }
+    InicioRecepcionScreen(state = state, onEvent = viewModel::onEvent)
 }
 
 fun NavGraphBuilder.inicioRecepcionDestino(navController: NavController) {
     composable<Inicio> {
-        InicioRecepcionRoute()
+        InicioRecepcionRoute(
+            onAbrirDetalle = { visitaId -> navController.navigate(Detalle(visitaId)) },
+            onNuevoPaciente = { navController.navigate(Registro) },
+            onEscanearQr = { navController.navigate(Escaneo) },
+            onVerResumen = { navController.navigate(Resumen) },
+            onVerAgenda = { navController.irAPestana(AgendaRecepcion) },
+            onCambiarConfiguracion = { navController.navigate(Rol) }
+        )
     }
 }

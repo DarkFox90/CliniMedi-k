@@ -6,10 +6,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -41,16 +47,37 @@ fun FilaMedicoScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            EncabezadoPantalla(
-                titulo = "Mis pacientes",
-                subtitulo = state.subtitulo,
-                modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 12.dp)
-            )
+            Row(
+                verticalAlignment = Alignment.Top,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, end = 4.dp, top = 16.dp, bottom = 12.dp)
+            ) {
+                EncabezadoPantalla(
+                    titulo = "Mis pacientes",
+                    subtitulo = state.subtitulo,
+                    modifier = Modifier.weight(1f)
+                )
+                IconButton(onClick = { onEvent(FilaMedicoEvent.CambiarConfiguracion) }) {
+                    Icon(
+                        imageVector = Icons.Filled.Settings,
+                        contentDescription = "Cambiar configuración",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
             AvisoSoloLectura(
                 ultimaActualizacion = state.ultimaActualizacion,
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
-            if (state.pacientes.isEmpty()) {
+            if (state.cargando) {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    CircularProgressIndicator()
+                }
+            } else if (state.pacientes.isEmpty()) {
                 FilaVacia(modifier = Modifier.fillMaxSize())
             } else {
                 LazyColumn(
@@ -118,6 +145,19 @@ private fun FilaVacia(modifier: Modifier = Modifier) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
         )
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+private fun FilaMedicoCargandoPreview() {
+    CliniMedikTheme {
+        ContenedorMedico(seleccion = PestanaMedico.FILA) {
+            FilaMedicoScreen(
+                state = FilaMedicoUiState(),
+                onEvent = {}
+            )
+        }
     }
 }
 

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -56,7 +57,14 @@ fun BuscarScreen(
                 placeholder = "Nombre o teléfono",
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
-            if (state.pacientes.isEmpty()) {
+            if (state.cargando) {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    CircularProgressIndicator()
+                }
+            } else if (state.pacientes.isEmpty()) {
                 ListaVacia(
                     mensaje = state.mensajeVacio,
                     modifier = Modifier.fillMaxSize()
@@ -102,6 +110,19 @@ private fun ListaVacia(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
         )
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+private fun BuscarCargandoPreview() {
+    CliniMedikTheme {
+        ContenedorRecepcion(seleccion = PestanaRecepcion.BUSCAR) {
+            BuscarScreen(
+                state = BuscarUiState(),
+                onEvent = {}
+            )
+        }
     }
 }
 
