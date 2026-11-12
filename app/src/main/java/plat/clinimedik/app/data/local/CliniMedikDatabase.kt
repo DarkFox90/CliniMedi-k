@@ -31,7 +31,7 @@ import plat.clinimedik.app.data.local.entity.VisitaEntity
         RecetaEntity::class, ReferenciaEntity::class, CobroEntity::class,
         DocumentoEntity::class, CitaEntity::class, MetadatoEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = true
 )
 @ColumnTypeConverters(Convertidores::class)
@@ -50,6 +50,7 @@ abstract class CliniMedikDatabase : RoomDatabase() {
         fun crear(context: Context): CliniMedikDatabase =
             Room.databaseBuilder<CliniMedikDatabase>(context, "clinimedik.db")
                 .setQueryCoroutineContext(Dispatchers.IO)
+                .fallbackToDestructiveMigration(dropAllTables = true)
                 .build()
     }
 }

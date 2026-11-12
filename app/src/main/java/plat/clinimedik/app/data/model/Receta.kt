@@ -6,5 +6,6 @@ data class Receta (
     val medicamento: String,
     val dosis: String,
     val frecuencia: String,
-    val duracion: String
+    val duracion: String,
+    val indicaciones: String? = null
 )

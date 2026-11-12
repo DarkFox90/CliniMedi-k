@@ -3,6 +3,7 @@ package plat.clinimedik.app.data.fake
 import plat.clinimedik.app.data.model.Cita
 import plat.clinimedik.app.data.model.Cobro
 import plat.clinimedik.app.data.model.Documento
+import plat.clinimedik.app.data.model.EstadoCita
 import plat.clinimedik.app.data.model.EstadoCivil
 import plat.clinimedik.app.data.model.EstadoConfirmacion
 import plat.clinimedik.app.data.model.EstadoVisita
@@ -42,7 +43,10 @@ object FakeDataSource {
             enfermedadesPrevias = "Hipertensión arterial",
             tratamientosPrevios = "Losartán 50 mg diario",
             cirugias = "Ninguna",
-            fechaRegistro = LocalDateTime.of(2025, 10, 18, 8, 30)
+            fechaRegistro = LocalDateTime.of(2025, 10, 18, 8, 30),
+            aseguradora = "Seguros G&T",
+            numeroPoliza = "GT-204518",
+            titularPoliza = "Álvaro Chacón"
         ),
         Paciente(
             id = "pac-002",
@@ -56,7 +60,10 @@ object FakeDataSource {
             enfermedadesPrevias = "Ninguna",
             tratamientosPrevios = "Ninguno",
             cirugias = "Apendicectomía en 2015",
-            fechaRegistro = LocalDateTime.of(2026, 1, 2, 9, 15)
+            fechaRegistro = LocalDateTime.of(2026, 1, 2, 9, 15),
+            aseguradora = "Seguros Universales",
+            numeroPoliza = "SU-551207",
+            titularPoliza = "Marta Ríos"
         ),
         Paciente(
             id = "pac-003",
@@ -84,7 +91,10 @@ object FakeDataSource {
             enfermedadesPrevias = "Ninguna",
             tratamientosPrevios = "Ninguno",
             cirugias = "Ninguna",
-            fechaRegistro = LocalDateTime.of(2025, 12, 5, 11, 20)
+            fechaRegistro = LocalDateTime.of(2025, 12, 5, 11, 20),
+            aseguradora = "Seguros El Roble",
+            numeroPoliza = "ER-88213",
+            titularPoliza = "Jorge Méndez"
         ),
         Paciente(
             id = "pac-005",
@@ -298,7 +308,8 @@ object FakeDataSource {
             medicamento = "Losartán 50 mg",
             dosis = "1 tableta",
             frecuencia = "Cada 24 horas",
-            duracion = "30 días"
+            duracion = "30 días",
+            indicaciones = "Tomar por la mañana, a la misma hora"
         ),
         Receta(
             id = "rec-002",
@@ -306,7 +317,8 @@ object FakeDataSource {
             medicamento = "Amoxicilina 500 mg",
             dosis = "1 cápsula",
             frecuencia = "Cada 8 horas",
-            duracion = "7 días"
+            duracion = "7 días",
+            indicaciones = "Tomar con alimentos y completar los 7 días aunque mejore"
         ),
         Receta(
             id = "rec-003",
@@ -338,9 +350,36 @@ object FakeDataSource {
 
     val cobros = listOf(
         Cobro(id = "cob-001", visitaId = "vis-106", tipoPago = TipoPago.PARTICULAR, monto = 350.0),
-        Cobro(id = "cob-002", visitaId = "vis-105", tipoPago = TipoPago.SEGURO, monto = 300.0),
-        Cobro(id = "cob-003", visitaId = "vis-201", tipoPago = TipoPago.PARTICULAR, monto = 300.0),
-        Cobro(id = "cob-004", visitaId = "vis-202", tipoPago = TipoPago.CORTESIA, monto = 0.0)
+        Cobro(
+            id = "cob-002",
+            visitaId = "vis-105",
+            tipoPago = TipoPago.SEGURO,
+            monto = 300.0,
+            aseguradora = "Seguros El Roble",
+            numeroAutorizacion = "AUT-48213",
+            copago = 50.0,
+            montoAseguradora = 250.0
+        ),
+        Cobro(
+            id = "cob-003",
+            visitaId = "vis-201",
+            tipoPago = TipoPago.SEGURO,
+            monto = 300.0,
+            aseguradora = "Seguros G&T",
+            numeroAutorizacion = "AUT-31077",
+            copago = 60.0,
+            montoAseguradora = 240.0
+        ),
+        Cobro(id = "cob-004", visitaId = "vis-202", tipoPago = TipoPago.CORTESIA, monto = 0.0),
+        Cobro(
+            id = "cob-005",
+            visitaId = "vis-204",
+            tipoPago = TipoPago.SEGURO,
+            monto = 300.0,
+            aseguradora = "Seguros Universales",
+            copago = 75.0,
+            montoAseguradora = 225.0
+        )
     )
 
     val documentos = listOf(
@@ -378,7 +417,9 @@ object FakeDataSource {
             duracionMinutos = 30,
             motivo = "Control de presión",
             estadoConfirmacion = EstadoConfirmacion.CONFIRMADA,
-            recordatorioEnviado = true
+            recordatorioEnviado = true,
+            estado = EstadoCita.COMPLETADA,
+            visitaId = "vis-102"
         ),
         Cita(
             id = "cit-002",
@@ -390,7 +431,9 @@ object FakeDataSource {
             duracionMinutos = 30,
             motivo = "Chequeo general",
             estadoConfirmacion = EstadoConfirmacion.CONFIRMADA,
-            recordatorioEnviado = true
+            recordatorioEnviado = true,
+            estado = EstadoCita.COMPLETADA,
+            visitaId = "vis-104"
         ),
         Cita(
             id = "cit-003",
@@ -427,6 +470,31 @@ object FakeDataSource {
             motivo = "Control de presión",
             estadoConfirmacion = EstadoConfirmacion.PENDIENTE,
             recordatorioEnviado = false
+        ),
+        Cita(
+            id = "cit-006",
+            pacienteId = "pac-005",
+            nombrePaciente = "Roberto Ixchop",
+            correoPaciente = "roberto.ixchop@gmail.com",
+            medicoId = "med-001",
+            fechaHora = hoy.plusDays(1).atTime(10, 0),
+            duracionMinutos = 30,
+            motivo = "Control de artritis",
+            estadoConfirmacion = EstadoConfirmacion.PENDIENTE,
+            recordatorioEnviado = false,
+            estado = EstadoCita.CANCELADA
+        ),
+        Cita(
+            id = "cit-007",
+            pacienteId = "pac-002",
+            nombrePaciente = "Marta Ríos",
+            correoPaciente = "marta.rios@gmail.com",
+            medicoId = "med-001",
+            fechaHora = hoy.plusDays(3).atTime(11, 30),
+            duracionMinutos = 30,
+            motivo = "Seguimiento de presión",
+            estadoConfirmacion = EstadoConfirmacion.CONFIRMADA,
+            recordatorioEnviado = true
         )
     )
 
@@ -464,6 +532,18 @@ object FakeDataSource {
         citas
             .filter { it.medicoId == medicoId && it.fechaHora.toLocalDate() == fecha }
             .sortedBy { it.fechaHora }
+
+    fun proximaCitaDe(pacienteId: String): Cita? =
+        citas
+            .filter {
+                it.pacienteId == pacienteId &&
+                    it.estado == EstadoCita.PROGRAMADA &&
+                    !it.fechaHora.isBefore(ahora)
+            }
+            .minByOrNull { it.fechaHora }
+
+    fun ultimaReferenciaDe(pacienteId: String): Referencia? =
+        historialDe(pacienteId).firstNotNullOfOrNull { referenciaDe(it.id) }
 
     private fun normalizar(texto: String): String =
         Normalizer.normalize(texto, Normalizer.Form.NFD)

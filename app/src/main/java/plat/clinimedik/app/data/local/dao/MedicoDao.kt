@@ -16,8 +16,14 @@ interface MedicoDao {
     @Query("SELECT * FROM medico WHERE id = :id")
     fun observarPorId(id: String): Flow<MedicoEntity?>
 
+    @Query("SELECT * FROM medico")
+    suspend fun obtenerTodos(): List<MedicoEntity>
+
     @Insert
     suspend fun insertar(medico: MedicoEntity)
+
+    @Upsert
+    suspend fun guardar(medico: MedicoEntity)
 
     @Upsert
     suspend fun guardarTodos(medicos: List<MedicoEntity>)

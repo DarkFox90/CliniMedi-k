@@ -70,7 +70,7 @@ fun NavGraphBuilder.agendaRecepcionDestino(navController: NavController) {
 
         AgendaRecepcionRoute(
             onNuevaCita = {
-                navController.navigate(NuevaCita)
+                navController.navigate(NuevaCita())
             }
         )
     }

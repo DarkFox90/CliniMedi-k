@@ -29,6 +29,7 @@ import plat.clinimedik.app.data.model.Referencia
 import plat.clinimedik.app.data.model.TipoPago
 import plat.clinimedik.app.data.model.Visita
 import plat.clinimedik.app.data.model.VisitaConPaciente
+import plat.clinimedik.app.data.sincronizacion.Sincronizador
 
 class VisitaRepositorio(
     private val database: CliniMedikDatabase,
@@ -36,7 +37,8 @@ class VisitaRepositorio(
     private val pacienteDao: PacienteDao,
     private val recetaDao: RecetaDao,
     private val referenciaDao: ReferenciaDao,
-    private val cobroDao: CobroDao
+    private val cobroDao: CobroDao,
+    private val sincronizador: Sincronizador
 ) {
 
     fun observarFilaDelDia(medicoId: String): Flow<List<VisitaConPaciente>> {
@@ -78,6 +80,19 @@ class VisitaRepositorio(
     fun observarReferenciasDePaciente(pacienteId: String): Flow<List<Referencia>> =
         referenciaDao.observarDePaciente(pacienteId).map { lista -> lista.map { it.aModelo() } }
 
+    /** La referencia de la visita más reciente del paciente que tenga una. */
+    fun observarUltimaReferencia(pacienteId: String): Flow<Referencia?> =
+        referenciaDao.observarUltimaDePaciente(pacienteId).map { it?.aModelo() }
+
+    fun observarRecetasDeVisita(visitaId: String): Flow<List<Receta>> =
+        recetaDao.observarDeVisita(visitaId).map { lista -> lista.map { it.aModelo() } }
+
+    fun observarReferenciaDeVisita(visitaId: String): Flow<Referencia?> =
+        referenciaDao.observarDeVisita(visitaId).map { it?.aModelo() }
+
+    fun observarCobroDeVisita(visitaId: String): Flow<Cobro?> =
+        cobroDao.observarDeVisita(visitaId).map { it?.aModelo() }
+
     fun observarCobrosDelDia(medicoId: String): Flow<List<Cobro>> {
         val hoy = LocalDate.now()
         return cobroDao.observarDelDia(medicoId, inicioDelDia(hoy), finDelDia(hoy))
@@ -100,24 +115,34 @@ class VisitaRepositorio(
             motivoConsulta = motivo.trim(),
             horaLlegada = LocalDateTime.now(),
             estado = EstadoVisita.ESPERANDO
-        )
-        visitaDao.insertar(visita.aEntity())
+        ).aEntity()
+        visitaDao.insertar(visita)
+        publicar { sincronizador.publicarVisita(visita) }
         return visita.id
     }
 
     suspend fun marcarUrgente(visitaId: String, motivo: String) {
-        actualizarVisita(visitaId) { it.copy(esUrgente = true, motivoPrioridad = motivo.trim()) }
+        actualizarYPublicar(visitaId) { it.copy(esUrgente = true, motivoPrioridad = motivo.trim()) }
     }
 
     suspend fun pasarAConsulta(visitaId: String) {
-        actualizarVisita(visitaId) {
+        actualizarYPublicar(visitaId) {
             it.copy(estado = EstadoVisita.EN_CONSULTA, horaInicioConsulta = LocalDateTime.now())
         }
     }
 
-    suspend fun finalizarConsulta(visitaId: String) {
-        actualizarVisita(visitaId) {
-            it.copy(estado = EstadoVisita.ATENDIDO, horaFin = LocalDateTime.now())
+    /**
+     * Termina la consulta. Si [diagnostico] o [notas] llegan con texto, se guardan en la visita;
+     * si llegan vacíos o `null`, se conserva lo que la visita ya tenía.
+     */
+    suspend fun finalizarConsulta(visitaId: String, diagnostico: String? = null, notas: String? = null) {
+        actualizarYPublicar(visitaId) {
+            it.copy(
+                estado = EstadoVisita.ATENDIDO,
+                horaFin = LocalDateTime.now(),
+                diagnostico = diagnostico.textoONulo() ?: it.diagnostico,
+                notas = notas.textoONulo() ?: it.notas
+            )
         }
     }
 
@@ -126,52 +151,83 @@ class VisitaRepositorio(
         medicamento: String,
         dosis: String,
         frecuencia: String,
-        duracion: String
+        duracion: String,
+        indicaciones: String? = null
     ) {
-        recetaDao.insertar(
-            RecetaEntity(
-                id = UUID.randomUUID().toString(),
-                visitaId = visitaId,
-                medicamento = medicamento.trim(),
-                dosis = dosis.trim(),
-                frecuencia = frecuencia.trim(),
-                duracion = duracion.trim()
-            )
+        val receta = RecetaEntity(
+            id = UUID.randomUUID().toString(),
+            visitaId = visitaId,
+            medicamento = medicamento.trim(),
+            dosis = dosis.trim(),
+            frecuencia = frecuencia.trim(),
+            duracion = duracion.trim(),
+            indicaciones = indicaciones.textoONulo()
         )
+        recetaDao.insertar(receta)
+        publicar { sincronizador.publicarReceta(receta) }
     }
 
     suspend fun guardarReferencia(visitaId: String, especialidad: String, destino: String, motivo: String) {
-        database.withWriteTransaction {
-            referenciaDao.insertar(
-                ReferenciaEntity(
-                    id = UUID.randomUUID().toString(),
-                    visitaId = visitaId,
-                    especialidad = especialidad.trim(),
-                    destino = destino.trim(),
-                    motivo = motivo.trim()
-                )
-            )
+        val referencia = ReferenciaEntity(
+            id = UUID.randomUUID().toString(),
+            visitaId = visitaId,
+            especialidad = especialidad.trim(),
+            destino = destino.trim(),
+            motivo = motivo.trim()
+        )
+        val visita = database.withWriteTransaction<VisitaEntity?> {
+            referenciaDao.insertar(referencia)
             actualizarVisita(visitaId) {
                 it.copy(estado = EstadoVisita.REFERIDO, horaFin = LocalDateTime.now())
             }
         }
+        publicar { sincronizador.publicarReferencia(referencia) }
+        if (visita != null) {
+            publicar { sincronizador.publicarVisita(visita) }
+        }
     }
 
-    suspend fun guardarCobro(visitaId: String, tipoPago: TipoPago, monto: Double) {
-        cobroDao.insertar(
-            CobroEntity(
-                id = UUID.randomUUID().toString(),
-                visitaId = visitaId,
-                tipoPago = tipoPago,
-                monto = monto
-            )
+    /**
+     * Registra el cobro de una visita. Los datos del seguro solo se guardan con [TipoPago.SEGURO];
+     * en ese caso, si llegan [copago] y [montoAseguradora], el monto es la suma de los dos.
+     */
+    suspend fun guardarCobro(
+        visitaId: String,
+        tipoPago: TipoPago,
+        monto: Double,
+        aseguradora: String? = null,
+        numeroAutorizacion: String? = null,
+        copago: Double? = null,
+        montoAseguradora: Double? = null
+    ) {
+        val esSeguro = tipoPago == TipoPago.SEGURO
+        val cobro = CobroEntity(
+            id = UUID.randomUUID().toString(),
+            visitaId = visitaId,
+            tipoPago = tipoPago,
+            monto = if (esSeguro && copago != null && montoAseguradora != null) copago + montoAseguradora else monto,
+            aseguradora = if (esSeguro) aseguradora.textoONulo() else null,
+            numeroAutorizacion = if (esSeguro) numeroAutorizacion.textoONulo() else null,
+            copago = if (esSeguro) copago else null,
+            montoAseguradora = if (esSeguro) montoAseguradora else null
         )
+        cobroDao.insertar(cobro)
+        publicar { sincronizador.publicarCobro(cobro) }
     }
 
-    private suspend fun actualizarVisita(visitaId: String, cambio: (VisitaEntity) -> VisitaEntity) {
-        val visita = visitaDao.obtenerPorId(visitaId) ?: return
-        visitaDao.actualizar(cambio(visita))
+    private suspend fun actualizarYPublicar(visitaId: String, cambio: (VisitaEntity) -> VisitaEntity) {
+        val visita = actualizarVisita(visitaId, cambio) ?: return
+        publicar { sincronizador.publicarVisita(visita) }
     }
+
+    private suspend fun actualizarVisita(visitaId: String, cambio: (VisitaEntity) -> VisitaEntity): VisitaEntity? {
+        val visita = visitaDao.obtenerPorId(visitaId) ?: return null
+        val actualizada = cambio(visita)
+        visitaDao.actualizar(actualizada)
+        return actualizada
+    }
+
+    private fun String?.textoONulo(): String? = this?.trim()?.ifBlank { null }
 
     private fun prioridadEnFila(visita: Visita): Int = when {
         visita.estado == EstadoVisita.ESPERANDO && visita.esUrgente -> 0

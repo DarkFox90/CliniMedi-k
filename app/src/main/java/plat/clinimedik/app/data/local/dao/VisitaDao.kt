@@ -4,6 +4,7 @@ import androidx.room3.Dao
 import androidx.room3.Insert
 import androidx.room3.Query
 import androidx.room3.Update
+import androidx.room3.Upsert
 import java.time.LocalDateTime
 import kotlinx.coroutines.flow.Flow
 import plat.clinimedik.app.data.local.entity.VisitaEntity
@@ -29,15 +30,18 @@ interface VisitaDao {
     @Query("SELECT * FROM visita WHERE pacienteId = :pacienteId AND medicoId = :medicoId AND estado IN ('ESPERANDO', 'EN_CONSULTA') AND horaLlegada >= :inicio AND horaLlegada < :fin LIMIT 1")
     suspend fun obtenerActivaDelDia(pacienteId: String, medicoId: String, inicio: LocalDateTime, fin: LocalDateTime): VisitaEntity?
 
+    @Query("SELECT * FROM visita")
+    suspend fun obtenerTodos(): List<VisitaEntity>
+
     @Insert
     suspend fun insertar(visita: VisitaEntity)
 
     @Update
     suspend fun actualizar(visita: VisitaEntity)
 
-    @Insert
-    suspend fun insertarTodos(visitas: List<VisitaEntity>)
+    @Upsert
+    suspend fun guardar(visita: VisitaEntity)
 
-    @Query("DELETE FROM visita")
-    suspend fun borrarTodos()
+    @Upsert
+    suspend fun guardarTodos(visitas: List<VisitaEntity>)
 }

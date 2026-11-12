@@ -22,7 +22,10 @@ data class PacienteEntity(
     val enfermedadesPrevias: String,
     val tratamientosPrevios: String,
     val cirugias: String,
-    val fechaRegistro: LocalDateTime
+    val fechaRegistro: LocalDateTime,
+    val aseguradora: String?,
+    val numeroPoliza: String?,
+    val titularPoliza: String?
 )
 
 fun PacienteEntity.aModelo(): Paciente = Paciente(
@@ -37,7 +40,10 @@ fun PacienteEntity.aModelo(): Paciente = Paciente(
     enfermedadesPrevias = enfermedadesPrevias,
     tratamientosPrevios = tratamientosPrevios,
     cirugias = cirugias,
-    fechaRegistro = fechaRegistro
+    fechaRegistro = fechaRegistro,
+    aseguradora = aseguradora,
+    numeroPoliza = numeroPoliza,
+    titularPoliza = titularPoliza
 )
 
 fun Paciente.aEntity(): PacienteEntity = PacienteEntity(
@@ -52,5 +58,8 @@ fun Paciente.aEntity(): PacienteEntity = PacienteEntity(
     enfermedadesPrevias = enfermedadesPrevias,
     tratamientosPrevios = tratamientosPrevios,
     cirugias = cirugias,
-    fechaRegistro = fechaRegistro
+    fechaRegistro = fechaRegistro,
+    aseguradora = aseguradora,
+    numeroPoliza = numeroPoliza,
+    titularPoliza = titularPoliza
 )

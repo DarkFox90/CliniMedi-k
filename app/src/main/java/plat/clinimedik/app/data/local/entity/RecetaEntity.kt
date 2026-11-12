@@ -15,7 +15,8 @@ data class RecetaEntity(
     val medicamento: String,
     val dosis: String,
     val frecuencia: String,
-    val duracion: String
+    val duracion: String,
+    val indicaciones: String?
 )
 
 fun RecetaEntity.aModelo(): Receta = Receta(
@@ -24,7 +25,8 @@ fun RecetaEntity.aModelo(): Receta = Receta(
     medicamento = medicamento,
     dosis = dosis,
     frecuencia = frecuencia,
-    duracion = duracion
+    duracion = duracion,
+    indicaciones = indicaciones
 )
 
 fun Receta.aEntity(): RecetaEntity = RecetaEntity(
@@ -33,5 +35,6 @@ fun Receta.aEntity(): RecetaEntity = RecetaEntity(
     medicamento = medicamento,
     dosis = dosis,
     frecuencia = frecuencia,
-    duracion = duracion
+    duracion = duracion,
+    indicaciones = indicaciones
 )

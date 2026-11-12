@@ -5,11 +5,12 @@ import androidx.room3.Index
 import androidx.room3.PrimaryKey
 import java.time.LocalDateTime
 import plat.clinimedik.app.data.model.Cita
+import plat.clinimedik.app.data.model.EstadoCita
 import plat.clinimedik.app.data.model.EstadoConfirmacion
 
 @Entity(
     tableName = "cita",
-    indices = [Index("medicoId")]
+    indices = [Index("medicoId"), Index("pacienteId")]
 )
 data class CitaEntity(
     @PrimaryKey val id: String,
@@ -21,7 +22,10 @@ data class CitaEntity(
     val duracionMinutos: Int,
     val motivo: String,
     val estadoConfirmacion: EstadoConfirmacion,
-    val recordatorioEnviado: Boolean
+    val recordatorioEnviado: Boolean,
+    val estado: EstadoCita,
+    val visitaId: String?,
+    val idCorreoRecordatorio: String?
 )
 
 fun CitaEntity.aModelo(): Cita = Cita(
@@ -34,7 +38,10 @@ fun CitaEntity.aModelo(): Cita = Cita(
     duracionMinutos = duracionMinutos,
     motivo = motivo,
     estadoConfirmacion = estadoConfirmacion,
-    recordatorioEnviado = recordatorioEnviado
+    recordatorioEnviado = recordatorioEnviado,
+    estado = estado,
+    visitaId = visitaId,
+    idCorreoRecordatorio = idCorreoRecordatorio
 )
 
 fun Cita.aEntity(): CitaEntity = CitaEntity(
@@ -47,5 +54,8 @@ fun Cita.aEntity(): CitaEntity = CitaEntity(
     duracionMinutos = duracionMinutos,
     motivo = motivo,
     estadoConfirmacion = estadoConfirmacion,
-    recordatorioEnviado = recordatorioEnviado
+    recordatorioEnviado = recordatorioEnviado,
+    estado = estado,
+    visitaId = visitaId,
+    idCorreoRecordatorio = idCorreoRecordatorio
 )

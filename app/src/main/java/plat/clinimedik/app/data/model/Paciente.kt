@@ -15,5 +15,8 @@ data class Paciente (
     val enfermedadesPrevias: String,
     val tratamientosPrevios: String,
     val cirugias: String,
-    val fechaRegistro: LocalDateTime
+    val fechaRegistro: LocalDateTime,
+    val aseguradora: String? = null,
+    val numeroPoliza: String? = null,
+    val titularPoliza: String? = null
 )
