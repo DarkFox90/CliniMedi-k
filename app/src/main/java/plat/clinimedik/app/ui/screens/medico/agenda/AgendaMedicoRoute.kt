@@ -9,13 +9,20 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import plat.clinimedik.app.data.fake.FakeDataSource
+import plat.clinimedik.app.ui.components.DiaVisible
 import plat.clinimedik.app.ui.navigation.AgendaMedico
 import plat.clinimedik.app.ui.navigation.FilaMedico
 import plat.clinimedik.app.ui.navigation.irAPestana
 
-fun agendaMedicoUiStateDePrueba(): AgendaMedicoUiState {
+fun agendaMedicoUiStateDePrueba(diasDesdeHoy: Long = 0): AgendaMedicoUiState {
     val medico = FakeDataSource.medicoActual
-    return calcularAgendaMedico(FakeDataSource.citasDelDia(medico.id), medico.nombre, FakeDataSource.ahora)
+    val fecha = FakeDataSource.hoy.plusDays(diasDesdeHoy)
+    return calcularAgendaMedico(
+        citas = FakeDataSource.citasDelDia(medico.id, fecha),
+        nombreMedico = medico.nombre,
+        ahora = FakeDataSource.ahora,
+        dia = DiaVisible(fecha = fecha, hoy = FakeDataSource.hoy)
+    )
 }
 
 @Composable

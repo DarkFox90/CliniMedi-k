@@ -23,8 +23,10 @@ import androidx.compose.ui.unit.dp
 import plat.clinimedik.app.ui.components.CitaItem
 import plat.clinimedik.app.ui.components.ContenedorMedico
 import plat.clinimedik.app.ui.components.EncabezadoPantalla
+import plat.clinimedik.app.ui.components.EstadoError
 import plat.clinimedik.app.ui.components.EtiquetaChip
 import plat.clinimedik.app.ui.components.PestanaMedico
+import plat.clinimedik.app.ui.components.SelectorDia
 import plat.clinimedik.app.ui.theme.CliniMedikTheme
 
 @Composable
@@ -51,30 +53,43 @@ fun AgendaMedicoScreen(
                 ultimaActualizacion = state.ultimaActualizacion,
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
-            if (state.cargando) {
-                Box(
+            SelectorDia(
+                fecha = state.fecha,
+                textoFecha = state.textoFecha,
+                esHoy = state.esHoy,
+                onDiaAnterior = { onEvent(AgendaMedicoEvent.DiaAnterior) },
+                onDiaSiguiente = { onEvent(AgendaMedicoEvent.DiaSiguiente) },
+                onElegirDia = { onEvent(AgendaMedicoEvent.ElegirDia(it)) },
+                onVolverAHoy = { onEvent(AgendaMedicoEvent.VolverAHoy) },
+                modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp)
+            )
+            when {
+                state.cargando -> Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier.fillMaxSize()
                 ) {
                     CircularProgressIndicator()
                 }
-            } else if (state.citas.isEmpty()) {
-                Box(
+                state.mensajeError != null -> EstadoError(
+                    mensaje = state.mensajeError,
+                    onReintentar = { onEvent(AgendaMedicoEvent.Reintentar) },
+                    modifier = Modifier.fillMaxSize()
+                )
+                state.citas.isEmpty() -> Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(32.dp)
                 ) {
                     Text(
-                        text = "No hay citas programadas para hoy",
+                        text = state.mensajeSinCitas,
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center
                     )
                 }
-            } else {
-                LazyColumn(
-                    contentPadding = PaddingValues(16.dp),
+                else -> LazyColumn(
+                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.fillMaxSize()
                 ) {
@@ -83,7 +98,8 @@ fun AgendaMedicoScreen(
                             hora = cita.hora,
                             nombrePaciente = cita.nombrePaciente,
                             motivo = cita.motivo,
-                            estadoConfirmacion = cita.estadoConfirmacion
+                            estadoConfirmacion = cita.estadoConfirmacion,
+                            estado = cita.estado
                         )
                     }
                 }
@@ -152,11 +168,40 @@ private fun AgendaMedicoConCitasPreview() {
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
+private fun AgendaMedicoOtroDiaPreview() {
+    CliniMedikTheme {
+        ContenedorMedico(seleccion = PestanaMedico.AGENDA) {
+            AgendaMedicoScreen(
+                state = agendaMedicoUiStateDePrueba(diasDesdeHoy = 1),
+                onEvent = {}
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
 private fun AgendaMedicoSinCitasPreview() {
     CliniMedikTheme {
         ContenedorMedico(seleccion = PestanaMedico.AGENDA) {
             AgendaMedicoScreen(
                 state = agendaMedicoUiStateDePrueba().copy(citas = emptyList()),
+                onEvent = {}
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+private fun AgendaMedicoErrorPreview() {
+    CliniMedikTheme {
+        ContenedorMedico(seleccion = PestanaMedico.AGENDA) {
+            AgendaMedicoScreen(
+                state = agendaMedicoUiStateDePrueba().copy(
+                    citas = emptyList(),
+                    mensajeError = "No se pudo cargar la agenda"
+                ),
                 onEvent = {}
             )
         }

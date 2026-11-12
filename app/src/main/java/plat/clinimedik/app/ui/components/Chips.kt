@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import plat.clinimedik.app.data.model.EstadoCita
 import plat.clinimedik.app.data.model.EstadoConfirmacion
 import plat.clinimedik.app.data.model.EstadoVisita
 import plat.clinimedik.app.ui.theme.CliniMedikTheme
@@ -76,6 +77,25 @@ fun ConfirmacionChip(
         EstadoConfirmacion.CONFIRMADA -> colores.primaryContainer to colores.onPrimaryContainer
         EstadoConfirmacion.PENDIENTE -> colores.tertiaryContainer to colores.onTertiaryContainer
         EstadoConfirmacion.NO_CONFIRMADA -> colores.errorContainer to colores.onErrorContainer
+    }
+    EtiquetaChip(
+        texto = estado.etiqueta(),
+        fondo = fondo,
+        contenido = contenido,
+        modifier = modifier
+    )
+}
+
+@Composable
+fun EstadoCitaChip(
+    estado: EstadoCita,
+    modifier: Modifier = Modifier
+) {
+    val colores = MaterialTheme.colorScheme
+    val (fondo, contenido) = when (estado) {
+        EstadoCita.PROGRAMADA -> colores.surfaceVariant to colores.onSurfaceVariant
+        EstadoCita.CANCELADA -> colores.surfaceContainerHigh to colores.onSurfaceVariant
+        EstadoCita.COMPLETADA -> colores.secondaryContainer to colores.onSecondaryContainer
     }
     EtiquetaChip(
         texto = estado.etiqueta(),

@@ -183,9 +183,9 @@ private fun textoAFecha(texto: String): LocalDate? = try {
     null
 }
 
-private fun LocalDate.aMilisUtc(): Long = atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
+internal fun LocalDate.aMilisUtc(): Long = atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
 
-private fun milisUtcAFecha(milis: Long): LocalDate =
+internal fun milisUtcAFecha(milis: Long): LocalDate =
     Instant.ofEpochMilli(milis).atZone(ZoneOffset.UTC).toLocalDate()
 
 @Preview(showBackground = true)
