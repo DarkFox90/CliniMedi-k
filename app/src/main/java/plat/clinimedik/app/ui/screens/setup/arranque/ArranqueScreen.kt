@@ -1,7 +1,6 @@
 package plat.clinimedik.app.ui.screens.setup.arranque
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
@@ -15,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import plat.clinimedik.app.ui.components.ColumnaDesplazable
 import plat.clinimedik.app.ui.theme.CliniMedikTheme
 
 @Composable
@@ -24,7 +24,7 @@ fun ArranqueScreen(
     modifier: Modifier = Modifier
 ) {
     Scaffold(modifier = modifier) { innerPadding ->
-        Column(
+        ColumnaDesplazable(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterVertically),
             modifier = Modifier

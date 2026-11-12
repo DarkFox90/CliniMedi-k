@@ -20,6 +20,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import plat.clinimedik.app.ui.components.AvatarIniciales
 import plat.clinimedik.app.ui.components.BarraSuperior
+import plat.clinimedik.app.ui.components.ColumnaDesplazable
 import plat.clinimedik.app.ui.theme.CliniMedikTheme
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
@@ -41,7 +42,7 @@ fun ResultadoScreen(
         },
         modifier = modifier
     ) { innerPadding ->
-        Column(
+        ColumnaDesplazable(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .fillMaxSize()
@@ -50,7 +51,7 @@ fun ResultadoScreen(
         ) {
             if (state.cargando) {
                 CircularProgressIndicator()
-                return@Column
+                return@ColumnaDesplazable
             }
 
             if (state.mensajeError != null && state.nombre.isBlank()) {
@@ -58,7 +59,7 @@ fun ResultadoScreen(
                     text = state.mensajeError,
                     color = MaterialTheme.colorScheme.error
                 )
-                return@Column
+                return@ColumnaDesplazable
             }
 
             Spacer(modifier = Modifier.height(32.dp))

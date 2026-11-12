@@ -2,7 +2,6 @@ package plat.clinimedik.app.ui.screens.setup.login
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,6 +26,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import plat.clinimedik.app.R
+import plat.clinimedik.app.ui.components.ColumnaDesplazable
 import plat.clinimedik.app.ui.theme.CliniMedikTheme
 
 @Composable
@@ -36,7 +36,7 @@ fun LoginScreen(
     modifier: Modifier = Modifier
 ) {
     Scaffold(modifier = modifier) { innerPadding ->
-        Column(
+        ColumnaDesplazable(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
             modifier = Modifier
