@@ -2,6 +2,7 @@ package plat.clinimedik.app.ui.screens.recepcion.inicio
 
 import java.time.LocalDateTime
 import plat.clinimedik.app.data.model.Cita
+import plat.clinimedik.app.data.model.EstadoCita
 import plat.clinimedik.app.data.model.EstadoConfirmacion
 import plat.clinimedik.app.data.model.EstadoVisita
 import plat.clinimedik.app.data.model.VisitaConPaciente
@@ -53,7 +54,9 @@ fun calcularInicio(
     saludo = saludoPara(ahora),
     medicoYRol = "$nombreMedico · Recepción",
     pacientes = fila.map { it.aPacienteEnFila(ahora) },
-    proximaCita = citas.firstOrNull { it.fechaHora.isAfter(ahora) }?.aProximaCita()
+    proximaCita = citas
+        .firstOrNull { it.estado == EstadoCita.PROGRAMADA && it.fechaHora.isAfter(ahora) }
+        ?.aProximaCita()
 )
 
 private fun Cita.aProximaCita(): ProximaCita = ProximaCita(
