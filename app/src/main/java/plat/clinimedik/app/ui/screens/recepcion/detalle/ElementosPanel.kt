@@ -39,7 +39,8 @@ internal fun EncabezadoPanel(
 internal fun BotonesPanel(
     textoConfirmar: String,
     onConfirmar: () -> Unit,
-    onCancelar: () -> Unit
+    onCancelar: () -> Unit,
+    habilitado: Boolean = true
 ) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -53,6 +54,7 @@ internal fun BotonesPanel(
         }
         Button(
             onClick = onConfirmar,
+            enabled = habilitado,
             modifier = Modifier.weight(1f)
         ) {
             Text(textoConfirmar)

@@ -25,7 +25,8 @@ fun CobroContenido(
     nombrePaciente: String,
     formulario: FormularioCobro,
     onEvent: (DetalleEvent) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    guardando: Boolean = false
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -73,7 +74,8 @@ fun CobroContenido(
         BotonesPanel(
             textoConfirmar = "Guardar cobro",
             onConfirmar = { onEvent(DetalleEvent.GuardarCobro) },
-            onCancelar = { onEvent(DetalleEvent.CerrarPanel) }
+            onCancelar = { onEvent(DetalleEvent.CerrarPanel) },
+            habilitado = !guardando
         )
     }
 }
@@ -82,13 +84,15 @@ fun CobroContenido(
 fun CobroSheet(
     nombrePaciente: String,
     formulario: FormularioCobro,
-    onEvent: (DetalleEvent) -> Unit
+    onEvent: (DetalleEvent) -> Unit,
+    guardando: Boolean = false
 ) {
     PanelInferior(onDescartar = { onEvent(DetalleEvent.CerrarPanel) }) {
         CobroContenido(
             nombrePaciente = nombrePaciente,
             formulario = formulario,
-            onEvent = onEvent
+            onEvent = onEvent,
+            guardando = guardando
         )
     }
 }

@@ -150,6 +150,19 @@ class VisitaRepositorio(
         }
     }
 
+    /**
+     * Cambia el diagnóstico y las notas de una visita sin cambiar su estado.
+     * Se usa en visitas ya terminadas (por ejemplo, referidas). Si [notas] llega vacío, las notas se borran.
+     */
+    suspend fun guardarDiagnostico(visitaId: String, diagnostico: String, notas: String?) {
+        actualizarYPublicar(visitaId) {
+            it.copy(
+                diagnostico = diagnostico.textoONulo() ?: it.diagnostico,
+                notas = notas.textoONulo()
+            )
+        }
+    }
+
     suspend fun guardarReceta(
         visitaId: String,
         medicamento: String,
