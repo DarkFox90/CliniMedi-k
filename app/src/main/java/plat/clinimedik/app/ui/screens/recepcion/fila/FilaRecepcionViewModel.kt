@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.AP
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import java.time.LocalDateTime
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -22,6 +21,7 @@ import plat.clinimedik.app.CliniMedikApp
 import plat.clinimedik.app.data.preferencias.ConfiguracionRepositorio
 import plat.clinimedik.app.data.repository.MedicoRepositorio
 import plat.clinimedik.app.data.repository.VisitaRepositorio
+import plat.clinimedik.app.ui.components.relojPorMinuto
 
 class FilaRecepcionViewModel(
     private val visitaRepositorio: VisitaRepositorio,
@@ -61,11 +61,11 @@ class FilaRecepcionViewModel(
                 .flatMapLatest { configuracion ->
                     combine(
                         visitaRepositorio.observarFilaDelDia(configuracion.medicoId),
-                        medicoRepositorio.observarMedico(configuracion.medicoId)
-                    ) { fila, medico -> fila to medico }
+                        medicoRepositorio.observarMedico(configuracion.medicoId),
+                        relojPorMinuto()
+                    ) { fila, medico, ahora -> Triple(fila, medico, ahora) }
                 }
-                .collect { (fila, medico) ->
-                    val ahora = LocalDateTime.now()
+                .collect { (fila, medico, ahora) ->
                     _state.update { actual ->
                         actual.copy(
                             cargando = false,

@@ -41,8 +41,11 @@ class VisitaRepositorio(
     private val sincronizador: Sincronizador
 ) {
 
-    fun observarFilaDelDia(medicoId: String): Flow<List<VisitaConPaciente>> {
-        val hoy = LocalDate.now()
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun observarFilaDelDia(medicoId: String): Flow<List<VisitaConPaciente>> =
+        diaActual().flatMapLatest { hoy -> filaDe(medicoId, hoy) }
+
+    private fun filaDe(medicoId: String, hoy: LocalDate): Flow<List<VisitaConPaciente>> {
         return combine(
             visitaDao.observarDelDia(medicoId, inicioDelDia(hoy), finDelDia(hoy)),
             pacienteDao.observarTodos()
@@ -93,11 +96,12 @@ class VisitaRepositorio(
     fun observarCobroDeVisita(visitaId: String): Flow<Cobro?> =
         cobroDao.observarDeVisita(visitaId).map { it?.aModelo() }
 
-    fun observarCobrosDelDia(medicoId: String): Flow<List<Cobro>> {
-        val hoy = LocalDate.now()
-        return cobroDao.observarDelDia(medicoId, inicioDelDia(hoy), finDelDia(hoy))
-            .map { lista -> lista.map { it.aModelo() } }
-    }
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun observarCobrosDelDia(medicoId: String): Flow<List<Cobro>> =
+        diaActual().flatMapLatest { hoy ->
+            cobroDao.observarDelDia(medicoId, inicioDelDia(hoy), finDelDia(hoy))
+                .map { lista -> lista.map { it.aModelo() } }
+        }
 
     suspend fun tieneCobro(visitaId: String): Boolean =
         cobroDao.obtenerDeVisita(visitaId) != null

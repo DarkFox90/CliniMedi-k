@@ -4,8 +4,10 @@ import androidx.room3.withWriteTransaction
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import plat.clinimedik.app.data.local.CliniMedikDatabase
@@ -29,8 +31,19 @@ class CitaRepositorio(
     private val sincronizador: Sincronizador
 ) {
 
-    /** Todas las citas del día, incluidas las canceladas y las completadas. */
-    fun observarCitasDelDia(medicoId: String, fecha: LocalDate = LocalDate.now()): Flow<List<Cita>> =
+    /**
+     * Todas las citas de un día, incluidas las canceladas y las completadas.
+     * Sin [fecha] devuelve las de hoy y cambia sola de día a medianoche.
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun observarCitasDelDia(medicoId: String, fecha: LocalDate? = null): Flow<List<Cita>> =
+        if (fecha != null) {
+            citasDe(medicoId, fecha)
+        } else {
+            diaActual().flatMapLatest { hoy -> citasDe(medicoId, hoy) }
+        }
+
+    private fun citasDe(medicoId: String, fecha: LocalDate): Flow<List<Cita>> =
         citaDao.observarDelDia(medicoId, inicioDelDia(fecha), finDelDia(fecha))
             .map { lista -> lista.map { it.aModelo() } }
 
