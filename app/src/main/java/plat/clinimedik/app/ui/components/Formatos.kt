@@ -3,7 +3,6 @@ package plat.clinimedik.app.ui.components
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.LocalTime
 import java.time.Period
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -14,8 +13,6 @@ private val formatoFechaLarga = DateTimeFormatter.ofPattern("EEEE, d 'de' MMMM",
 private val formatoFecha = DateTimeFormatter.ofPattern("d 'de' MMMM 'de' yyyy", localeEspanol)
 
 fun formatearHora(fechaHora: LocalDateTime): String = fechaHora.format(formatoHora)
-
-fun formatearHora(hora: LocalTime): String = hora.format(formatoHora)
 
 fun formatearFechaLarga(fecha: LocalDate): String =
     fecha.format(formatoFechaLarga).replaceFirstChar { it.titlecase(localeEspanol) }
