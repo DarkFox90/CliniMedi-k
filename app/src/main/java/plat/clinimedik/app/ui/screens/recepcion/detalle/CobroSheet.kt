@@ -106,7 +106,7 @@ private fun CamposSeguro(
         CampoTexto(
             valor = formulario.copago,
             onValorChange = { onEvent(DetalleEvent.CambiarCopago(it)) },
-            etiqueta = "Copago que paga el paciente (Q)",
+            etiqueta = "Lo que paga el paciente (Q)",
             placeholder = "0.00",
             mensajeError = formulario.errorCopago,
             tipoTeclado = KeyboardType.Decimal
@@ -114,14 +114,14 @@ private fun CamposSeguro(
         CampoTexto(
             valor = formulario.montoAseguradora,
             onValorChange = { onEvent(DetalleEvent.CambiarMontoAseguradora(it)) },
-            etiqueta = "Monto a cobrar a la aseguradora (Q)",
+            etiqueta = "Lo que paga el seguro (Q)",
             placeholder = "0.00",
             mensajeError = formulario.errorMontoAseguradora,
             tipoTeclado = KeyboardType.Decimal
         )
         Text(
             text = formulario.totalSeguro?.let { "Total del cobro: ${formatearMonto(it)}" }
-                ?: "El total se calcula con el copago y el monto a la aseguradora",
+                ?: "El total es lo que paga el paciente más lo que paga el seguro",
             style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.onSurface
         )

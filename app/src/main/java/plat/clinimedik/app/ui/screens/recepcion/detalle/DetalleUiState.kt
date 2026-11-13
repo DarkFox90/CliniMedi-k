@@ -271,8 +271,8 @@ private fun Cobro.aDetalle(): CobroDetalle {
     val partesSeguro = listOfNotNull(
         aseguradora,
         numeroAutorizacion?.let { "Autorización $it" },
-        copago?.let { "Copago ${formatearMonto(it)}" },
-        montoAseguradora?.let { "Aseguradora ${formatearMonto(it)}" }
+        copago?.let { "Paciente ${formatearMonto(it)}" },
+        montoAseguradora?.let { "Seguro ${formatearMonto(it)}" }
     )
     return CobroDetalle(
         tipoPago = tipoPago.etiqueta(),
