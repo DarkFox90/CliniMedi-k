@@ -44,6 +44,12 @@ class PacienteRepositorio(
         }
     }
 
+    /** Todos los pacientes en orden alfabético, sin distinguir tildes ni mayúsculas. */
+    fun observarTodos(): Flow<List<Paciente>> =
+        pacienteDao.observarTodos().map { lista ->
+            lista.map { it.aModelo() }.sortedBy { normalizar(it.nombreCompleto) }
+        }
+
     fun observarPorIds(ids: List<String>): Flow<List<Paciente>> =
         pacienteDao.observarPorIds(ids).map { lista ->
             lista.map { it.aModelo() }.sortedBy { ids.indexOf(it.id) }

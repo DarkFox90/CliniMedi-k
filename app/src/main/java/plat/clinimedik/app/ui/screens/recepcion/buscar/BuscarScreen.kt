@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -23,6 +24,7 @@ import plat.clinimedik.app.ui.components.BotonNuevoPaciente
 import plat.clinimedik.app.ui.components.CampoTexto
 import plat.clinimedik.app.ui.components.ContenedorRecepcion
 import plat.clinimedik.app.ui.components.EncabezadoPantalla
+import plat.clinimedik.app.ui.components.EstadoError
 import plat.clinimedik.app.ui.components.PacienteItem
 import plat.clinimedik.app.ui.components.PestanaRecepcion
 import plat.clinimedik.app.ui.theme.CliniMedikTheme
@@ -57,41 +59,80 @@ fun BuscarScreen(
                 placeholder = "Nombre o teléfono",
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
-            if (state.cargando) {
-                Box(
+            when {
+                state.cargando -> Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier.fillMaxSize()
                 ) {
                     CircularProgressIndicator()
                 }
-            } else if (state.pacientes.isEmpty()) {
-                ListaVacia(
+                state.mensajeError != null -> EstadoError(
+                    mensaje = state.mensajeError,
+                    onReintentar = null,
+                    modifier = Modifier.fillMaxSize()
+                )
+                state.sinPacientes -> ListaVacia(
                     mensaje = state.mensajeVacio,
                     modifier = Modifier.fillMaxSize()
                 )
-            } else {
-                LazyColumn(
+                else -> LazyColumn(
                     contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 96.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    item {
-                        Text(
-                            text = state.tituloLista,
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSurface
+                    if (state.buscando) {
+                        seccionPacientes(
+                            titulo = state.tituloResultados,
+                            pacientes = state.resultados,
+                            prefijoClave = "resultado",
+                            onEvent = onEvent
                         )
-                    }
-                    items(state.pacientes, key = { it.pacienteId }) { paciente ->
-                        PacienteItem(
-                            nombre = paciente.nombre,
-                            detalle = paciente.telefono,
-                            onClick = { onEvent(BuscarEvent.AbrirPaciente(paciente.pacienteId)) }
+                    } else {
+                        if (state.recientes.isNotEmpty()) {
+                            seccionPacientes(
+                                titulo = "Recientes",
+                                pacientes = state.recientes,
+                                prefijoClave = "reciente",
+                                onEvent = onEvent
+                            )
+                        }
+                        seccionPacientes(
+                            titulo = state.tituloTodos,
+                            pacientes = state.todos,
+                            prefijoClave = "todos",
+                            onEvent = onEvent
                         )
                     }
                 }
             }
         }
+    }
+}
+
+/**
+ * Título y lista de una sección. [prefijoClave] evita claves repetidas en la lista,
+ * porque un mismo paciente puede estar en "Recientes" y en "Todos los pacientes".
+ */
+private fun LazyListScope.seccionPacientes(
+    titulo: String,
+    pacientes: List<PacienteEncontrado>,
+    prefijoClave: String,
+    onEvent: (BuscarEvent) -> Unit
+) {
+    item(key = "titulo-$prefijoClave") {
+        Text(
+            text = titulo,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(top = 8.dp)
+        )
+    }
+    items(pacientes, key = { "$prefijoClave-${it.pacienteId}" }) { paciente ->
+        PacienteItem(
+            nombre = paciente.nombre,
+            detalle = paciente.telefono,
+            onClick = { onEvent(BuscarEvent.AbrirPaciente(paciente.pacienteId)) }
+        )
     }
 }
 
@@ -128,7 +169,7 @@ private fun BuscarCargandoPreview() {
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-private fun BuscarRecientesPreview() {
+private fun BuscarRecientesYTodosPreview() {
     CliniMedikTheme {
         ContenedorRecepcion(seleccion = PestanaRecepcion.BUSCAR) {
             BuscarScreen(
@@ -159,6 +200,19 @@ private fun BuscarSinResultadosPreview() {
         ContenedorRecepcion(seleccion = PestanaRecepcion.BUSCAR) {
             BuscarScreen(
                 state = buscarUiStateDePrueba(texto = "zzz"),
+                onEvent = {}
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+private fun BuscarErrorPreview() {
+    CliniMedikTheme {
+        ContenedorRecepcion(seleccion = PestanaRecepcion.BUSCAR) {
+            BuscarScreen(
+                state = BuscarUiState(cargando = false, mensajeError = "No se pudieron cargar los pacientes"),
                 onEvent = {}
             )
         }
