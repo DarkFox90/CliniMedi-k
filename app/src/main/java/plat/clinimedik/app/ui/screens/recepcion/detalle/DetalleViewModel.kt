@@ -33,6 +33,7 @@ import plat.clinimedik.app.data.repository.CitaRepositorio
 import plat.clinimedik.app.data.repository.MedicoRepositorio
 import plat.clinimedik.app.data.repository.PacienteRepositorio
 import plat.clinimedik.app.data.repository.VisitaRepositorio
+import plat.clinimedik.app.ui.components.leerMonto
 import plat.clinimedik.app.ui.navigation.Detalle
 
 class DetalleViewModel(
@@ -103,10 +104,19 @@ class DetalleViewModel(
                     tipoPago = event.tipoPago,
                     monto = if (event.tipoPago == TipoPago.CORTESIA) "" else it.monto,
                     errorTipoPago = null,
-                    errorMonto = null
+                    errorMonto = null,
+                    errorAseguradora = null,
+                    errorCopago = null,
+                    errorMontoAseguradora = null
                 )
             }
             is DetalleEvent.CambiarMonto -> actualizarCobro { it.copy(monto = event.valor, errorMonto = null) }
+            is DetalleEvent.CambiarAseguradora -> actualizarCobro { it.copy(aseguradora = event.valor, errorAseguradora = null) }
+            is DetalleEvent.CambiarAutorizacion -> actualizarCobro { it.copy(numeroAutorizacion = event.valor) }
+            is DetalleEvent.CambiarCopago -> actualizarCobro { it.copy(copago = event.valor, errorCopago = null) }
+            is DetalleEvent.CambiarMontoAseguradora -> actualizarCobro {
+                it.copy(montoAseguradora = event.valor, errorMontoAseguradora = null)
+            }
             DetalleEvent.GuardarCobro -> guardarCobro()
 
             DetalleEvent.AgendarSeguimiento -> _state.value.let { actual ->
@@ -329,29 +339,68 @@ class DetalleViewModel(
         if (_state.value.cobro != null) {
             enviar(DetalleEfecto.MostrarMensaje("Esta visita ya tiene cobro registrado"))
         } else {
-            abrirPanel(PanelDetalle.Cobro())
+            abrirPanel(PanelDetalle.Cobro(FormularioCobro(aseguradora = _state.value.aseguradora.orEmpty())))
         }
     }
 
     private fun guardarCobro() {
         val panel = _state.value.panel as? PanelDetalle.Cobro ?: return
         val formulario = panel.formulario
-        val tipoPago = formulario.tipoPago
-        if (tipoPago == null) {
-            actualizarCobro { it.copy(errorTipoPago = "Selecciona el tipo de pago") }
-            return
+        when (formulario.tipoPago) {
+            null -> actualizarCobro { it.copy(errorTipoPago = "Selecciona el tipo de pago") }
+            TipoPago.CORTESIA -> guardar(mensajeExito = "Cobro registrado") {
+                visitaRepositorio.guardarCobro(visitaId, TipoPago.CORTESIA, 0.0)
+            }
+            TipoPago.PARTICULAR -> {
+                val error = errorDeMonto(formulario.monto, permiteCero = false)
+                if (error != null) {
+                    actualizarCobro { it.copy(errorMonto = error) }
+                    return
+                }
+                val monto = leerMonto(formulario.monto) ?: return
+                guardar(mensajeExito = "Cobro registrado") {
+                    visitaRepositorio.guardarCobro(visitaId, TipoPago.PARTICULAR, monto)
+                }
+            }
+            TipoPago.SEGURO -> guardarCobroConSeguro(formulario)
         }
-        val monto = if (tipoPago == TipoPago.CORTESIA) {
-            0.0
-        } else {
-            formulario.monto.trim().replace(",", "").toDoubleOrNull()?.takeIf { it > 0 }
-        }
-        if (monto == null) {
-            actualizarCobro { it.copy(errorMonto = "Ingresa un monto mayor a 0") }
+    }
+
+    private fun guardarCobroConSeguro(formulario: FormularioCobro) {
+        val validado = formulario.copy(
+            errorAseguradora = if (formulario.aseguradora.isBlank()) "Ingresa la aseguradora" else null,
+            errorCopago = errorDeMonto(formulario.copago, permiteCero = true),
+            errorMontoAseguradora = errorDeMonto(formulario.montoAseguradora, permiteCero = false)
+        )
+        val copago = leerMonto(formulario.copago)
+        val montoAseguradora = leerMonto(formulario.montoAseguradora)
+        val hayErrores = listOf(validado.errorAseguradora, validado.errorCopago, validado.errorMontoAseguradora)
+            .any { it != null }
+        if (hayErrores || copago == null || montoAseguradora == null) {
+            _state.update { it.copy(panel = PanelDetalle.Cobro(validado)) }
             return
         }
         guardar(mensajeExito = "Cobro registrado") {
-            visitaRepositorio.guardarCobro(visitaId, tipoPago, monto)
+            visitaRepositorio.guardarCobro(
+                visitaId = visitaId,
+                tipoPago = TipoPago.SEGURO,
+                monto = copago + montoAseguradora,
+                aseguradora = formulario.aseguradora,
+                numeroAutorizacion = formulario.numeroAutorizacion,
+                copago = copago,
+                montoAseguradora = montoAseguradora
+            )
+        }
+    }
+
+    /** Mensaje de error de un monto escrito, o `null` si es válido. */
+    private fun errorDeMonto(texto: String, permiteCero: Boolean): String? {
+        val monto = leerMonto(texto)
+        return when {
+            texto.isBlank() -> "Este campo es obligatorio"
+            monto == null -> "Usa solo números, con hasta dos decimales"
+            !permiteCero && monto <= 0.0 -> "Ingresa un monto mayor a 0"
+            else -> null
         }
     }
 

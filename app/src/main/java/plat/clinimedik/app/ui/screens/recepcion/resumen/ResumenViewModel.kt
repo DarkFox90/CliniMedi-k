@@ -12,10 +12,12 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import plat.clinimedik.app.CliniMedikApp
 import plat.clinimedik.app.data.preferencias.ConfiguracionRepositorio
@@ -34,6 +36,8 @@ class ResumenViewModel(
     private val _efectos = Channel<ResumenEfecto>()
     val efectos: Flow<ResumenEfecto> = _efectos.receiveAsFlow()
 
+    private val reintentos = MutableStateFlow(0)
+
     init {
         observarResumen()
     }
@@ -41,22 +45,32 @@ class ResumenViewModel(
     fun onEvent(event: ResumenEvent) {
         when (event) {
             ResumenEvent.Regresar -> viewModelScope.launch { _efectos.send(ResumenEfecto.Regresar) }
+            ResumenEvent.Reintentar -> {
+                _state.update { it.copy(cargando = true, mensajeError = null) }
+                reintentos.update { it + 1 }
+            }
         }
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun observarResumen() {
         viewModelScope.launch {
-            configuracionRepositorio.configuracion
-                .filterNotNull()
-                .flatMapLatest { configuracion ->
-                    combine(
-                        visitaRepositorio.observarFilaDelDia(configuracion.medicoId),
-                        visitaRepositorio.observarCobrosDelDia(configuracion.medicoId),
-                        medicoRepositorio.observarMedico(configuracion.medicoId)
-                    ) { fila, cobros, medico ->
-                        calcularResumen(fila, cobros, medico?.nombre.orEmpty(), LocalDate.now())
-                    }
+            reintentos
+                .flatMapLatest {
+                    configuracionRepositorio.configuracion
+                        .filterNotNull()
+                        .flatMapLatest { configuracion ->
+                            combine(
+                                visitaRepositorio.observarFilaDelDia(configuracion.medicoId),
+                                visitaRepositorio.observarCobrosDelDia(configuracion.medicoId),
+                                medicoRepositorio.observarMedico(configuracion.medicoId)
+                            ) { fila, cobros, medico ->
+                                calcularResumen(fila, cobros, medico?.nombre.orEmpty(), LocalDate.now())
+                            }
+                        }
+                        .catch {
+                            emit(_state.value.copy(cargando = false, mensajeError = "No se pudo cargar el resumen"))
+                        }
                 }
                 .collect { resumen -> _state.value = resumen }
         }

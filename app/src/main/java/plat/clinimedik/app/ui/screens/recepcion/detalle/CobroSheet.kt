@@ -18,6 +18,7 @@ import plat.clinimedik.app.data.model.TipoPago
 import plat.clinimedik.app.ui.components.CampoTexto
 import plat.clinimedik.app.ui.components.PanelInferior
 import plat.clinimedik.app.ui.components.etiqueta
+import plat.clinimedik.app.ui.components.formatearMonto
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,20 +63,67 @@ fun CobroContenido(
                 )
             }
         }
-        CampoTexto(
-            valor = formulario.monto,
-            onValorChange = { onEvent(DetalleEvent.CambiarMonto(it)) },
-            etiqueta = "Monto (Q)",
-            placeholder = "0.00",
-            mensajeError = formulario.errorMonto,
-            tipoTeclado = KeyboardType.Decimal,
-            habilitado = formulario.tipoPago != TipoPago.CORTESIA
-        )
+        if (formulario.esSeguro) {
+            CamposSeguro(formulario = formulario, onEvent = onEvent)
+        } else {
+            CampoTexto(
+                valor = formulario.monto,
+                onValorChange = { onEvent(DetalleEvent.CambiarMonto(it)) },
+                etiqueta = "Monto (Q)",
+                placeholder = "0.00",
+                mensajeError = formulario.errorMonto,
+                tipoTeclado = KeyboardType.Decimal,
+                habilitado = formulario.tipoPago != TipoPago.CORTESIA
+            )
+        }
         BotonesPanel(
             textoConfirmar = "Guardar cobro",
             onConfirmar = { onEvent(DetalleEvent.GuardarCobro) },
             onCancelar = { onEvent(DetalleEvent.CerrarPanel) },
             habilitado = !guardando
+        )
+    }
+}
+
+@Composable
+private fun CamposSeguro(
+    formulario: FormularioCobro,
+    onEvent: (DetalleEvent) -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        CampoTexto(
+            valor = formulario.aseguradora,
+            onValorChange = { onEvent(DetalleEvent.CambiarAseguradora(it)) },
+            etiqueta = "Aseguradora",
+            placeholder = "Ej. Seguros G&T",
+            mensajeError = formulario.errorAseguradora
+        )
+        CampoTexto(
+            valor = formulario.numeroAutorizacion,
+            onValorChange = { onEvent(DetalleEvent.CambiarAutorizacion(it)) },
+            etiqueta = "Número de autorización (opcional)"
+        )
+        CampoTexto(
+            valor = formulario.copago,
+            onValorChange = { onEvent(DetalleEvent.CambiarCopago(it)) },
+            etiqueta = "Copago que paga el paciente (Q)",
+            placeholder = "0.00",
+            mensajeError = formulario.errorCopago,
+            tipoTeclado = KeyboardType.Decimal
+        )
+        CampoTexto(
+            valor = formulario.montoAseguradora,
+            onValorChange = { onEvent(DetalleEvent.CambiarMontoAseguradora(it)) },
+            etiqueta = "Monto a cobrar a la aseguradora (Q)",
+            placeholder = "0.00",
+            mensajeError = formulario.errorMontoAseguradora,
+            tipoTeclado = KeyboardType.Decimal
+        )
+        Text(
+            text = formulario.totalSeguro?.let { "Total del cobro: ${formatearMonto(it)}" }
+                ?: "El total se calcula con el copago y el monto a la aseguradora",
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.onSurface
         )
     }
 }
@@ -111,13 +159,31 @@ private fun CobroVacioPreview() {
 
 @Preview(showBackground = true)
 @Composable
+private fun CobroParticularErrorPreview() {
+    SuperficiePanelPreview {
+        CobroContenido(
+            nombrePaciente = "Julio Estrada",
+            formulario = FormularioCobro(
+                tipoPago = TipoPago.PARTICULAR,
+                monto = "15.505",
+                errorMonto = "Usa solo números, con hasta dos decimales"
+            ),
+            onEvent = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
 private fun CobroConTipoPreview() {
     SuperficiePanelPreview {
         CobroContenido(
             nombrePaciente = "Julio Estrada",
             formulario = FormularioCobro(
                 tipoPago = TipoPago.SEGURO,
-                monto = "300.00"
+                aseguradora = "Seguros G&T",
+                copago = "50",
+                montoAseguradora = "250.00"
             ),
             onEvent = {}
         )

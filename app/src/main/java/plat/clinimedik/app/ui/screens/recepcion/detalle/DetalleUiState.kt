@@ -16,6 +16,7 @@ import plat.clinimedik.app.ui.components.etiqueta
 import plat.clinimedik.app.ui.components.formatearFecha
 import plat.clinimedik.app.ui.components.formatearHora
 import plat.clinimedik.app.ui.components.formatearMonto
+import plat.clinimedik.app.ui.components.leerMonto
 
 private const val SIN_REGISTRAR = "Sin registrar"
 
@@ -84,9 +85,27 @@ data class FormularioReferencia(
 data class FormularioCobro(
     val tipoPago: TipoPago? = null,
     val monto: String = "",
+    val aseguradora: String = "",
+    val numeroAutorizacion: String = "",
+    val copago: String = "",
+    val montoAseguradora: String = "",
     val errorTipoPago: String? = null,
-    val errorMonto: String? = null
-)
+    val errorMonto: String? = null,
+    val errorAseguradora: String? = null,
+    val errorCopago: String? = null,
+    val errorMontoAseguradora: String? = null
+) {
+    val esSeguro: Boolean
+        get() = tipoPago == TipoPago.SEGURO
+
+    /** Copago más monto a la aseguradora, o `null` mientras alguno de los dos no sea un monto válido. */
+    val totalSeguro: Double?
+        get() {
+            val copagoLeido = leerMonto(copago) ?: return null
+            val aseguradoraLeida = leerMonto(montoAseguradora) ?: return null
+            return copagoLeido + aseguradoraLeida
+        }
+}
 
 sealed interface PanelDetalle {
     data class Urgencia(
@@ -251,6 +270,7 @@ private fun Referencia.aDetalle(): ReferenciaDetalle = ReferenciaDetalle(
 private fun Cobro.aDetalle(): CobroDetalle {
     val partesSeguro = listOfNotNull(
         aseguradora,
+        numeroAutorizacion?.let { "Autorización $it" },
         copago?.let { "Copago ${formatearMonto(it)}" },
         montoAseguradora?.let { "Aseguradora ${formatearMonto(it)}" }
     )

@@ -35,6 +35,10 @@ sealed interface DetalleEvent {
     data object AbrirCobro : DetalleEvent
     data class SeleccionarTipoPago(val tipoPago: TipoPago) : DetalleEvent
     data class CambiarMonto(val valor: String) : DetalleEvent
+    data class CambiarAseguradora(val valor: String) : DetalleEvent
+    data class CambiarAutorizacion(val valor: String) : DetalleEvent
+    data class CambiarCopago(val valor: String) : DetalleEvent
+    data class CambiarMontoAseguradora(val valor: String) : DetalleEvent
     data object GuardarCobro : DetalleEvent
 
     data object AgendarSeguimiento : DetalleEvent
