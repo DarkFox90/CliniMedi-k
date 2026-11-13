@@ -41,6 +41,7 @@ class AgendaRecepcionViewModel(
 
     init {
         observarCitas()
+        citaRepositorio.actualizarConfirmaciones()
     }
 
     fun onEvent(event: AgendaRecepcionEvent) {

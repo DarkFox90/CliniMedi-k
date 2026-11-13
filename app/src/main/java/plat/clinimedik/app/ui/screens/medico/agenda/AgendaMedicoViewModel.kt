@@ -38,6 +38,7 @@ class AgendaMedicoViewModel(
 
     init {
         observarAgenda()
+        citaRepositorio.actualizarConfirmaciones()
     }
 
     fun onEvent(event: AgendaMedicoEvent) {

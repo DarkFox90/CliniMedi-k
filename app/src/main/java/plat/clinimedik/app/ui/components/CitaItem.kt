@@ -67,7 +67,7 @@ fun CitaItem(
                 )
                 if (recordatorioEnviado != null && estado == EstadoCita.PROGRAMADA) {
                     Text(
-                        text = if (recordatorioEnviado) "Recordatorio enviado" else "Recordatorio pendiente de envío",
+                        text = if (recordatorioEnviado) "Correo enviado" else "Correo pendiente de envío",
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

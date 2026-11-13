@@ -33,6 +33,18 @@ interface CitaDao {
     @Query("SELECT * FROM cita")
     suspend fun obtenerTodos(): List<CitaEntity>
 
+    /**
+     * Citas que el Worker de correos todavía no tiene al día: futuras PROGRAMADA con correo sin registrar,
+     * o CANCELADA que siguen registradas.
+     */
+    @Query(
+        "SELECT * FROM cita WHERE " +
+            "(estado = 'PROGRAMADA' AND recordatorioEnviado = 0 AND correoPaciente IS NOT NULL " +
+            "AND correoPaciente != '' AND fechaHora > :desde) " +
+            "OR (estado = 'CANCELADA' AND recordatorioEnviado = 1)"
+    )
+    suspend fun obtenerPendientesDeCorreo(desde: LocalDateTime): List<CitaEntity>
+
     @Insert
     suspend fun insertar(cita: CitaEntity)
 

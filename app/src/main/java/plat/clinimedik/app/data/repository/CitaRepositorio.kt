@@ -28,7 +28,8 @@ class CitaRepositorio(
     private val database: CliniMedikDatabase,
     private val citaDao: CitaDao,
     private val visitaDao: VisitaDao,
-    private val sincronizador: Sincronizador
+    private val sincronizador: Sincronizador,
+    private val notificaciones: NotificacionRepositorio
 ) {
 
     /**
@@ -89,17 +90,24 @@ class CitaRepositorio(
         val entidad = cita.copy(id = UUID.randomUUID().toString()).aEntity()
         citaDao.insertar(entidad)
         publicar { sincronizador.publicarCita(entidad) }
+        notificaciones.sincronizarCita(entidad.id)
         return entidad.id
     }
 
     suspend fun marcarConfirmacion(citaId: String, estado: EstadoConfirmacion) {
-        modificarCita(citaId) { it.copy(estadoConfirmacion = estado) }
+        val modificada = modificarCita(citaId) { it.copy(estadoConfirmacion = estado) }
+        if (modificada != null && estado == EstadoConfirmacion.CONFIRMADA) {
+            notificaciones.sincronizarCita(citaId)
+        }
     }
 
     /** Cancela una cita PROGRAMADA. En cualquier otro estado no hace nada. */
     suspend fun cancelar(citaId: String) {
-        modificarCita(citaId) { cita ->
+        val cancelada = modificarCita(citaId) { cita ->
             if (cita.estado == EstadoCita.PROGRAMADA) cita.copy(estado = EstadoCita.CANCELADA) else null
+        }
+        if (cancelada != null) {
+            notificaciones.sincronizarCita(citaId)
         }
     }
 
@@ -136,6 +144,7 @@ class CitaRepositorio(
         }
         if (reprogramada != null) {
             publicar { sincronizador.publicarCita(reprogramada) }
+            notificaciones.sincronizarCita(citaId)
         }
         return conflicto
     }
@@ -198,7 +207,56 @@ class CitaRepositorio(
         }
     }
 
-    private suspend fun modificarCita(citaId: String, cambio: (CitaEntity) -> CitaEntity?) {
+    suspend fun obtenerCita(citaId: String): Cita? = citaDao.obtenerPorId(citaId)?.aModelo()
+
+    /**
+     * El Worker de correos ya tiene la cita. Solo se marca si sigue PROGRAMADA y a la misma hora:
+     * si se reprogramó mientras tanto, el trabajo siguiente la vuelve a registrar.
+     */
+    suspend fun marcarCorreoRegistrado(citaId: String, fechaHora: LocalDateTime) {
+        modificarCita(citaId) { cita ->
+            if (cita.estado == EstadoCita.PROGRAMADA && cita.fechaHora == fechaHora) {
+                cita.copy(recordatorioEnviado = true)
+            } else {
+                null
+            }
+        }
+    }
+
+    /** El Worker de correos ya borró la cita cancelada. */
+    suspend fun marcarCorreoRetirado(citaId: String) {
+        modificarCita(citaId) { cita ->
+            if (cita.estado == EstadoCita.CANCELADA) cita.copy(recordatorioEnviado = false) else null
+        }
+    }
+
+    /** Marca CONFIRMADA las citas PROGRAMADA que el paciente confirmó con el enlace del correo. */
+    suspend fun aplicarConfirmaciones(citaIds: List<String>) {
+        citaIds.forEach { citaId ->
+            modificarCita(citaId) { cita ->
+                if (cita.estado == EstadoCita.PROGRAMADA && cita.estadoConfirmacion != EstadoConfirmacion.CONFIRMADA) {
+                    cita.copy(estadoConfirmacion = EstadoConfirmacion.CONFIRMADA)
+                } else {
+                    null
+                }
+            }
+        }
+    }
+
+    /** Pide al Worker de correos las confirmaciones nuevas. Corre en segundo plano y espera a que haya internet. */
+    fun actualizarConfirmaciones() {
+        notificaciones.consultarConfirmaciones()
+    }
+
+    /** Programa otra vez los correos que no llegaron al Worker (por ejemplo, si se agotaron los reintentos). */
+    suspend fun reenviarCorreosPendientes() {
+        citaDao.obtenerPendientesDeCorreo(LocalDateTime.now()).forEach { cita ->
+            notificaciones.sincronizarCita(cita.id)
+        }
+    }
+
+    /** Aplica [cambio] dentro de una transacción. Devuelve la cita guardada, o `null` si no cambió nada. */
+    private suspend fun modificarCita(citaId: String, cambio: (CitaEntity) -> CitaEntity?): CitaEntity? {
         val modificada = database.withWriteTransaction<CitaEntity?> {
             val nueva = citaDao.obtenerPorId(citaId)?.let(cambio)
             if (nueva != null) {
@@ -209,6 +267,7 @@ class CitaRepositorio(
         if (modificada != null) {
             publicar { sincronizador.publicarCita(modificada) }
         }
+        return modificada
     }
 }
 

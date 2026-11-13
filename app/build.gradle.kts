@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -6,6 +8,18 @@ plugins {
     alias(libs.plugins.room3)
     alias(libs.plugins.google.services)
 }
+
+// URL y clave del Worker de correos. Viven en local.properties, que no va al repositorio.
+// Sin ellas la app compila y funciona, pero no envía correos.
+val propiedadesLocales = Properties().apply {
+    val archivo = rootProject.file("local.properties")
+    if (archivo.exists()) {
+        archivo.inputStream().use { load(it) }
+    }
+}
+
+fun textoParaBuildConfig(valor: String?): String =
+    "\"" + valor.orEmpty().trim().replace("\\", "\\\\").replace("\"", "\\\"") + "\""
 
 android {
     namespace = "plat.clinimedik.app"
@@ -19,6 +33,9 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "CORREOS_URL", textoParaBuildConfig(propiedadesLocales.getProperty("CORREOS_URL")))
+        buildConfigField("String", "CORREOS_CLAVE", textoParaBuildConfig(propiedadesLocales.getProperty("CORREOS_CLAVE")))
     }
 
     buildTypes {
@@ -34,6 +51,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 room3 {
@@ -69,4 +87,6 @@ dependencies {
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.googleid)
+    implementation(libs.okhttp)
+    implementation(libs.androidx.work.runtime)
 }

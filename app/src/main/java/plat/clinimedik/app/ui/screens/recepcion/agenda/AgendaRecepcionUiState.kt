@@ -14,7 +14,8 @@ data class ElementoCita(
     val nombrePaciente: String,
     val motivo: String,
     val estadoConfirmacion: EstadoConfirmacion,
-    val recordatorioEnviado: Boolean,
+    /** `null` si la cita no tiene correo: no hay nada que enviar. */
+    val recordatorioEnviado: Boolean?,
     val estado: EstadoCita
 )
 
@@ -45,7 +46,7 @@ fun calcularAgendaRecepcion(
             nombrePaciente = cita.nombrePaciente,
             motivo = cita.motivo,
             estadoConfirmacion = cita.estadoConfirmacion,
-            recordatorioEnviado = cita.recordatorioEnviado,
+            recordatorioEnviado = cita.recordatorioEnviado.takeUnless { cita.correoPaciente.isNullOrBlank() },
             estado = cita.estado
         )
     }

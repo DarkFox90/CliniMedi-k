@@ -38,7 +38,8 @@ class VisitaRepositorio(
     private val recetaDao: RecetaDao,
     private val referenciaDao: ReferenciaDao,
     private val cobroDao: CobroDao,
-    private val sincronizador: Sincronizador
+    private val sincronizador: Sincronizador,
+    private val notificaciones: NotificacionRepositorio
 ) {
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -125,8 +126,10 @@ class VisitaRepositorio(
         return visita.id
     }
 
+    /** Marca la visita como urgente y avisa por correo a la clínica (sin el motivo). */
     suspend fun marcarUrgente(visitaId: String, motivo: String) {
         actualizarYPublicar(visitaId) { it.copy(esUrgente = true, motivoPrioridad = motivo.trim()) }
+        notificaciones.avisarUrgente(visitaId)
     }
 
     suspend fun pasarAConsulta(visitaId: String) {
