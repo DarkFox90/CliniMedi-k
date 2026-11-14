@@ -42,13 +42,21 @@ class VisitaRepositorio(
     private val notificaciones: NotificacionRepositorio
 ) {
 
+    /**
+     * Las visitas de un día, en el orden de la fila. Sin [fecha] devuelve las de hoy
+     * y cambia sola de día a medianoche.
+     */
     @OptIn(ExperimentalCoroutinesApi::class)
-    fun observarFilaDelDia(medicoId: String): Flow<List<VisitaConPaciente>> =
-        diaActual().flatMapLatest { hoy -> filaDe(medicoId, hoy) }
+    fun observarFilaDelDia(medicoId: String, fecha: LocalDate? = null): Flow<List<VisitaConPaciente>> =
+        if (fecha != null) {
+            filaDe(medicoId, fecha)
+        } else {
+            diaActual().flatMapLatest { hoy -> filaDe(medicoId, hoy) }
+        }
 
-    private fun filaDe(medicoId: String, hoy: LocalDate): Flow<List<VisitaConPaciente>> {
+    private fun filaDe(medicoId: String, fecha: LocalDate): Flow<List<VisitaConPaciente>> {
         return combine(
-            visitaDao.observarDelDia(medicoId, inicioDelDia(hoy), finDelDia(hoy)),
+            visitaDao.observarDelDia(medicoId, inicioDelDia(fecha), finDelDia(fecha)),
             pacienteDao.observarTodos()
         ) { visitas, pacientes ->
             val pacientesPorId = pacientes.associateBy { it.id }

@@ -156,7 +156,8 @@ internal fun CampoDeSeleccion(
     )
 }
 
-private class FechasPermitidas(
+/** Días que se pueden elegir en un calendario. La usan `CampoFecha` y `SelectorDia`. */
+internal class FechasPermitidas(
     private val hoy: LocalDate,
     private val permitePasado: Boolean,
     private val permiteFuturo: Boolean

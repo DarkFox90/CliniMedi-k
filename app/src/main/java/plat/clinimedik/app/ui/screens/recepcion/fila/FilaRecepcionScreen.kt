@@ -28,9 +28,11 @@ import androidx.compose.ui.unit.dp
 import plat.clinimedik.app.ui.components.BotonNuevoPaciente
 import plat.clinimedik.app.ui.components.ContenedorRecepcion
 import plat.clinimedik.app.ui.components.EncabezadoPantalla
+import plat.clinimedik.app.ui.components.EstadoError
 import plat.clinimedik.app.ui.components.MarcarUrgenteSheet
 import plat.clinimedik.app.ui.components.PacienteItem
 import plat.clinimedik.app.ui.components.PestanaRecepcion
+import plat.clinimedik.app.ui.components.SelectorDia
 import plat.clinimedik.app.ui.theme.CliniMedikTheme
 
 @Composable
@@ -42,7 +44,10 @@ fun FilaRecepcionScreen(
     Scaffold(
         contentWindowInsets = WindowInsets(0),
         floatingActionButton = {
-            BotonNuevoPaciente(onClick = { onEvent(FilaRecepcionEvent.NuevoPaciente) })
+            // Solo se registra a alguien en la fila de hoy.
+            if (state.esHoy) {
+                BotonNuevoPaciente(onClick = { onEvent(FilaRecepcionEvent.NuevoPaciente) })
+            }
         },
         modifier = modifier
     ) { innerPadding ->
@@ -52,15 +57,32 @@ fun FilaRecepcionScreen(
                 .padding(innerPadding)
         ) {
             EncabezadoPantalla(
-                titulo = "Fila de hoy",
+                titulo = state.titulo,
                 subtitulo = state.subtitulo,
-                modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 12.dp)
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 4.dp)
+            )
+            SelectorDia(
+                fecha = state.fecha,
+                textoFecha = state.textoFecha,
+                esHoy = state.esHoy,
+                onDiaAnterior = { onEvent(FilaRecepcionEvent.DiaAnterior) },
+                onDiaSiguiente = { onEvent(FilaRecepcionEvent.DiaSiguiente) },
+                onElegirDia = { onEvent(FilaRecepcionEvent.ElegirDia(it)) },
+                onVolverAHoy = { onEvent(FilaRecepcionEvent.VolverAHoy) },
+                permiteFuturo = false,
+                modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp)
             )
             FiltrosFila(
                 filtroActual = state.filtro,
                 onSeleccionar = { onEvent(FilaRecepcionEvent.SeleccionarFiltro(it)) }
             )
-            if (state.cargando) {
+            if (state.mensajeError != null) {
+                EstadoError(
+                    mensaje = state.mensajeError,
+                    onReintentar = { onEvent(FilaRecepcionEvent.Reintentar) },
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else if (state.cargando) {
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier.fillMaxSize()
@@ -69,7 +91,7 @@ fun FilaRecepcionScreen(
                 }
             } else if (state.pacientesVisibles.isEmpty()) {
                 FilaVacia(
-                    mensaje = state.filtro.mensajeVacio,
+                    mensaje = state.mensajeVacio,
                     modifier = Modifier.fillMaxSize()
                 )
             } else {
@@ -169,6 +191,45 @@ private fun FilaConPacientesPreview() {
         ContenedorRecepcion(seleccion = PestanaRecepcion.FILA) {
             FilaRecepcionScreen(
                 state = filaRecepcionUiStateDePrueba(),
+                onEvent = {}
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+private fun FilaDiaAnteriorPreview() {
+    CliniMedikTheme {
+        ContenedorRecepcion(seleccion = PestanaRecepcion.FILA) {
+            FilaRecepcionScreen(
+                state = filaRecepcionUiStateDePrueba(esHoy = false),
+                onEvent = {}
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+private fun FilaDiaAnteriorVaciaPreview() {
+    CliniMedikTheme {
+        ContenedorRecepcion(seleccion = PestanaRecepcion.FILA) {
+            FilaRecepcionScreen(
+                state = filaRecepcionUiStateDePrueba(esHoy = false).copy(pacientes = emptyList()),
+                onEvent = {}
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+private fun FilaErrorPreview() {
+    CliniMedikTheme {
+        ContenedorRecepcion(seleccion = PestanaRecepcion.FILA) {
+            FilaRecepcionScreen(
+                state = filaRecepcionUiStateDePrueba().copy(mensajeError = "No se pudo cargar la fila"),
                 onEvent = {}
             )
         }

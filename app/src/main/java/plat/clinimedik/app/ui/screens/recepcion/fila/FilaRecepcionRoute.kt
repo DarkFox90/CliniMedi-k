@@ -11,22 +11,30 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import plat.clinimedik.app.data.fake.FakeDataSource
 import plat.clinimedik.app.data.model.VisitaConPaciente
+import plat.clinimedik.app.ui.components.formatearFechaLarga
 import plat.clinimedik.app.ui.navigation.Detalle
 import plat.clinimedik.app.ui.navigation.Fila
 import plat.clinimedik.app.ui.navigation.Inicio
 import plat.clinimedik.app.ui.navigation.Registro
 import plat.clinimedik.app.ui.navigation.irAPestana
 
-fun filaRecepcionUiStateDePrueba(filtro: FiltroFila = FiltroFila.TODOS): FilaRecepcionUiState {
+fun filaRecepcionUiStateDePrueba(
+    filtro: FiltroFila = FiltroFila.TODOS,
+    esHoy: Boolean = true
+): FilaRecepcionUiState {
     val medico = FakeDataSource.medicoActual
+    val fecha = if (esHoy) FakeDataSource.hoy else FakeDataSource.hoy.minusDays(1)
     val pacientes = FakeDataSource.filaDeHoy(medico.id).mapNotNull { visita ->
         FakeDataSource.paciente(visita.pacienteId)?.let { paciente ->
-            VisitaConPaciente(visita, paciente).aPacienteEnFila(FakeDataSource.ahora)
+            VisitaConPaciente(visita, paciente).aPacienteEnFila(FakeDataSource.ahora, esHoy)
         }
     }
     return FilaRecepcionUiState(
         cargando = false,
         subtitulo = "${medico.nombre} · Recepción",
+        fecha = fecha,
+        textoFecha = formatearFechaLarga(fecha),
+        esHoy = esHoy,
         filtro = filtro,
         pacientes = pacientes
     )

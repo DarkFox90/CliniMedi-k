@@ -25,6 +25,7 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -51,10 +52,11 @@ data class DiaVisible(
 }
 
 /**
- * Guarda el día elegido en una agenda. Se crea dentro del ViewModel.
+ * Guarda el día elegido en una agenda o en la fila. Se crea dentro del ViewModel.
  * Mientras no se elige otro día, sigue al día de hoy y cambia solo a medianoche.
+ * Con [permiteFuturo] en `false` no deja pasar de hoy (la fila solo muestra días anteriores).
  */
-class SeleccionDia {
+class SeleccionDia(private val permiteFuturo: Boolean = true) {
 
     private val elegido = MutableStateFlow<LocalDate?>(null)
 
@@ -70,6 +72,7 @@ class SeleccionDia {
     fun siguiente() = mover(1L)
 
     fun elegir(fecha: LocalDate) {
+        if (!permitida(fecha)) return
         elegido.value = fecha.takeIf { it != LocalDate.now() }
     }
 
@@ -79,14 +82,18 @@ class SeleccionDia {
 
     private fun mover(dias: Long) {
         elegido.update { actual ->
-            (actual ?: LocalDate.now()).plusDays(dias).takeIf { it != LocalDate.now() }
+            val nueva = (actual ?: LocalDate.now()).plusDays(dias)
+            if (permitida(nueva)) nueva.takeIf { it != LocalDate.now() } else actual
         }
     }
+
+    private fun permitida(fecha: LocalDate): Boolean = permiteFuturo || !fecha.isAfter(LocalDate.now())
 }
 
 /**
  * Fila para cambiar el día de una agenda: flechas para el día anterior y el siguiente,
  * y la fecha, que abre el calendario para saltar a cualquier día. "Hoy" aparece cuando se mira otro día.
+ * Con [permiteFuturo] en `false`, la flecha del día siguiente se apaga en hoy y el calendario no deja elegir días futuros.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -98,7 +105,8 @@ fun SelectorDia(
     onDiaSiguiente: () -> Unit,
     onElegirDia: (LocalDate) -> Unit,
     onVolverAHoy: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    permiteFuturo: Boolean = true
 ) {
     var calendarioAbierto by rememberSaveable { mutableStateOf(false) }
 
@@ -139,7 +147,7 @@ fun SelectorDia(
                 )
             }
         }
-        IconButton(onClick = onDiaSiguiente) {
+        IconButton(onClick = onDiaSiguiente, enabled = permiteFuturo || !esHoy) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = "Día siguiente"
@@ -153,7 +161,14 @@ fun SelectorDia(
     }
 
     if (calendarioAbierto) {
-        val estado = rememberDatePickerState(initialSelectedDateMillis = fecha.aMilisUtc())
+        val fechas = remember(permiteFuturo) {
+            FechasPermitidas(LocalDate.now(), permitePasado = true, permiteFuturo = permiteFuturo)
+        }
+        val estado = rememberDatePickerState(
+            initialSelectedDateMillis = fecha.aMilisUtc(),
+            yearRange = fechas.anios,
+            selectableDates = fechas
+        )
         DatePickerDialog(
             onDismissRequest = { calendarioAbierto = false },
             confirmButton = {
