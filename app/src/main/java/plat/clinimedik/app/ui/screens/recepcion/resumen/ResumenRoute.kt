@@ -1,8 +1,10 @@
 package plat.clinimedik.app.ui.screens.recepcion.resumen
 
+import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -27,10 +29,12 @@ fun ResumenRoute(
     viewModel: ResumenViewModel = viewModel(factory = ResumenViewModel.Factory)
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val context = LocalContext.current
     LaunchedEffect(viewModel) {
         viewModel.efectos.collect { efecto ->
             when (efecto) {
                 ResumenEfecto.Regresar -> onRegresar()
+                is ResumenEfecto.MostrarMensaje -> Toast.makeText(context, efecto.texto, Toast.LENGTH_SHORT).show()
             }
         }
     }

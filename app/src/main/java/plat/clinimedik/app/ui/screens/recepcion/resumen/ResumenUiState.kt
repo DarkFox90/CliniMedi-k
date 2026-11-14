@@ -20,6 +20,11 @@ data class CobroPorTipo(
     val monto: String
 )
 
+data class CobroPorAseguradora(
+    val aseguradora: String,
+    val monto: String
+)
+
 data class BarraAfluencia(
     val hora: String,
     val llegadas: Int,
@@ -34,9 +39,13 @@ data class ResumenUiState(
     val nuevos: Int = 0,
     val recurrentes: Int = 0,
     val cobrosPorTipo: List<CobroPorTipo> = emptyList(),
+    val cobradoEnCaja: String = "",
+    val porCobrarAseguradoras: String = "",
+    val porAseguradora: List<CobroPorAseguradora> = emptyList(),
     val totalDelDia: String = "",
     val pendientesDeCobro: List<String> = emptyList(),
-    val afluencia: List<BarraAfluencia> = emptyList()
+    val afluencia: List<BarraAfluencia> = emptyList(),
+    val mensajeError: String? = null
 ) {
     val textoAfluencia: String
         get() {
@@ -75,12 +84,39 @@ fun calcularResumen(
                 monto = formatearMonto(cobros.filter { it.tipoPago == tipo }.sumOf { it.monto })
             )
         },
-        totalDelDia = formatearMonto(cobros.sumOf { it.monto }),
+        cobradoEnCaja = formatearMonto(cobros.sumOf { it.montoEnCaja() }),
+        porCobrarAseguradoras = formatearMonto(cobros.sumOf { it.montoPorCobrar() }),
+        porAseguradora = cobros
+            .filter { it.tipoPago == TipoPago.SEGURO }
+            .groupBy { it.aseguradora?.trim()?.ifBlank { null } ?: SIN_ASEGURADORA }
+            .toSortedMap()
+            .map { (aseguradora, lista) ->
+                CobroPorAseguradora(aseguradora, formatearMonto(lista.sumOf { it.montoPorCobrar() }))
+            },
+        totalDelDia = formatearMonto(cobros.sumOf { it.montoEnCaja() + it.montoPorCobrar() }),
         pendientesDeCobro = terminadas
             .filter { it.visita.id !in visitasConCobro }
             .map { it.paciente.nombreCompleto },
         afluencia = barrasDeAfluencia(visitas)
     )
+}
+
+private const val SIN_ASEGURADORA = "Aseguradora sin nombre"
+
+/** Lo que entra a la caja de la clínica: el pago particular completo y el copago de los cobros con seguro. */
+private fun Cobro.montoEnCaja(): Double = when (tipoPago) {
+    TipoPago.PARTICULAR -> monto
+    TipoPago.SEGURO -> copago ?: 0.0
+    TipoPago.CORTESIA -> 0.0
+}
+
+/**
+ * Lo que la clínica cobra después a la aseguradora. Un cobro con seguro registrado sin el detalle
+ * del copago cuenta completo como pendiente con la aseguradora.
+ */
+private fun Cobro.montoPorCobrar(): Double = when (tipoPago) {
+    TipoPago.SEGURO -> montoAseguradora ?: (monto - (copago ?: 0.0))
+    else -> 0.0
 }
 
 private fun Visita.terminoConsulta(): Boolean =

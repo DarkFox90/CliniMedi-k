@@ -3,6 +3,7 @@ package plat.clinimedik.app.data.fake
 import plat.clinimedik.app.data.model.Cita
 import plat.clinimedik.app.data.model.Cobro
 import plat.clinimedik.app.data.model.Documento
+import plat.clinimedik.app.data.model.EstadoCita
 import plat.clinimedik.app.data.model.EstadoCivil
 import plat.clinimedik.app.data.model.EstadoConfirmacion
 import plat.clinimedik.app.data.model.EstadoVisita
@@ -35,35 +36,41 @@ object FakeDataSource {
             nombreCompleto = "Álvaro Chacón",
             fechaNacimiento = LocalDate.of(1984, 5, 12),
             telefono = "5512-7788",
-            correo = "alvaro.chacon@gmail.com",
+            correo = "alvaro.chacon@example.com",
             estadoCivil = EstadoCivil.CASADO,
             ocupacion = "Contador",
             alergias = "Penicilina",
             enfermedadesPrevias = "Hipertensión arterial",
             tratamientosPrevios = "Losartán 50 mg diario",
             cirugias = "Ninguna",
-            fechaRegistro = LocalDateTime.of(2025, 10, 18, 8, 30)
+            fechaRegistro = LocalDateTime.of(2025, 10, 18, 8, 30),
+            aseguradora = "Seguros G&T",
+            numeroPoliza = "GT-204518",
+            titularPoliza = "Álvaro Chacón"
         ),
         Paciente(
             id = "pac-002",
             nombreCompleto = "Marta Ríos",
             fechaNacimiento = LocalDate.of(1992, 2, 20),
             telefono = "5599-8877",
-            correo = "marta.rios@gmail.com",
+            correo = "marta.rios@example.com",
             estadoCivil = EstadoCivil.SOLTERO,
             ocupacion = "Maestra",
             alergias = "Ninguna conocida",
             enfermedadesPrevias = "Ninguna",
             tratamientosPrevios = "Ninguno",
             cirugias = "Apendicectomía en 2015",
-            fechaRegistro = LocalDateTime.of(2026, 1, 2, 9, 15)
+            fechaRegistro = LocalDateTime.of(2026, 1, 2, 9, 15),
+            aseguradora = "Seguros Universales",
+            numeroPoliza = "SU-551207",
+            titularPoliza = "Marta Ríos"
         ),
         Paciente(
             id = "pac-003",
             nombreCompleto = "Julio Estrada",
             fechaNacimiento = LocalDate.of(1969, 7, 3),
             telefono = "4477-1122",
-            correo = "julio.estrada@yahoo.com",
+            correo = "julio.estrada@example.com",
             estadoCivil = EstadoCivil.CASADO,
             ocupacion = "Comerciante",
             alergias = "Ninguna conocida",
@@ -77,21 +84,24 @@ object FakeDataSource {
             nombreCompleto = "Carla Méndez",
             fechaNacimiento = LocalDate.of(1997, 3, 15),
             telefono = "4433-2211",
-            correo = "carla.mendez@gmail.com",
+            correo = "carla.mendez@example.com",
             estadoCivil = EstadoCivil.UNION_DE_HECHO,
             ocupacion = "Diseñadora gráfica",
             alergias = "Sulfas",
             enfermedadesPrevias = "Ninguna",
             tratamientosPrevios = "Ninguno",
             cirugias = "Ninguna",
-            fechaRegistro = LocalDateTime.of(2025, 12, 5, 11, 20)
+            fechaRegistro = LocalDateTime.of(2025, 12, 5, 11, 20),
+            aseguradora = "Seguros El Roble",
+            numeroPoliza = "ER-88213",
+            titularPoliza = "Jorge Méndez"
         ),
         Paciente(
             id = "pac-005",
             nombreCompleto = "Roberto Ixchop",
             fechaNacimiento = LocalDate.of(1965, 1, 22),
             telefono = "5512-3344",
-            correo = "roberto.ixchop@gmail.com",
+            correo = "roberto.ixchop@example.com",
             estadoCivil = EstadoCivil.VIUDO,
             ocupacion = "Jubilado",
             alergias = "Ninguna conocida",
@@ -105,7 +115,7 @@ object FakeDataSource {
             nombreCompleto = "Lucía Ajú",
             fechaNacimiento = LocalDate.of(2001, 9, 2),
             telefono = "3021-5566",
-            correo = "lucia.aju@gmail.com",
+            correo = "lucia.aju@example.com",
             estadoCivil = EstadoCivil.SOLTERO,
             ocupacion = "Estudiante",
             alergias = "Ninguna conocida",
@@ -119,7 +129,7 @@ object FakeDataSource {
             nombreCompleto = "Pedro Coc",
             fechaNacimiento = LocalDate.of(1978, 11, 10),
             telefono = "5877-9900",
-            correo = "pedro.coc@gmail.com",
+            correo = "pedro.coc@example.com",
             estadoCivil = EstadoCivil.DIVORCIADO,
             ocupacion = "Ingeniero civil",
             alergias = "Mariscos",
@@ -133,7 +143,7 @@ object FakeDataSource {
             nombreCompleto = "Sergio Ramírez",
             fechaNacimiento = LocalDate.of(1988, 8, 14),
             telefono = "5234-6677",
-            correo = "sergio.ramirez@gmail.com",
+            correo = "sergio.ramirez@example.com",
             estadoCivil = EstadoCivil.CASADO,
             ocupacion = "Mecánico",
             alergias = "Ninguna conocida",
@@ -298,7 +308,8 @@ object FakeDataSource {
             medicamento = "Losartán 50 mg",
             dosis = "1 tableta",
             frecuencia = "Cada 24 horas",
-            duracion = "30 días"
+            duracion = "30 días",
+            indicaciones = "Tomar por la mañana, a la misma hora"
         ),
         Receta(
             id = "rec-002",
@@ -306,7 +317,8 @@ object FakeDataSource {
             medicamento = "Amoxicilina 500 mg",
             dosis = "1 cápsula",
             frecuencia = "Cada 8 horas",
-            duracion = "7 días"
+            duracion = "7 días",
+            indicaciones = "Tomar con alimentos y completar los 7 días aunque mejore"
         ),
         Receta(
             id = "rec-003",
@@ -338,9 +350,36 @@ object FakeDataSource {
 
     val cobros = listOf(
         Cobro(id = "cob-001", visitaId = "vis-106", tipoPago = TipoPago.PARTICULAR, monto = 350.0),
-        Cobro(id = "cob-002", visitaId = "vis-105", tipoPago = TipoPago.SEGURO, monto = 300.0),
-        Cobro(id = "cob-003", visitaId = "vis-201", tipoPago = TipoPago.PARTICULAR, monto = 300.0),
-        Cobro(id = "cob-004", visitaId = "vis-202", tipoPago = TipoPago.CORTESIA, monto = 0.0)
+        Cobro(
+            id = "cob-002",
+            visitaId = "vis-105",
+            tipoPago = TipoPago.SEGURO,
+            monto = 300.0,
+            aseguradora = "Seguros El Roble",
+            numeroAutorizacion = "AUT-48213",
+            copago = 50.0,
+            montoAseguradora = 250.0
+        ),
+        Cobro(
+            id = "cob-003",
+            visitaId = "vis-201",
+            tipoPago = TipoPago.SEGURO,
+            monto = 300.0,
+            aseguradora = "Seguros G&T",
+            numeroAutorizacion = "AUT-31077",
+            copago = 60.0,
+            montoAseguradora = 240.0
+        ),
+        Cobro(id = "cob-004", visitaId = "vis-202", tipoPago = TipoPago.CORTESIA, monto = 0.0),
+        Cobro(
+            id = "cob-005",
+            visitaId = "vis-204",
+            tipoPago = TipoPago.SEGURO,
+            monto = 300.0,
+            aseguradora = "Seguros Universales",
+            copago = 75.0,
+            montoAseguradora = 225.0
+        )
     )
 
     val documentos = listOf(
@@ -372,31 +411,35 @@ object FakeDataSource {
             id = "cit-001",
             pacienteId = "pac-002",
             nombrePaciente = "Marta Ríos",
-            correoPaciente = "marta.rios@gmail.com",
+            correoPaciente = "marta.rios@example.com",
             medicoId = "med-001",
             fechaHora = hoy.atTime(9, 30),
             duracionMinutos = 30,
             motivo = "Control de presión",
             estadoConfirmacion = EstadoConfirmacion.CONFIRMADA,
-            recordatorioEnviado = true
+            recordatorioEnviado = true,
+            estado = EstadoCita.COMPLETADA,
+            visitaId = "vis-102"
         ),
         Cita(
             id = "cit-002",
             pacienteId = "pac-003",
             nombrePaciente = "Julio Estrada",
-            correoPaciente = "julio.estrada@yahoo.com",
+            correoPaciente = "julio.estrada@example.com",
             medicoId = "med-001",
             fechaHora = hoy.atTime(10, 15),
             duracionMinutos = 30,
             motivo = "Chequeo general",
             estadoConfirmacion = EstadoConfirmacion.CONFIRMADA,
-            recordatorioEnviado = true
+            recordatorioEnviado = true,
+            estado = EstadoCita.COMPLETADA,
+            visitaId = "vis-104"
         ),
         Cita(
             id = "cit-003",
             pacienteId = null,
             nombrePaciente = "Sofía Hernández",
-            correoPaciente = "sofia.hernandez@gmail.com",
+            correoPaciente = "sofia.hernandez@example.com",
             medicoId = "med-001",
             fechaHora = hoy.atTime(11, 0),
             duracionMinutos = 30,
@@ -408,7 +451,7 @@ object FakeDataSource {
             id = "cit-004",
             pacienteId = "pac-007",
             nombrePaciente = "Pedro Coc",
-            correoPaciente = "pedro.coc@gmail.com",
+            correoPaciente = "pedro.coc@example.com",
             medicoId = "med-001",
             fechaHora = hoy.atTime(15, 0),
             duracionMinutos = 30,
@@ -420,13 +463,38 @@ object FakeDataSource {
             id = "cit-005",
             pacienteId = "pac-001",
             nombrePaciente = "Álvaro Chacón",
-            correoPaciente = "alvaro.chacon@gmail.com",
+            correoPaciente = "alvaro.chacon@example.com",
             medicoId = "med-001",
             fechaHora = hoy.plusDays(1).atTime(9, 0),
             duracionMinutos = 30,
             motivo = "Control de presión",
             estadoConfirmacion = EstadoConfirmacion.PENDIENTE,
             recordatorioEnviado = false
+        ),
+        Cita(
+            id = "cit-006",
+            pacienteId = "pac-005",
+            nombrePaciente = "Roberto Ixchop",
+            correoPaciente = "roberto.ixchop@example.com",
+            medicoId = "med-001",
+            fechaHora = hoy.plusDays(1).atTime(10, 0),
+            duracionMinutos = 30,
+            motivo = "Control de artritis",
+            estadoConfirmacion = EstadoConfirmacion.PENDIENTE,
+            recordatorioEnviado = false,
+            estado = EstadoCita.CANCELADA
+        ),
+        Cita(
+            id = "cit-007",
+            pacienteId = "pac-002",
+            nombrePaciente = "Marta Ríos",
+            correoPaciente = "marta.rios@example.com",
+            medicoId = "med-001",
+            fechaHora = hoy.plusDays(3).atTime(11, 30),
+            duracionMinutos = 30,
+            motivo = "Seguimiento de presión",
+            estadoConfirmacion = EstadoConfirmacion.CONFIRMADA,
+            recordatorioEnviado = true
         )
     )
 
@@ -464,6 +532,18 @@ object FakeDataSource {
         citas
             .filter { it.medicoId == medicoId && it.fechaHora.toLocalDate() == fecha }
             .sortedBy { it.fechaHora }
+
+    fun proximaCitaDe(pacienteId: String): Cita? =
+        citas
+            .filter {
+                it.pacienteId == pacienteId &&
+                    it.estado == EstadoCita.PROGRAMADA &&
+                    !it.fechaHora.isBefore(ahora)
+            }
+            .minByOrNull { it.fechaHora }
+
+    fun ultimaReferenciaDe(pacienteId: String): Referencia? =
+        historialDe(pacienteId).firstNotNullOfOrNull { referenciaDe(it.id) }
 
     private fun normalizar(texto: String): String =
         Normalizer.normalize(texto, Normalizer.Form.NFD)

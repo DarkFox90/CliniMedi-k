@@ -1,5 +1,6 @@
 package plat.clinimedik.app.ui.components
 
+import plat.clinimedik.app.data.model.EstadoCita
 import plat.clinimedik.app.data.model.EstadoCivil
 import plat.clinimedik.app.data.model.EstadoConfirmacion
 import plat.clinimedik.app.data.model.EstadoVisita
@@ -24,6 +25,12 @@ fun EstadoConfirmacion.etiqueta(): String = when (this) {
     EstadoConfirmacion.PENDIENTE -> "Pendiente"
     EstadoConfirmacion.CONFIRMADA -> "Confirmada"
     EstadoConfirmacion.NO_CONFIRMADA -> "No confirmada"
+}
+
+fun EstadoCita.etiqueta(): String = when (this) {
+    EstadoCita.PROGRAMADA -> "Programada"
+    EstadoCita.CANCELADA -> "Cancelada"
+    EstadoCita.COMPLETADA -> "Llegó"
 }
 
 fun TipoDocumento.etiqueta(): String = when (this) {

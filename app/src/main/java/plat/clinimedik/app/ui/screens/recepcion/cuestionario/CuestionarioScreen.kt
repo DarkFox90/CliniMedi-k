@@ -24,6 +24,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import plat.clinimedik.app.data.model.EstadoCivil
 import plat.clinimedik.app.ui.components.BarraSuperior
+import plat.clinimedik.app.ui.components.CampoFecha
 import plat.clinimedik.app.ui.components.CampoTexto
 import plat.clinimedik.app.ui.components.etiqueta
 import plat.clinimedik.app.ui.theme.CliniMedikTheme
@@ -63,12 +64,12 @@ fun CuestionarioScreen(
                 mensajeError = state.errorNombre,
                 modifier = Modifier.fillMaxWidth()
             )
-            CampoTexto(
+            CampoFecha(
                 valor = state.fechaNacimiento,
                 onValorChange = { onEvent(CuestionarioEvent.CambiarFechaNacimiento(it)) },
                 etiqueta = "Fecha de nacimiento",
-                placeholder = "dd/mm/aaaa",
                 mensajeError = state.errorFechaNacimiento,
+                permiteFuturo = false,
                 modifier = Modifier.fillMaxWidth()
             )
 

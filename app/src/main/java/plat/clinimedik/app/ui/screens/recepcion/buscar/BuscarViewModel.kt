@@ -11,6 +11,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
@@ -31,7 +33,7 @@ class BuscarViewModel(
     val efectos: Flow<BuscarEfecto> = _efectos.receiveAsFlow()
 
     init {
-        observarRecientes()
+        observarListas()
         observarResultados()
     }
 
@@ -43,13 +45,20 @@ class BuscarViewModel(
         }
     }
 
-    private fun observarRecientes() {
+    private fun observarListas() {
         viewModelScope.launch {
-            pacienteRepositorio.observarPorIds(idsRecientes).collect { pacientes ->
-                _state.update { actual ->
-                    actual.copy(cargando = false, recientes = pacientes.map { it.aPacienteEncontrado() })
-                }
+            combine(
+                pacienteRepositorio.observarPorIds(idsRecientes),
+                pacienteRepositorio.observarTodos()
+            ) { recientes, todos ->
+                recientes.map { it.aPacienteEncontrado() } to todos.map { it.aPacienteEncontrado() }
             }
+                .catch { marcarError() }
+                .collect { (recientes, todos) ->
+                    _state.update { actual ->
+                        actual.copy(cargando = false, recientes = recientes, todos = todos, mensajeError = null)
+                    }
+                }
         }
     }
 
@@ -60,12 +69,17 @@ class BuscarViewModel(
                 .map { it.texto }
                 .distinctUntilChanged()
                 .flatMapLatest { texto -> pacienteRepositorio.buscar(texto) }
+                .catch { marcarError() }
                 .collect { pacientes ->
                     _state.update { actual ->
                         actual.copy(resultados = pacientes.map { it.aPacienteEncontrado() })
                     }
                 }
         }
+    }
+
+    private fun marcarError() {
+        _state.update { it.copy(cargando = false, mensajeError = "No se pudieron cargar los pacientes") }
     }
 
     private fun enviar(efecto: BuscarEfecto) {

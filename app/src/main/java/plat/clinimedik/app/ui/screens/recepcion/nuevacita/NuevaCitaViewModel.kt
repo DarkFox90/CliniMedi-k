@@ -93,13 +93,13 @@ class NuevaCitaViewModel(
         } else null
 
         val errorFecha = when {
-            fecha == null -> "Usa el formato dd/mm/aaaa"
+            fecha == null -> "Selecciona la fecha de la cita"
             fecha.isBefore(LocalDate.now()) -> "La fecha no puede ser anterior a hoy"
             else -> null
         }
 
         val errorHora = when {
-            hora == null -> "Usa el formato de 24 horas, por ejemplo 09:30"
+            hora == null -> "Selecciona la hora de la cita"
             fechaHora != null && fechaHora.isBefore(LocalDateTime.now()) ->
                 "La hora de la cita ya pasó"
             else -> null

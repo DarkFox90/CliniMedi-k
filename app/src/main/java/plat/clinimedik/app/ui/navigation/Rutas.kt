@@ -39,16 +39,16 @@ data object Buscar
 data class Detalle(val visitaId: String)
 
 @Serializable
-data object NuevaCita
+data class NuevaCita(val pacienteId: String? = null, val motivo: String? = null)
 
 @Serializable
 data object Registro
 
 @Serializable
-data object Cuestionario
+data class Cuestionario(val citaId: String? = null)
 
 @Serializable
-data class CodigoQr(val pacienteId: String)
+data class CodigoQr(val pacienteId: String, val desdeRegistro: Boolean = true)
 
 @Serializable
 data object Escaneo
@@ -58,6 +58,12 @@ data class Resultado(val pacienteId: String)
 
 @Serializable
 data object Resumen
+
+@Serializable
+data class FichaPaciente(val pacienteId: String)
+
+@Serializable
+data class VisorDocumento(val documentoId: String)
 
 @Serializable
 data object FilaMedico

@@ -1,6 +1,8 @@
 
 package plat.clinimedik.app.ui.navigation
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -103,7 +105,14 @@ fun CliniMedikNavHost() {
         NavHost(
             navController = navController,
             startDestination = Arranque,
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier.padding(innerPadding),
+            // Sin animaciones: al navegar o regresar, la pantalla cambia al instante.
+            enterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None },
+            popEnterTransition = { EnterTransition.None },
+            popExitTransition = { ExitTransition.None },
+            predictivePopEnterTransition = { EnterTransition.None },
+            predictivePopExitTransition = { ExitTransition.None }
         ) {
             arranqueDestino(navController)
 

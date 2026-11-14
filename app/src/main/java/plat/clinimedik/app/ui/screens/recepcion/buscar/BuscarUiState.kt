@@ -10,30 +10,35 @@ data class PacienteEncontrado(
     val telefono: String
 )
 
+/**
+ * Con el campo vacío la pantalla muestra dos listas: recientes y todos los pacientes.
+ * Al escribir, muestra solo los resultados de la búsqueda.
+ */
 data class BuscarUiState(
     val cargando: Boolean = true,
     val texto: String = "",
     val recientes: List<PacienteEncontrado> = emptyList(),
-    val resultados: List<PacienteEncontrado> = emptyList()
+    val todos: List<PacienteEncontrado> = emptyList(),
+    val resultados: List<PacienteEncontrado> = emptyList(),
+    val mensajeError: String? = null
 ) {
     val buscando: Boolean
         get() = texto.isNotBlank()
 
-    val pacientes: List<PacienteEncontrado>
-        get() = if (buscando) resultados else recientes
+    val sinPacientes: Boolean
+        get() = if (buscando) resultados.isEmpty() else recientes.isEmpty() && todos.isEmpty()
 
-    val tituloLista: String
-        get() = when {
-            !buscando -> "Recientes"
-            resultados.size == 1 -> "1 resultado"
-            else -> "${resultados.size} resultados"
-        }
+    val tituloResultados: String
+        get() = if (resultados.size == 1) "1 resultado" else "${resultados.size} resultados"
+
+    val tituloTodos: String
+        get() = "Todos los pacientes (${todos.size})"
 
     val mensajeVacio: String
         get() = if (buscando) {
             "No se encontraron pacientes con “${texto.trim()}”"
         } else {
-            "No hay búsquedas recientes"
+            "Todavía no hay pacientes registrados"
         }
 }
 

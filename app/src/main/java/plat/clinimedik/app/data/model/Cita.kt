@@ -12,5 +12,8 @@ data class Cita (
     val duracionMinutos: Int,
     val motivo: String,
     val estadoConfirmacion: EstadoConfirmacion,
-    val recordatorioEnviado: Boolean
+    val recordatorioEnviado: Boolean,
+    val estado: EstadoCita = EstadoCita.PROGRAMADA,
+    val visitaId: String? = null,
+    val idCorreoRecordatorio: String? = null
 )

@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import plat.clinimedik.app.ui.components.BarraSuperior
+import plat.clinimedik.app.ui.components.ColumnaDesplazable
 import plat.clinimedik.app.ui.theme.CliniMedikTheme
 
 @Composable
@@ -43,7 +44,7 @@ fun RegistroScreen(
         },
         modifier = modifier
     ) { innerPadding ->
-        Column(
+        ColumnaDesplazable(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier
                 .fillMaxSize()

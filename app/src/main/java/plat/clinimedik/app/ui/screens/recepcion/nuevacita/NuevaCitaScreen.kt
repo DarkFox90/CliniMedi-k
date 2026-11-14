@@ -19,6 +19,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import plat.clinimedik.app.ui.components.BarraSuperior
+import plat.clinimedik.app.ui.components.CampoFecha
+import plat.clinimedik.app.ui.components.CampoHora
 import plat.clinimedik.app.ui.components.CampoTexto
 import plat.clinimedik.app.ui.theme.CliniMedikTheme
 import androidx.compose.material3.CircularProgressIndicator
@@ -64,20 +66,19 @@ fun NuevaCitaScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            CampoTexto(
+            CampoFecha(
                 valor = state.fecha,
                 onValorChange = { onEvent(NuevaCitaEvent.CambiarFecha(it)) },
                 etiqueta = "Fecha",
-                placeholder = "dd/mm/aaaa",
                 mensajeError = state.errorFecha,
+                permitePasado = false,
                 modifier = Modifier.fillMaxWidth()
             )
 
-            CampoTexto(
+            CampoHora(
                 valor = state.hora,
                 onValorChange = { onEvent(NuevaCitaEvent.CambiarHora(it)) },
                 etiqueta = "Hora",
-                placeholder = "9:30 (formato de 24 horas)",
                 mensajeError = state.errorHora,
                 modifier = Modifier.fillMaxWidth()
             )

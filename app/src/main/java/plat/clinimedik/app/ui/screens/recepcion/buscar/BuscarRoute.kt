@@ -29,6 +29,9 @@ fun buscarUiStateDePrueba(texto: String = ""): BuscarUiState {
         cargando = false,
         texto = texto,
         recientes = recientes,
+        todos = FakeDataSource.pacientes
+            .sortedBy { it.nombreCompleto }
+            .map { it.aPacienteEncontrado() },
         resultados = resultados
     )
 }

@@ -3,6 +3,7 @@ package plat.clinimedik.app.data.local.dao
 import androidx.room3.Dao
 import androidx.room3.Insert
 import androidx.room3.Query
+import androidx.room3.Upsert
 import java.time.LocalDateTime
 import kotlinx.coroutines.flow.Flow
 import plat.clinimedik.app.data.local.entity.CobroEntity
@@ -19,12 +20,18 @@ interface CobroDao {
     @Query("SELECT * FROM cobro WHERE visitaId = :visitaId LIMIT 1")
     suspend fun obtenerDeVisita(visitaId: String): CobroEntity?
 
+    @Query("SELECT * FROM cobro WHERE visitaId = :visitaId LIMIT 1")
+    fun observarDeVisita(visitaId: String): Flow<CobroEntity?>
+
+    @Query("SELECT * FROM cobro")
+    suspend fun obtenerTodos(): List<CobroEntity>
+
     @Insert
     suspend fun insertar(cobro: CobroEntity)
 
-    @Insert
-    suspend fun insertarTodos(cobros: List<CobroEntity>)
+    @Upsert
+    suspend fun guardar(cobro: CobroEntity)
 
-    @Query("DELETE FROM cobro")
-    suspend fun borrarTodos()
+    @Upsert
+    suspend fun guardarTodos(cobros: List<CobroEntity>)
 }

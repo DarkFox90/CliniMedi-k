@@ -41,7 +41,7 @@ fun NavGraphBuilder.registroDestino(navController: NavController) {
     composable<Registro> {
         RegistroRoute(
             onCuestionario = {
-                navController.navigate(Cuestionario)
+                navController.navigate(Cuestionario())
             },
             onEscaneo = {
                 navController.navigate(Escaneo)

@@ -13,9 +13,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import plat.clinimedik.app.data.model.EstadoCita
 import plat.clinimedik.app.data.model.EstadoConfirmacion
 import plat.clinimedik.app.ui.theme.CliniMedikTheme
 
@@ -27,6 +29,7 @@ fun CitaItem(
     estadoConfirmacion: EstadoConfirmacion,
     modifier: Modifier = Modifier,
     recordatorioEnviado: Boolean? = null,
+    estado: EstadoCita = EstadoCita.PROGRAMADA,
     onClick: () -> Unit = {}
 ) {
     Surface(
@@ -37,7 +40,9 @@ fun CitaItem(
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp)
+            modifier = Modifier
+                .alpha(if (estado == EstadoCita.CANCELADA) 0.6f else 1f)
+                .padding(horizontal = 16.dp, vertical = 14.dp)
         ) {
             Text(
                 text = hora,
@@ -60,16 +65,20 @@ fun CitaItem(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                if (recordatorioEnviado != null) {
+                if (recordatorioEnviado != null && estado == EstadoCita.PROGRAMADA) {
                     Text(
-                        text = if (recordatorioEnviado) "Recordatorio enviado" else "Recordatorio pendiente de envío",
+                        text = if (recordatorioEnviado) "Correo enviado" else "Correo pendiente de envío",
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
             Spacer(modifier = Modifier.width(12.dp))
-            ConfirmacionChip(estado = estadoConfirmacion)
+            if (estado == EstadoCita.PROGRAMADA) {
+                ConfirmacionChip(estado = estadoConfirmacion)
+            } else {
+                EstadoCitaChip(estado = estado)
+            }
         }
     }
 }
@@ -94,6 +103,21 @@ private fun CitaItemPreview() {
                 nombrePaciente = "Sofía Hernández",
                 motivo = "Primera consulta",
                 estadoConfirmacion = EstadoConfirmacion.PENDIENTE
+            )
+            CitaItem(
+                hora = "12:00 p. m.",
+                nombrePaciente = "Pedro Gómez",
+                motivo = "Control",
+                estadoConfirmacion = EstadoConfirmacion.CONFIRMADA,
+                recordatorioEnviado = true,
+                estado = EstadoCita.CANCELADA
+            )
+            CitaItem(
+                hora = "8:30 a. m.",
+                nombrePaciente = "Lucía Morales",
+                motivo = "Chequeo general",
+                estadoConfirmacion = EstadoConfirmacion.CONFIRMADA,
+                estado = EstadoCita.COMPLETADA
             )
         }
     }

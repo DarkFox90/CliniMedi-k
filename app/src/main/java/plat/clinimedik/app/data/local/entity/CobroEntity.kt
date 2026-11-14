@@ -14,19 +14,31 @@ data class CobroEntity(
     @PrimaryKey val id: String,
     val visitaId: String,
     val tipoPago: TipoPago,
-    val monto: Double
+    val monto: Double,
+    val aseguradora: String?,
+    val numeroAutorizacion: String?,
+    val copago: Double?,
+    val montoAseguradora: Double?
 )
 
 fun CobroEntity.aModelo(): Cobro = Cobro(
     id = id,
     visitaId = visitaId,
     tipoPago = tipoPago,
-    monto = monto
+    monto = monto,
+    aseguradora = aseguradora,
+    numeroAutorizacion = numeroAutorizacion,
+    copago = copago,
+    montoAseguradora = montoAseguradora
 )
 
 fun Cobro.aEntity(): CobroEntity = CobroEntity(
     id = id,
     visitaId = visitaId,
     tipoPago = tipoPago,
-    monto = monto
+    monto = monto,
+    aseguradora = aseguradora,
+    numeroAutorizacion = numeroAutorizacion,
+    copago = copago,
+    montoAseguradora = montoAseguradora
 )

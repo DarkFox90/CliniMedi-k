@@ -79,9 +79,11 @@ private suspend fun pedirTokenDeGoogle(activity: Activity): LoginEvent {
 fun NavGraphBuilder.loginDestino(navController: NavController) {
     composable<Login> {
         LoginRoute(
+            // Login se queda debajo de Rol: el botón Atrás de Rol regresa aquí.
+            // Al terminar la configuración, Selección de médico borra toda la pila (Login, Rol y Médico).
             onIrARol = {
                 navController.navigate(Rol) {
-                    popUpTo<Login> { inclusive = true }
+                    launchSingleTop = true
                 }
             }
         )

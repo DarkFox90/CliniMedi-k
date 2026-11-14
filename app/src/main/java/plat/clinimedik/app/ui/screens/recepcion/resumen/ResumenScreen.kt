@@ -18,6 +18,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -29,6 +30,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import plat.clinimedik.app.ui.components.BarraSuperior
+import plat.clinimedik.app.ui.components.EstadoError
 import plat.clinimedik.app.ui.components.TarjetaMetrica
 import plat.clinimedik.app.ui.theme.CliniMedikTheme
 
@@ -58,6 +60,16 @@ fun ResumenScreen(
             }
             return@Scaffold
         }
+        if (state.mensajeError != null) {
+            EstadoError(
+                mensaje = state.mensajeError,
+                onReintentar = { onEvent(ResumenEvent.Reintentar) },
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            )
+            return@Scaffold
+        }
         Column(
             verticalArrangement = Arrangement.spacedBy(24.dp),
             modifier = Modifier
@@ -74,6 +86,12 @@ fun ResumenScreen(
             SeccionPacientes(state = state)
             SeccionCobros(state = state)
             SeccionAfluencia(state = state)
+            OutlinedButton(
+                onClick = { onEvent(ResumenEvent.EnviarResumen) },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(text = "Enviar resumen por correo")
+            }
         }
     }
 }
@@ -139,8 +157,10 @@ private fun SeccionCobros(state: ResumenUiState) {
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier.padding(16.dp)
             ) {
-                state.cobrosPorTipo.forEach { cobro ->
-                    FilaValor(etiqueta = cobro.tipo, valor = cobro.monto)
+                FilaValor(etiqueta = "Cobrado en caja", valor = state.cobradoEnCaja)
+                FilaValor(etiqueta = "Por cobrar a aseguradoras", valor = state.porCobrarAseguradoras)
+                state.porAseguradora.forEach { cobro ->
+                    FilaDetalle(etiqueta = cobro.aseguradora, valor = cobro.monto)
                 }
                 HorizontalDivider()
                 FilaValor(
@@ -148,6 +168,15 @@ private fun SeccionCobros(state: ResumenUiState) {
                     valor = state.totalDelDia,
                     destacado = true
                 )
+                HorizontalDivider()
+                Text(
+                    text = "Por tipo de pago",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                state.cobrosPorTipo.forEach { cobro ->
+                    FilaDetalle(etiqueta = cobro.tipo, valor = cobro.monto)
+                }
                 HorizontalDivider()
                 PendientesDeCobro(nombres = state.pendientesDeCobro)
             }
@@ -180,6 +209,32 @@ private fun FilaValor(
             text = valor,
             style = estilo,
             color = if (destacado) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+        )
+    }
+}
+
+/** Fila secundaria, con sangría, para desgloses dentro de la sección de cobros. */
+@Composable
+private fun FilaDetalle(
+    etiqueta: String,
+    valor: String
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 16.dp)
+    ) {
+        Text(
+            text = etiqueta,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.weight(1f)
+        )
+        Text(
+            text = valor,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
@@ -304,6 +359,17 @@ private fun ResumenCargandoPreview() {
     CliniMedikTheme {
         ResumenScreen(
             state = ResumenUiState(),
+            onEvent = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+private fun ResumenErrorPreview() {
+    CliniMedikTheme {
+        ResumenScreen(
+            state = ResumenUiState(cargando = false, mensajeError = "No se pudo cargar el resumen"),
             onEvent = {}
         )
     }

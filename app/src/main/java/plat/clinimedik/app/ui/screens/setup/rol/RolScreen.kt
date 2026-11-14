@@ -28,6 +28,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import plat.clinimedik.app.data.model.RolDispositivo
 import plat.clinimedik.app.ui.components.EncabezadoPantalla
+import plat.clinimedik.app.ui.components.ColumnaDesplazable
 import plat.clinimedik.app.ui.theme.CliniMedikTheme
 
 @Composable
@@ -37,7 +38,7 @@ fun RolScreen(
     modifier: Modifier = Modifier
 ) {
     Scaffold(modifier = modifier) { innerPadding ->
-        Column(
+        ColumnaDesplazable(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)

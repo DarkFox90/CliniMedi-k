@@ -14,7 +14,8 @@ fun RecetaContenido(
     nombrePaciente: String,
     formulario: FormularioReceta,
     onEvent: (DetalleEvent) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    guardando: Boolean = false
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -52,10 +53,18 @@ fun RecetaContenido(
             placeholder = "Ej. 7 días",
             mensajeError = formulario.errorDuracion
         )
+        CampoTexto(
+            valor = formulario.indicaciones,
+            onValorChange = { onEvent(DetalleEvent.CambiarIndicaciones(it)) },
+            etiqueta = "Indicaciones (opcional)",
+            placeholder = "Ej. Tomar después de las comidas",
+            lineas = 2
+        )
         BotonesPanel(
             textoConfirmar = "Guardar receta",
             onConfirmar = { onEvent(DetalleEvent.GuardarReceta) },
-            onCancelar = { onEvent(DetalleEvent.CerrarPanel) }
+            onCancelar = { onEvent(DetalleEvent.CerrarPanel) },
+            habilitado = !guardando
         )
     }
 }
@@ -64,13 +73,15 @@ fun RecetaContenido(
 fun RecetaSheet(
     nombrePaciente: String,
     formulario: FormularioReceta,
-    onEvent: (DetalleEvent) -> Unit
+    onEvent: (DetalleEvent) -> Unit,
+    guardando: Boolean = false
 ) {
     PanelInferior(onDescartar = { onEvent(DetalleEvent.CerrarPanel) }) {
         RecetaContenido(
             nombrePaciente = nombrePaciente,
             formulario = formulario,
-            onEvent = onEvent
+            onEvent = onEvent,
+            guardando = guardando
         )
     }
 }

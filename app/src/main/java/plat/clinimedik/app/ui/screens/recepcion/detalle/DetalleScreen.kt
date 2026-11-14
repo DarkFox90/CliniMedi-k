@@ -6,6 +6,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,12 +23,18 @@ import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Create
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -46,7 +53,9 @@ import plat.clinimedik.app.data.model.EstadoVisita
 import plat.clinimedik.app.data.model.TipoDocumento
 import plat.clinimedik.app.ui.components.AvatarIniciales
 import plat.clinimedik.app.ui.components.BarraSuperior
+import plat.clinimedik.app.ui.components.ChipSeguro
 import plat.clinimedik.app.ui.components.EstadoChip
+import plat.clinimedik.app.ui.components.EstadoError
 import plat.clinimedik.app.ui.components.MarcarUrgenteSheet
 import plat.clinimedik.app.ui.components.etiqueta
 import plat.clinimedik.app.ui.theme.CliniMedikTheme
@@ -77,6 +86,16 @@ fun DetalleScreen(
             }
             return@Scaffold
         }
+        if (state.mensajeError != null && state.nombre.isBlank()) {
+            EstadoError(
+                mensaje = state.mensajeError,
+                onReintentar = { onEvent(DetalleEvent.Reintentar) },
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            )
+            return@Scaffold
+        }
         Column(
             verticalArrangement = Arrangement.spacedBy(24.dp),
             modifier = Modifier
@@ -90,8 +109,16 @@ fun DetalleScreen(
                 AccionesDeEstado(state = state, onEvent = onEvent)
             }
             SeccionRegistro(state = state, onEvent = onEvent)
+            if (state.puedeRegistrarConsulta) {
+                SeccionEstaVisita(state = state, onEvent = onEvent)
+            }
+            SeccionSeguimiento(state = state, onEvent = onEvent)
             SeccionDocumentos(documentos = state.documentos, onEvent = onEvent)
-            SeccionVisitasAnteriores(visitas = state.visitasAnteriores)
+            SeccionVisitasAnteriores(
+                visitas = state.visitasAnteriores,
+                abiertaId = state.visitaAnteriorAbiertaId,
+                onEvent = onEvent
+            )
         }
 
         when (val panel = state.panel) {
@@ -103,20 +130,30 @@ fun DetalleScreen(
                 onDescartar = { onEvent(DetalleEvent.CerrarPanel) },
                 mensajeError = panel.mensajeError
             )
+            is PanelDetalle.Diagnostico -> DiagnosticoSheet(
+                nombrePaciente = state.nombre,
+                formulario = panel.formulario,
+                finalizaConsulta = panel.finalizaConsulta,
+                onEvent = onEvent,
+                guardando = state.guardando
+            )
             is PanelDetalle.Receta -> RecetaSheet(
                 nombrePaciente = state.nombre,
                 formulario = panel.formulario,
-                onEvent = onEvent
+                onEvent = onEvent,
+                guardando = state.guardando
             )
             is PanelDetalle.Referencia -> ReferenciaSheet(
                 nombrePaciente = state.nombre,
                 formulario = panel.formulario,
-                onEvent = onEvent
+                onEvent = onEvent,
+                guardando = state.guardando
             )
             is PanelDetalle.Cobro -> CobroSheet(
                 nombrePaciente = state.nombre,
                 formulario = panel.formulario,
-                onEvent = onEvent
+                onEvent = onEvent,
+                guardando = state.guardando
             )
             null -> Unit
         }
@@ -155,6 +192,9 @@ private fun EncabezadoPaciente(state: DetalleUiState) {
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                    if (state.aseguradora != null) {
+                        ChipSeguro(aseguradora = state.aseguradora)
+                    }
                 }
             }
             Row(
@@ -184,8 +224,11 @@ private fun EncabezadoPaciente(state: DetalleUiState) {
                     )
                 }
             }
+            DatoClinico(etiqueta = "Correo", valor = state.correo)
             DatoClinico(etiqueta = "Alergias", valor = state.alergias)
             DatoClinico(etiqueta = "Enfermedades previas", valor = state.enfermedadesPrevias)
+            DatoClinico(etiqueta = "Tratamientos previos", valor = state.tratamientosPrevios)
+            DatoClinico(etiqueta = "Cirugías", valor = state.cirugias)
         }
     }
 }
@@ -218,12 +261,14 @@ private fun AccionesDeEstado(
         when (state.estado) {
             EstadoVisita.ESPERANDO -> Button(
                 onClick = { onEvent(DetalleEvent.PasarAConsulta) },
+                enabled = !state.guardando,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Pasar a consulta")
             }
             EstadoVisita.EN_CONSULTA -> Button(
                 onClick = { onEvent(DetalleEvent.FinalizarConsulta) },
+                enabled = !state.guardando,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Finalizar consulta")
@@ -233,6 +278,7 @@ private fun AccionesDeEstado(
         if (state.puedeMarcarseUrgente) {
             OutlinedButton(
                 onClick = { onEvent(DetalleEvent.SolicitarUrgencia) },
+                enabled = !state.guardando,
                 colors = ButtonDefaults.outlinedButtonColors(
                     contentColor = MaterialTheme.colorScheme.error
                 ),
@@ -258,6 +304,14 @@ private fun SeccionRegistro(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         TituloSeccion(texto = "Registro de la visita")
+        if (state.consultaTerminada) {
+            FilaAccion(
+                icono = Icons.Filled.Edit,
+                texto = if (state.diagnostico == null) "Registrar diagnóstico" else "Editar diagnóstico",
+                habilitada = true,
+                onClick = { onEvent(DetalleEvent.EditarDiagnostico) }
+            )
+        }
         FilaAccion(
             icono = Icons.Filled.Create,
             texto = "Registrar receta",
@@ -336,6 +390,152 @@ private fun FilaAccion(
             )
         }
     }
+}
+
+@Composable
+private fun SeccionEstaVisita(
+    state: DetalleUiState,
+    onEvent: (DetalleEvent) -> Unit
+) {
+    val sinRegistros = state.diagnostico == null && state.recetas.isEmpty() &&
+        state.referencia == null && state.cobro == null
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        TituloSeccion(texto = "Registrado en esta visita")
+        if (sinRegistros) {
+            Text(
+                text = "Todavía no hay diagnóstico, recetas, referencia ni cobro en esta visita",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            return@Column
+        }
+        if (state.diagnostico != null) {
+            TarjetaRegistro(titulo = "Diagnóstico") {
+                TextoPrincipal(texto = state.diagnostico)
+                state.notas?.let { TextoSecundario(texto = it) }
+            }
+        }
+        if (state.recetas.isNotEmpty()) {
+            TarjetaRegistro(titulo = "Recetas") {
+                ListaRecetas(recetas = state.recetas)
+            }
+            if (state.textoReceta != null) {
+                OutlinedButton(
+                    onClick = { onEvent(DetalleEvent.CompartirReceta) },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Share,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Compartir receta")
+                }
+            }
+        }
+        state.referencia?.let { referencia ->
+            TarjetaRegistro(titulo = "Referencia") {
+                DatosReferencia(referencia = referencia)
+            }
+        }
+        state.cobro?.let { cobro ->
+            TarjetaRegistro(titulo = "Cobro") {
+                TextoPrincipal(texto = "${cobro.tipoPago} · ${cobro.monto}")
+                cobro.detalleSeguro?.let { TextoSecundario(texto = it) }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SeccionSeguimiento(
+    state: DetalleUiState,
+    onEvent: (DetalleEvent) -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        TituloSeccion(texto = "Seguimiento")
+        TarjetaRegistro(titulo = "Próxima cita") {
+            TextoPrincipal(texto = state.proximaCita ?: "Sin citas programadas")
+        }
+        TarjetaRegistro(titulo = "Última referencia") {
+            TextoPrincipal(texto = state.ultimaReferencia ?: "Sin referencias anteriores")
+        }
+        if (state.consultaTerminada) {
+            Button(
+                onClick = { onEvent(DetalleEvent.AgendarSeguimiento) },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.DateRange,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Agendar seguimiento")
+            }
+        }
+    }
+}
+
+@Composable
+private fun TarjetaRegistro(
+    titulo: String,
+    contenido: @Composable ColumnScope.() -> Unit
+) {
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceContainerLowest,
+        shape = MaterialTheme.shapes.medium,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(
+                text = titulo,
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.primary
+            )
+            contenido()
+        }
+    }
+}
+
+@Composable
+private fun TextoPrincipal(texto: String) {
+    Text(
+        text = texto,
+        style = MaterialTheme.typography.bodyLarge,
+        color = MaterialTheme.colorScheme.onSurface
+    )
+}
+
+@Composable
+private fun TextoSecundario(texto: String) {
+    Text(
+        text = texto,
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+}
+
+@Composable
+private fun ListaRecetas(recetas: List<RecetaDetalle>) {
+    recetas.forEachIndexed { indice, receta ->
+        if (indice > 0) {
+            HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+        }
+        TextoPrincipal(texto = receta.medicamento)
+        TextoSecundario(texto = receta.indicacion)
+        receta.indicaciones?.let { TextoSecundario(texto = "Indicaciones: $it") }
+    }
+}
+
+@Composable
+private fun DatosReferencia(referencia: ReferenciaDetalle) {
+    TextoPrincipal(texto = "${referencia.especialidad} · ${referencia.destino}")
+    TextoSecundario(texto = referencia.motivo)
 }
 
 @Composable
@@ -420,7 +620,11 @@ private fun iconoDocumento(tipo: TipoDocumento): ImageVector = when (tipo) {
 }
 
 @Composable
-private fun SeccionVisitasAnteriores(visitas: List<VisitaAnterior>) {
+private fun SeccionVisitasAnteriores(
+    visitas: List<VisitaAnterior>,
+    abiertaId: String?,
+    onEvent: (DetalleEvent) -> Unit
+) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         TituloSeccion(texto = "Visitas anteriores")
         if (visitas.isEmpty()) {
@@ -431,31 +635,78 @@ private fun SeccionVisitasAnteriores(visitas: List<VisitaAnterior>) {
             )
         } else {
             visitas.forEach { visita ->
-                Surface(
-                    color = MaterialTheme.colorScheme.surfaceContainerLowest,
-                    shape = MaterialTheme.shapes.medium,
-                    modifier = Modifier.fillMaxWidth()
+                TarjetaVisitaAnterior(
+                    visita = visita,
+                    abierta = visita.id == abiertaId,
+                    onClick = { onEvent(DetalleEvent.AlternarVisitaAnterior(visita.id)) }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun TarjetaVisitaAnterior(
+    visita: VisitaAnterior,
+    abierta: Boolean,
+    onClick: () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        color = MaterialTheme.colorScheme.surfaceContainerLowest,
+        shape = MaterialTheme.shapes.medium,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier.weight(1f)
                 ) {
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
-                        modifier = Modifier.padding(16.dp)
-                    ) {
-                        Text(
-                            text = visita.fecha,
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        Text(
-                            text = visita.motivo,
-                            style = MaterialTheme.typography.titleSmall,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Text(
-                            text = visita.diagnostico,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
+                    Text(
+                        text = visita.fecha,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = visita.motivo,
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+                Icon(
+                    imageVector = if (abierta) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                    contentDescription = if (abierta) "Ocultar detalle" else "Ver detalle",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            TextoSecundario(texto = visita.diagnostico)
+            if (abierta) {
+                visita.notas?.let { TextoSecundario(texto = "Notas: $it") }
+                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                Text(
+                    text = "Recetas",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                if (visita.recetas.isEmpty()) {
+                    TextoSecundario(texto = "Sin recetas")
+                } else {
+                    ListaRecetas(recetas = visita.recetas)
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Referencia",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                if (visita.referencia == null) {
+                    TextoSecundario(texto = "Sin referencia")
+                } else {
+                    DatosReferencia(referencia = visita.referencia)
                 }
             }
         }
@@ -484,6 +735,17 @@ private fun DetalleCargandoPreview() {
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
+private fun DetalleErrorPreview() {
+    CliniMedikTheme {
+        DetalleScreen(
+            state = DetalleUiState(cargando = false, mensajeError = "No se pudo cargar el expediente"),
+            onEvent = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
 private fun DetalleEsperandoPreview() {
     CliniMedikTheme {
         DetalleScreen(
@@ -495,10 +757,12 @@ private fun DetalleEsperandoPreview() {
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-private fun DetalleUrgenteConDocumentosPreview() {
+private fun DetalleUrgenteConHistorialPreview() {
     CliniMedikTheme {
         DetalleScreen(
-            state = detalleUiStateDePrueba(visitaId = "vis-101"),
+            state = detalleUiStateDePrueba(visitaId = "vis-101").let { estado ->
+                estado.copy(visitaAnteriorAbiertaId = estado.visitasAnteriores.firstOrNull()?.id)
+            },
             onEvent = {}
         )
     }
@@ -510,6 +774,28 @@ private fun DetalleEnConsultaPreview() {
     CliniMedikTheme {
         DetalleScreen(
             state = detalleUiStateDePrueba(visitaId = "vis-104"),
+            onEvent = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+private fun DetalleAtendidoPreview() {
+    CliniMedikTheme {
+        DetalleScreen(
+            state = detalleUiStateDePrueba(visitaId = "vis-106"),
+            onEvent = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+private fun DetalleDiagnosticoAbiertoPreview() {
+    CliniMedikTheme {
+        DetalleScreen(
+            state = detalleUiStateDePrueba(visitaId = "vis-104", panel = PanelDetalle.Diagnostico()),
             onEvent = {}
         )
     }

@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -19,14 +20,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import plat.clinimedik.app.ui.components.CitaItem
 import plat.clinimedik.app.ui.components.ContenedorRecepcion
 import plat.clinimedik.app.ui.components.EncabezadoPantalla
+import plat.clinimedik.app.ui.components.EstadoError
 import plat.clinimedik.app.ui.components.PestanaRecepcion
+import plat.clinimedik.app.ui.components.SelectorDia
 import plat.clinimedik.app.ui.theme.CliniMedikTheme
-import androidx.compose.material3.CircularProgressIndicator
 
 @Composable
 fun AgendaRecepcionScreen(
@@ -52,35 +55,51 @@ fun AgendaRecepcionScreen(
         ) {
             EncabezadoPantalla(
                 titulo = "Agenda",
-                subtitulo = state.subtitulo,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp)
             )
-            if (state.cargando) {
-                Box(
+            SelectorDia(
+                fecha = state.fecha,
+                textoFecha = state.textoFecha,
+                esHoy = state.esHoy,
+                onDiaAnterior = { onEvent(AgendaRecepcionEvent.DiaAnterior) },
+                onDiaSiguiente = { onEvent(AgendaRecepcionEvent.DiaSiguiente) },
+                onElegirDia = { onEvent(AgendaRecepcionEvent.ElegirDia(it)) },
+                onVolverAHoy = { onEvent(AgendaRecepcionEvent.VolverAHoy) },
+                modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp)
+            )
+            when {
+                state.cargando -> Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier.fillMaxSize()
                 ) {
                     CircularProgressIndicator()
                 }
-            } else if (state.elementos.isEmpty()) {
-                Box(
-                    contentAlignment = Alignment.Center,
+                state.mensajeError != null -> EstadoError(
+                    mensaje = state.mensajeError,
+                    onReintentar = { onEvent(AgendaRecepcionEvent.Reintentar) },
                     modifier = Modifier.fillMaxSize()
+                )
+                state.elementos.isEmpty() -> Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(32.dp)
                 ) {
                     Text(
-                        text = "No hay citas programadas para hoy",
+                        text = state.mensajeSinCitas,
                         style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center
                     )
                 }
-            } else {
-                LazyColumn(
+                else -> LazyColumn(
                     contentPadding = PaddingValues(
                         start = 16.dp,
                         end = 16.dp,
                         bottom = 96.dp
                     ),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxSize()
                 ) {
                     items(state.elementos, key = { it.citaId }) { elemento ->
                         CitaItem(
@@ -89,6 +108,7 @@ fun AgendaRecepcionScreen(
                             motivo = elemento.motivo,
                             estadoConfirmacion = elemento.estadoConfirmacion,
                             recordatorioEnviado = elemento.recordatorioEnviado,
+                            estado = elemento.estado,
                             onClick = {}
                         )
                     }
@@ -110,13 +130,36 @@ private fun AgendaConDatosPreview() {
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
+private fun AgendaOtroDiaPreview() {
+    CliniMedikTheme {
+        ContenedorRecepcion(seleccion = PestanaRecepcion.AGENDA) {
+            AgendaRecepcionScreen(state = agendaUiStateDePrueba(diasDesdeHoy = 1), onEvent = {})
+        }
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
 private fun AgendaVaciaPreview() {
     CliniMedikTheme {
         ContenedorRecepcion(seleccion = PestanaRecepcion.AGENDA) {
             AgendaRecepcionScreen(
-                state = AgendaRecepcionUiState(
-                    subtitulo = "Jueves, 24 de septiembre",
-                    cargando = false
+                state = agendaUiStateDePrueba().copy(elementos = emptyList()),
+                onEvent = {}
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+private fun AgendaErrorPreview() {
+    CliniMedikTheme {
+        ContenedorRecepcion(seleccion = PestanaRecepcion.AGENDA) {
+            AgendaRecepcionScreen(
+                state = agendaUiStateDePrueba().copy(
+                    elementos = emptyList(),
+                    mensajeError = "No se pudieron cargar las citas"
                 ),
                 onEvent = {}
             )
