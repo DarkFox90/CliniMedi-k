@@ -47,6 +47,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import plat.clinimedik.app.ui.components.LocalMensajes
 import plat.clinimedik.app.ui.components.MensajesSnackbar
 import androidx.compose.foundation.layout.navigationBarsPadding
+import plat.clinimedik.app.ui.screens.recepcion.visor.visorDocumentoDestino
 
 @Composable
 fun CliniMedikNavHost() {
@@ -161,6 +162,7 @@ private fun ContenidoNavegacion(snackbarHostState: SnackbarHostState) {
                 escaneoDestino(navController)
                 resultadoDestino(navController)
                 resumenDestino(navController)
+                visorDocumentoDestino(navController)
             }
 
             navigation<MedicoGraph>(startDestination = FilaMedico) {
