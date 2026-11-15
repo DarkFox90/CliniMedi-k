@@ -4,7 +4,6 @@ import android.content.ActivityNotFoundException
 import android.content.ClipData
 import android.content.Context
 import android.content.Intent
-import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -15,6 +14,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.print.PrintHelper
+import plat.clinimedik.app.ui.components.LocalMensajes
 import plat.clinimedik.app.ui.navigation.CodigoQr
 
 @Composable
@@ -25,24 +25,21 @@ fun CodigoQrRoute(
     )
 ) {
     val context = LocalContext.current
+    val mensajes = LocalMensajes.current
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(viewModel) {
-        val mostrarMensaje = { texto: String ->
-            Toast.makeText(context, texto, Toast.LENGTH_SHORT).show()
-        }
-
         viewModel.efectos.collect { efecto ->
             when (efecto) {
                 CodigoQrEfecto.Regresar -> onRegresar()
 
-                is CodigoQrEfecto.MostrarMensaje -> mostrarMensaje(efecto.texto)
+                is CodigoQrEfecto.MostrarMensaje -> mensajes.mostrar(efecto.texto)
 
                 is CodigoQrEfecto.CompartirImagen -> {
                     try {
                         compartirImagen(context, efecto)
                     } catch (error: Exception) {
-                        mostrarMensaje("No se pudo compartir el código")
+                        mensajes.mostrar("No se pudo compartir el código")
                     }
                 }
 
@@ -52,7 +49,7 @@ fun CodigoQrRoute(
                             scaleMode = PrintHelper.SCALE_MODE_FIT
                         }.printBitmap(efecto.trabajo, efecto.imagen)
                     } catch (error: Exception) {
-                        mostrarMensaje("No se pudo abrir la impresión")
+                        mensajes.mostrar("No se pudo abrir la impresión")
                     }
                 }
             }
