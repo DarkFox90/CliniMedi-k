@@ -109,11 +109,37 @@ fun AgendaRecepcionScreen(
                             estadoConfirmacion = elemento.estadoConfirmacion,
                             recordatorioEnviado = elemento.recordatorioEnviado,
                             estado = elemento.estado,
-                            onClick = {}
+                            onClick = { onEvent(AgendaRecepcionEvent.AbrirCita(elemento.citaId)) }
                         )
                     }
                 }
             }
+        }
+    }
+
+    val panel = state.panel
+    val elementoDelPanel = panel?.let { abierto ->
+        state.elementos.firstOrNull { it.citaId == abierto.citaId }
+    }
+    if (panel != null && elementoDelPanel != null) {
+        when (panel) {
+            is PanelAgenda.Acciones -> CitaAccionesSheet(
+                elemento = elementoDelPanel,
+                puedeRegistrarLlegada = state.esHoy,
+                guardando = state.guardando,
+                onEvent = onEvent
+            )
+            is PanelAgenda.Reprogramar -> ReprogramarSheet(
+                elemento = elementoDelPanel,
+                formulario = panel.formulario,
+                guardando = state.guardando,
+                onEvent = onEvent
+            )
+            is PanelAgenda.ConfirmarCancelacion -> CancelarCitaDialogo(
+                elemento = elementoDelPanel,
+                guardando = state.guardando,
+                onEvent = onEvent
+            )
         }
     }
 }
@@ -161,6 +187,19 @@ private fun AgendaErrorPreview() {
                     elementos = emptyList(),
                     mensajeError = "No se pudieron cargar las citas"
                 ),
+                onEvent = {}
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+private fun AgendaConPanelPreview() {
+    CliniMedikTheme {
+        ContenedorRecepcion(seleccion = PestanaRecepcion.AGENDA) {
+            AgendaRecepcionScreen(
+                state = agendaUiStateDePrueba().copy(panel = PanelAgenda.Acciones("cit-004")),
                 onEvent = {}
             )
         }
