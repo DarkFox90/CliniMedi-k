@@ -1,16 +1,20 @@
 package plat.clinimedik.app.ui.screens.recepcion.cuestionario
 
 import android.util.Patterns
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import androidx.navigation.toRoute
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 import java.time.format.ResolverStyle
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,17 +25,27 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import plat.clinimedik.app.CliniMedikApp
+import plat.clinimedik.app.data.model.Cita
+import plat.clinimedik.app.data.model.EstadoCita
 import plat.clinimedik.app.data.model.EstadoCivil
 import plat.clinimedik.app.data.model.Paciente
 import plat.clinimedik.app.data.preferencias.ConfiguracionRepositorio
+import plat.clinimedik.app.data.repository.CitaRepositorio
 import plat.clinimedik.app.data.repository.PacienteRepositorio
+import plat.clinimedik.app.data.repository.VisitaRepositorio
+import plat.clinimedik.app.ui.navigation.Cuestionario
 
 class CuestionarioViewModel(
+    savedStateHandle: SavedStateHandle,
     private val pacienteRepositorio: PacienteRepositorio,
+    private val citaRepositorio: CitaRepositorio,
+    private val visitaRepositorio: VisitaRepositorio,
     private val configuracionRepositorio: ConfiguracionRepositorio
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(CuestionarioUiState())
+    private val citaId: String? = savedStateHandle.toRoute<Cuestionario>().citaId
+
+    private val _state = MutableStateFlow(CuestionarioUiState(cargando = citaId != null))
     val state: StateFlow<CuestionarioUiState> = _state.asStateFlow()
 
     private val _efectos = Channel<CuestionarioEfecto>()
@@ -40,6 +54,13 @@ class CuestionarioViewModel(
     private val formatoFecha = DateTimeFormatter
         .ofPattern("dd/MM/uuuu")
         .withResolverStyle(ResolverStyle.STRICT)
+
+    private var cita: Cita? = null
+    private var pacienteRegistradoId: String? = null
+
+    init {
+        citaId?.let { cargarCita(it) }
+    }
 
     fun onEvent(event: CuestionarioEvent) {
         when (event) {
@@ -78,7 +99,21 @@ class CuestionarioViewModel(
             is CuestionarioEvent.CambiarCirugias ->
                 _state.update { it.copy(cirugias = event.texto) }
 
+            is CuestionarioEvent.CambiarTieneSeguro ->
+                _state.update { it.copy(tieneSeguro = event.activo, errorAseguradora = null) }
+
+            is CuestionarioEvent.CambiarAseguradora ->
+                _state.update { it.copy(aseguradora = event.texto, errorAseguradora = null) }
+
+            is CuestionarioEvent.CambiarPoliza ->
+                _state.update { it.copy(numeroPoliza = event.texto) }
+
+            is CuestionarioEvent.CambiarTitular ->
+                _state.update { it.copy(titularPoliza = event.texto) }
+
             CuestionarioEvent.Guardar -> guardarPaciente()
+
+            CuestionarioEvent.Reintentar -> citaId?.let { cargarCita(it) }
 
             CuestionarioEvent.Regresar -> {
                 if (!_state.value.guardando) {
@@ -88,9 +123,47 @@ class CuestionarioViewModel(
         }
     }
 
+    private fun cargarCita(id: String) {
+        _state.update {
+            it.copy(cargando = true, mensajeErrorCarga = null, cargaReintentable = false)
+        }
+        viewModelScope.launch {
+            try {
+                val encontrada = citaRepositorio.obtenerCita(id)
+                if (encontrada == null || encontrada.estado != EstadoCita.PROGRAMADA) {
+                    mostrarErrorCarga(MENSAJE_CITA_NO_DISPONIBLE, reintentable = false)
+                    return@launch
+                }
+                if (encontrada.pacienteId != null) {
+                    mostrarErrorCarga(MENSAJE_CITA_CON_PACIENTE, reintentable = false)
+                    return@launch
+                }
+                cita = encontrada
+                _state.update {
+                    it.copy(
+                        cargando = false,
+                        nombre = encontrada.nombrePaciente,
+                        correo = encontrada.correoPaciente.orEmpty(),
+                        motivo = encontrada.motivo
+                    )
+                }
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Exception) {
+                mostrarErrorCarga(MENSAJE_ERROR_CARGA, reintentable = true)
+            }
+        }
+    }
+
+    private fun mostrarErrorCarga(mensaje: String, reintentable: Boolean) {
+        _state.update {
+            it.copy(cargando = false, mensajeErrorCarga = mensaje, cargaReintentable = reintentable)
+        }
+    }
+
     private fun guardarPaciente() {
         val datos = _state.value
-        if (datos.guardando) return
+        if (datos.guardando || datos.cargando || datos.mensajeErrorCarga != null) return
 
         val fecha = try {
             LocalDate.parse(datos.fechaNacimiento.trim(), formatoFecha)
@@ -128,6 +201,10 @@ class CuestionarioViewModel(
             "El motivo de consulta es obligatorio"
         } else null
 
+        val errorAseguradora = if (datos.tieneSeguro && datos.aseguradora.isBlank()) {
+            "Ingresa la aseguradora"
+        } else null
+
         _state.update {
             it.copy(
                 errorNombre = errorNombre,
@@ -135,13 +212,14 @@ class CuestionarioViewModel(
                 errorTelefono = errorTelefono,
                 errorCorreo = errorCorreo,
                 errorMotivo = errorMotivo,
+                errorAseguradora = errorAseguradora,
                 mensajeError = null
             )
         }
 
         if (listOf(
                 errorNombre, errorFecha, errorTelefono,
-                errorCorreo, errorMotivo
+                errorCorreo, errorMotivo, errorAseguradora
             ).any { it != null }
         ) return
 
@@ -149,36 +227,55 @@ class CuestionarioViewModel(
             _state.update { it.copy(guardando = true) }
 
             try {
-                val configuracion = configuracionRepositorio.configuracion.first()
+                val citaOrigen = cita
+                val medicoId = citaOrigen?.medicoId
+                    ?: configuracionRepositorio.configuracion.first()?.medicoId
                     ?: throw IllegalStateException("No hay médico configurado")
 
-                val paciente = Paciente(
-                    id = "",
-                    nombreCompleto = datos.nombre.trim(),
-                    fechaNacimiento = requireNotNull(fecha),
-                    telefono = telefono,
-                    correo = datos.correo.trim(),
-                    estadoCivil = datos.estadoCivil ?: EstadoCivil.SOLTERO,
-                    ocupacion = datos.ocupacion.trim(),
-                    alergias = datos.alergias.trim(),
-                    enfermedadesPrevias = datos.enfermedades.trim(),
-                    tratamientosPrevios = datos.tratamientos.trim(),
-                    cirugias = datos.cirugias.trim(),
-                    fechaRegistro = LocalDateTime.now()
-                )
+                val pacienteId = pacienteRegistradoId ?: run {
+                    val paciente = Paciente(
+                        id = "",
+                        nombreCompleto = datos.nombre.trim(),
+                        fechaNacimiento = requireNotNull(fecha),
+                        telefono = telefono,
+                        correo = datos.correo.trim(),
+                        estadoCivil = datos.estadoCivil ?: EstadoCivil.SOLTERO,
+                        ocupacion = datos.ocupacion.trim(),
+                        alergias = datos.alergias.trim(),
+                        enfermedadesPrevias = datos.enfermedades.trim(),
+                        tratamientosPrevios = datos.tratamientos.trim(),
+                        cirugias = datos.cirugias.trim(),
+                        fechaRegistro = LocalDateTime.now(),
+                        aseguradora = datos.aseguradora.trim().takeIf { datos.tieneSeguro },
+                        numeroPoliza = datos.numeroPoliza.trim()
+                            .takeIf { datos.tieneSeguro && it.isNotEmpty() },
+                        titularPoliza = datos.titularPoliza.trim()
+                            .takeIf { datos.tieneSeguro && it.isNotEmpty() }
+                    )
+                    pacienteRepositorio.registrarConVisita(
+                        paciente = paciente,
+                        motivo = datos.motivo.trim(),
+                        medicoId = medicoId
+                    ).also { pacienteRegistradoId = it }
+                }
 
-                val pacienteId = pacienteRepositorio.registrarConVisita(
-                    paciente = paciente,
-                    motivo = datos.motivo.trim(),
-                    medicoId = configuracion.medicoId
-                )
+                if (citaOrigen != null) {
+                    val visita = visitaRepositorio.visitaActivaDeHoy(pacienteId, medicoId)
+                        ?: throw IllegalStateException("No se encontró la visita del paciente")
+                    citaRepositorio.enlazarPaciente(citaOrigen.id, pacienteId, visita.id)
+                }
 
                 _efectos.send(CuestionarioEfecto.IrACodigoQr(pacienteId))
 
-            } catch (_: Exception) {
-                _state.update {
-                    it.copy(mensajeError = "No se pudo registrar el paciente")
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Exception) {
+                val mensaje = if (pacienteRegistradoId != null) {
+                    MENSAJE_ERROR_ENLACE
+                } else {
+                    MENSAJE_ERROR_REGISTRO
                 }
+                _state.update { it.copy(mensajeError = mensaje) }
             } finally {
                 _state.update { it.copy(guardando = false) }
             }
@@ -190,6 +287,13 @@ class CuestionarioViewModel(
     }
 
     companion object {
+        private const val MENSAJE_ERROR_REGISTRO = "No se pudo registrar el paciente"
+        private const val MENSAJE_ERROR_ENLACE =
+            "El paciente se registró, pero no se pudo enlazar la cita. Toca guardar para reintentar."
+        private const val MENSAJE_ERROR_CARGA = "No se pudo cargar la cita"
+        private const val MENSAJE_CITA_NO_DISPONIBLE = "Esta cita ya no está disponible"
+        private const val MENSAJE_CITA_CON_PACIENTE = "Esta cita ya tiene un paciente registrado"
+
         val Factory = viewModelFactory {
             initializer {
                 val app = this[
@@ -197,7 +301,10 @@ class CuestionarioViewModel(
                 ] as CliniMedikApp
 
                 CuestionarioViewModel(
+                    createSavedStateHandle(),
                     app.container.pacienteRepositorio,
+                    app.container.citaRepositorio,
+                    app.container.visitaRepositorio,
                     app.container.configuracionRepositorio
                 )
             }

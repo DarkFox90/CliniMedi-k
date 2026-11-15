@@ -3,6 +3,9 @@ package plat.clinimedik.app.ui.screens.recepcion.cuestionario
 import plat.clinimedik.app.data.model.EstadoCivil
 
 data class CuestionarioUiState(
+    val cargando: Boolean = false,
+    val mensajeErrorCarga: String? = null,
+    val cargaReintentable: Boolean = false,
     val nombre: String = "",
     val errorNombre: String? = null,
     val fechaNacimiento: String = "",
@@ -19,6 +22,11 @@ data class CuestionarioUiState(
     val enfermedades: String = "",
     val tratamientos: String = "",
     val cirugias: String = "",
+    val tieneSeguro: Boolean = false,
+    val aseguradora: String = "",
+    val errorAseguradora: String? = null,
+    val numeroPoliza: String = "",
+    val titularPoliza: String = "",
     val guardando: Boolean = false,
     val mensajeError: String? = null
 )
