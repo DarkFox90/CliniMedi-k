@@ -4,5 +4,10 @@ data class CodigoQrUiState(
     val cargando: Boolean = true,
     val nombrePaciente: String = "",
     val pacienteId: String = "",
-    val mensajeError: String? = null
-)
+    val guardando: Boolean = false,
+    val mensajeError: String? = null,
+    val puedeReintentar: Boolean = false
+) {
+    val contenidoQr: String
+        get() = FormatoQr.contenidoDe(pacienteId)
+}
