@@ -39,9 +39,30 @@ import plat.clinimedik.app.ui.screens.setup.arranque.arranqueDestino
 import plat.clinimedik.app.ui.screens.setup.login.loginDestino
 import plat.clinimedik.app.ui.screens.setup.rol.rolDestino
 import plat.clinimedik.app.ui.screens.setup.seleccionmedico.seleccionMedicoDestino
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import plat.clinimedik.app.ui.components.LocalMensajes
+import plat.clinimedik.app.ui.components.MensajesSnackbar
+import androidx.compose.foundation.layout.navigationBarsPadding
+import plat.clinimedik.app.ui.screens.recepcion.visor.visorDocumentoDestino
 
 @Composable
 fun CliniMedikNavHost() {
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    val mensajes = remember(snackbarHostState, scope) {
+        MensajesSnackbar(snackbarHostState, scope)
+    }
+
+    CompositionLocalProvider(LocalMensajes provides mensajes) {
+        ContenidoNavegacion(snackbarHostState)
+    }
+}
+@Composable
+private fun ContenidoNavegacion(snackbarHostState: SnackbarHostState) {
     val navController = rememberNavController()
     val entradaActual by navController.currentBackStackEntryAsState()
     val destino = entradaActual?.destination
@@ -64,6 +85,12 @@ fun CliniMedikNavHost() {
     val hayBarra = pestanaRecepcion != null || pestanaMedico != null
 
     Scaffold(
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = if (hayBarra) Modifier else Modifier.navigationBarsPadding()
+            )
+        },
         bottomBar = {
             when {
                 pestanaRecepcion != null -> {
@@ -135,6 +162,7 @@ fun CliniMedikNavHost() {
                 escaneoDestino(navController)
                 resultadoDestino(navController)
                 resumenDestino(navController)
+                visorDocumentoDestino(navController)
             }
 
             navigation<MedicoGraph>(startDestination = FilaMedico) {

@@ -1,5 +1,6 @@
 package plat.clinimedik.app.ui.screens.recepcion.cuestionario
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -8,6 +9,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import androidx.navigation.toRoute
 import plat.clinimedik.app.ui.navigation.CodigoQr
 import plat.clinimedik.app.ui.navigation.Cuestionario
 import plat.clinimedik.app.ui.navigation.Registro
@@ -21,6 +23,10 @@ fun CuestionarioRoute(
     )
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+
+    BackHandler(enabled = state.guardando || state.registroParcial) {
+        viewModel.onEvent(CuestionarioEvent.Regresar)
+    }
 
     LaunchedEffect(viewModel) {
         viewModel.efectos.collect { efecto ->
@@ -39,13 +45,21 @@ fun CuestionarioRoute(
 }
 
 fun NavGraphBuilder.cuestionarioDestino(navController: NavController) {
-    composable<Cuestionario> {
+    composable<Cuestionario> { entrada ->
+        val vieneDeCita = entrada.toRoute<Cuestionario>().citaId != null
+
         CuestionarioRoute(
             onRegresar = { navController.popBackStack() },
             onCodigoQr = { pacienteId ->
                 navController.navigate(CodigoQr(pacienteId)) {
-                    popUpTo<Registro> {
-                        inclusive = true
+                    if (vieneDeCita) {
+                        popUpTo<Cuestionario> {
+                            inclusive = true
+                        }
+                    } else {
+                        popUpTo<Registro> {
+                            inclusive = true
+                        }
                     }
                 }
             }

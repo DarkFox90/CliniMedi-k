@@ -14,6 +14,13 @@ sealed interface CuestionarioEvent {
     data class CambiarEnfermedades(val texto: String) : CuestionarioEvent
     data class CambiarTratamientos(val texto: String) : CuestionarioEvent
     data class CambiarCirugias(val texto: String) : CuestionarioEvent
+    data class CambiarTieneSeguro(val activo: Boolean) : CuestionarioEvent
+    data class CambiarAseguradora(val texto: String) : CuestionarioEvent
+    data class CambiarPoliza(val texto: String) : CuestionarioEvent
+    data class CambiarTitular(val texto: String) : CuestionarioEvent
     data object Guardar : CuestionarioEvent
+    data object Reintentar : CuestionarioEvent
     data object Regresar : CuestionarioEvent
+    data object ConfirmarSalida : CuestionarioEvent
+    data object CancelarSalida : CuestionarioEvent
 }

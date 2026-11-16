@@ -1,6 +1,7 @@
 package plat.clinimedik.app.ui.screens.recepcion.detalle
 
 import plat.clinimedik.app.data.model.TipoPago
+import plat.clinimedik.app.data.model.TipoDocumento
 
 sealed interface DetalleEvent {
     data object Regresar : DetalleEvent
@@ -48,5 +49,12 @@ sealed interface DetalleEvent {
     data object AdjuntarDocumento : DetalleEvent
     data class AbrirDocumento(val documentoId: String) : DetalleEvent
 
+    data class ElegirTipoDocumento(val tipo: TipoDocumento) : DetalleEvent
+
+    data class DocumentoCapturado(val tipo: TipoDocumento, val ruta: String) : DetalleEvent
+
+    data object CamaraNoDisponible : DetalleEvent
+
+    data object VerCodigoQr : DetalleEvent
     data object CerrarPanel : DetalleEvent
 }

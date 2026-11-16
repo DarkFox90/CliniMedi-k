@@ -89,4 +89,7 @@ dependencies {
     implementation(libs.googleid)
     implementation(libs.okhttp)
     implementation(libs.androidx.work.runtime)
+    implementation(libs.zxing.core)
+    implementation(libs.androidx.print)
+    implementation(libs.play.services.code.scanner)
 }

@@ -124,6 +124,8 @@ sealed interface PanelDetalle {
     data class Referencia(val formulario: FormularioReferencia = FormularioReferencia()) : PanelDetalle
 
     data class Cobro(val formulario: FormularioCobro = FormularioCobro()) : PanelDetalle
+
+    data object Documento : PanelDetalle
 }
 
 data class DetalleUiState(

@@ -35,6 +35,8 @@ import plat.clinimedik.app.data.repository.PacienteRepositorio
 import plat.clinimedik.app.data.repository.VisitaRepositorio
 import plat.clinimedik.app.ui.components.leerMonto
 import plat.clinimedik.app.ui.navigation.Detalle
+import java.io.File
+import plat.clinimedik.app.data.model.TipoDocumento
 
 class DetalleViewModel(
     savedStateHandle: SavedStateHandle,
@@ -133,8 +135,17 @@ class DetalleViewModel(
                 )
             }
 
-            DetalleEvent.AdjuntarDocumento -> enviar(DetalleEfecto.MostrarMensaje(MENSAJE_SIGUIENTE_FASE))
-            is DetalleEvent.AbrirDocumento -> enviar(DetalleEfecto.MostrarMensaje(MENSAJE_SIGUIENTE_FASE))
+            DetalleEvent.AdjuntarDocumento -> abrirPanel(PanelDetalle.Documento)
+            is DetalleEvent.ElegirTipoDocumento -> {
+                _state.update { it.copy(panel = null) }
+                enviar(DetalleEfecto.AbrirCamara(event.tipo))
+            }
+            is DetalleEvent.DocumentoCapturado -> guardarDocumento(event.tipo, event.ruta)
+            DetalleEvent.CamaraNoDisponible -> enviar(DetalleEfecto.MostrarMensaje(MENSAJE_SIN_CAMARA))
+            is DetalleEvent.AbrirDocumento -> enviar(DetalleEfecto.IrAlVisor(event.documentoId))
+            DetalleEvent.VerCodigoQr -> _state.value.pacienteId.takeIf { it.isNotBlank() }?.let { pacienteId ->
+                enviar(DetalleEfecto.IrACodigoQr(pacienteId))
+            }
 
             DetalleEvent.CerrarPanel -> _state.update { it.copy(panel = null) }
         }
@@ -209,6 +220,22 @@ class DetalleViewModel(
 
     private fun abrirPanel(panel: PanelDetalle) {
         _state.update { it.copy(panel = panel) }
+    }
+
+    private fun guardarDocumento(tipo: TipoDocumento, ruta: String) {
+        val pacienteId = _state.value.pacienteId
+        if (pacienteId.isBlank()) {
+            File(ruta).delete()
+            return
+        }
+        guardar(mensajeExito = "Documento guardado") {
+            try {
+                pacienteRepositorio.guardarDocumento(pacienteId, tipo, ruta)
+            } catch (error: Exception) {
+                File(ruta).delete()
+                throw error
+            }
+        }
     }
 
     private fun abrirDiagnostico(finalizaConsulta: Boolean) {
@@ -434,7 +461,7 @@ class DetalleViewModel(
     }
 
     companion object {
-        private const val MENSAJE_SIGUIENTE_FASE = "Disponible en la siguiente fase"
+        private const val MENSAJE_SIN_CAMARA = "No hay una cámara disponible en este dispositivo"
         private const val MENSAJE_ERROR_GUARDAR = "No se pudo guardar. Intenta de nuevo."
 
         val Factory = viewModelFactory {
@@ -470,4 +497,7 @@ sealed interface DetalleEfecto {
     data class CompartirTexto(val texto: String, val titulo: String) : DetalleEfecto
     data class IrANuevaCita(val pacienteId: String, val motivo: String) : DetalleEfecto
     data class IrAFicha(val pacienteId: String) : DetalleEfecto
+    data class AbrirCamara(val tipo: TipoDocumento) : DetalleEfecto
+    data class IrAlVisor(val documentoId: String) : DetalleEfecto
+    data class IrACodigoQr(val pacienteId: String) : DetalleEfecto
 }

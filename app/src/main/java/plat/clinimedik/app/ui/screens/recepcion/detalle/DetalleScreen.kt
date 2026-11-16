@@ -59,6 +59,7 @@ import plat.clinimedik.app.ui.components.EstadoError
 import plat.clinimedik.app.ui.components.MarcarUrgenteSheet
 import plat.clinimedik.app.ui.components.etiqueta
 import plat.clinimedik.app.ui.theme.CliniMedikTheme
+import androidx.compose.material.icons.filled.Search
 
 @Composable
 fun DetalleScreen(
@@ -155,6 +156,9 @@ fun DetalleScreen(
                 onEvent = onEvent,
                 guardando = state.guardando
             )
+
+            PanelDetalle.Documento -> DocumentoSheet(onEvent = onEvent)
+
             null -> Unit
         }
     }
@@ -336,6 +340,14 @@ private fun SeccionRegistro(
             habilitada = true,
             onClick = { onEvent(DetalleEvent.AdjuntarDocumento) }
         )
+
+        FilaAccion(
+            icono = Icons.Filled.Search,
+            texto = "Ver código QR",
+            habilitada = true,
+            onClick = { onEvent(DetalleEvent.VerCodigoQr) }
+        )
+
         if (!state.puedeRegistrarConsulta) {
             Text(
                 text = "La receta, la referencia y el cobro se habilitan cuando el paciente pasa a consulta.",
