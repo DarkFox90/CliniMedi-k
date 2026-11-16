@@ -21,4 +21,6 @@ sealed interface CuestionarioEvent {
     data object Guardar : CuestionarioEvent
     data object Reintentar : CuestionarioEvent
     data object Regresar : CuestionarioEvent
+    data object ConfirmarSalida : CuestionarioEvent
+    data object CancelarSalida : CuestionarioEvent
 }

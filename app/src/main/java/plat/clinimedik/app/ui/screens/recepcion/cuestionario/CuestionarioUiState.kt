@@ -28,5 +28,7 @@ data class CuestionarioUiState(
     val numeroPoliza: String = "",
     val titularPoliza: String = "",
     val guardando: Boolean = false,
+    val registroParcial: Boolean = false,
+    val confirmandoSalida: Boolean = false,
     val mensajeError: String? = null
 )

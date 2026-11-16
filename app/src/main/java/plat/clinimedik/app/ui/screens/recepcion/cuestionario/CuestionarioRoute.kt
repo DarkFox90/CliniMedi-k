@@ -1,5 +1,6 @@
 package plat.clinimedik.app.ui.screens.recepcion.cuestionario
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -22,6 +23,10 @@ fun CuestionarioRoute(
     )
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+
+    BackHandler(enabled = state.guardando || state.registroParcial) {
+        viewModel.onEvent(CuestionarioEvent.Regresar)
+    }
 
     LaunchedEffect(viewModel) {
         viewModel.efectos.collect { efecto ->

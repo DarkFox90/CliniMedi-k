@@ -1,5 +1,6 @@
 package plat.clinimedik.app.ui.screens.recepcion.cuestionario
 
+import android.content.res.Configuration
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,7 +13,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -20,6 +23,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -81,6 +85,34 @@ fun CuestionarioScreen(
             )
         }
     }
+
+    if (state.confirmandoSalida) {
+        AlertDialog(
+            onDismissRequest = { onEvent(CuestionarioEvent.CancelarSalida) },
+            title = { Text("Registro incompleto") },
+            text = {
+                Text(
+                    "El paciente ya quedó registrado y está en la fila, pero la cita no se " +
+                            "enlazó. Si sales ahora, la cita seguirá sin paciente."
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = { onEvent(CuestionarioEvent.ConfirmarSalida) },
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Text("Salir")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { onEvent(CuestionarioEvent.CancelarSalida) }) {
+                    Text("Seguir aquí")
+                }
+            }
+        )
+    }
 }
 
 @Composable
@@ -89,6 +121,8 @@ private fun Formulario(
     onEvent: (CuestionarioEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val habilitado = !state.guardando && !state.registroParcial
+
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = modifier
@@ -102,6 +136,7 @@ private fun Formulario(
             onValorChange = { onEvent(CuestionarioEvent.CambiarNombre(it)) },
             etiqueta = "Nombre completo",
             mensajeError = state.errorNombre,
+            habilitado = habilitado,
             modifier = Modifier.fillMaxWidth()
         )
         CampoFecha(
@@ -110,6 +145,7 @@ private fun Formulario(
             etiqueta = "Fecha de nacimiento",
             mensajeError = state.errorFechaNacimiento,
             permiteFuturo = false,
+            habilitado = habilitado,
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -122,6 +158,7 @@ private fun Formulario(
                 FilterChip(
                     selected = state.estadoCivil == estado,
                     onClick = { onEvent(CuestionarioEvent.SeleccionarEstadoCivil(estado)) },
+                    enabled = habilitado,
                     label = { Text(estado.etiqueta()) }
                 )
             }
@@ -131,6 +168,7 @@ private fun Formulario(
             valor = state.ocupacion,
             onValorChange = { onEvent(CuestionarioEvent.CambiarOcupacion(it)) },
             etiqueta = "Ocupación",
+            habilitado = habilitado,
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -143,6 +181,7 @@ private fun Formulario(
             etiqueta = "Teléfono",
             mensajeError = state.errorTelefono,
             tipoTeclado = KeyboardType.Phone,
+            habilitado = habilitado,
             modifier = Modifier.fillMaxWidth()
         )
         CampoTexto(
@@ -151,6 +190,7 @@ private fun Formulario(
             etiqueta = "Correo electrónico",
             mensajeError = state.errorCorreo,
             tipoTeclado = KeyboardType.Email,
+            habilitado = habilitado,
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -162,6 +202,7 @@ private fun Formulario(
             onValorChange = { onEvent(CuestionarioEvent.CambiarMotivo(it)) },
             etiqueta = "Motivo de consulta",
             lineas = 3,
+            habilitado = habilitado,
             modifier = Modifier.fillMaxWidth(),
             mensajeError = state.errorMotivo,
         )
@@ -174,6 +215,7 @@ private fun Formulario(
             onValorChange = { onEvent(CuestionarioEvent.CambiarAlergias(it)) },
             etiqueta = "Alergias",
             lineas = 2,
+            habilitado = habilitado,
             modifier = Modifier.fillMaxWidth()
         )
         CampoTexto(
@@ -181,6 +223,7 @@ private fun Formulario(
             onValorChange = { onEvent(CuestionarioEvent.CambiarEnfermedades(it)) },
             etiqueta = "Enfermedades previas",
             lineas = 2,
+            habilitado = habilitado,
             modifier = Modifier.fillMaxWidth()
         )
         CampoTexto(
@@ -188,6 +231,7 @@ private fun Formulario(
             onValorChange = { onEvent(CuestionarioEvent.CambiarTratamientos(it)) },
             etiqueta = "Tratamientos previos",
             lineas = 2,
+            habilitado = habilitado,
             modifier = Modifier.fillMaxWidth()
         )
         CampoTexto(
@@ -195,6 +239,7 @@ private fun Formulario(
             onValorChange = { onEvent(CuestionarioEvent.CambiarCirugias(it)) },
             etiqueta = "Cirugías",
             lineas = 2,
+            habilitado = habilitado,
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -214,7 +259,7 @@ private fun Formulario(
             Switch(
                 checked = state.tieneSeguro,
                 onCheckedChange = { onEvent(CuestionarioEvent.CambiarTieneSeguro(it)) },
-                enabled = !state.guardando
+                enabled = habilitado
             )
         }
         if (state.tieneSeguro) {
@@ -223,18 +268,21 @@ private fun Formulario(
                 onValorChange = { onEvent(CuestionarioEvent.CambiarAseguradora(it)) },
                 etiqueta = "Aseguradora",
                 mensajeError = state.errorAseguradora,
+                habilitado = habilitado,
                 modifier = Modifier.fillMaxWidth()
             )
             CampoTexto(
                 valor = state.numeroPoliza,
                 onValorChange = { onEvent(CuestionarioEvent.CambiarPoliza(it)) },
                 etiqueta = "Número de póliza o afiliado (opcional)",
+                habilitado = habilitado,
                 modifier = Modifier.fillMaxWidth()
             )
             CampoTexto(
                 valor = state.titularPoliza,
                 onValorChange = { onEvent(CuestionarioEvent.CambiarTitular(it)) },
                 etiqueta = "Titular de la póliza (opcional)",
+                habilitado = habilitado,
                 modifier = Modifier.fillMaxWidth()
             )
         }
@@ -281,7 +329,7 @@ private fun CuestionarioErrorFaltantesPreview() {
             state = CuestionarioUiState(
                 errorNombre = "El nombre es obligatorio",
                 errorFechaNacimiento = "La fecha de nacimiento es obligatoria",
-                errorTelefono = "El teléfono es obligatorio"
+                errorTelefono = "Ingresa un teléfono de 8 dígitos"
             ),
             onEvent = {}
         )
@@ -392,6 +440,59 @@ private fun CuestionarioGuardandoPreview() {
     CliniMedikTheme {
         CuestionarioScreen(
             state = CuestionarioUiState(nombre = "Lucía Ajú", guardando = true),
+            onEvent = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+private fun CuestionarioRegistroParcialPreview() {
+    CliniMedikTheme {
+        CuestionarioScreen(
+            state = CuestionarioUiState(
+                nombre = "Sofía Hernández",
+                correo = "sofia.hernandez@example.com",
+                motivo = "Primera consulta",
+                registroParcial = true,
+                mensajeError = "El paciente se registró, pero no se pudo enlazar la cita. " +
+                        "Toca guardar para reintentar."
+            ),
+            onEvent = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+private fun CuestionarioConfirmarSalidaPreview() {
+    CliniMedikTheme {
+        CuestionarioScreen(
+            state = CuestionarioUiState(
+                nombre = "Sofía Hernández",
+                registroParcial = true,
+                confirmandoSalida = true
+            ),
+            onEvent = {}
+        )
+    }
+}
+
+@Preview(
+    showBackground = true,
+    showSystemUi = true,
+    uiMode = Configuration.UI_MODE_NIGHT_YES
+)
+@Composable
+private fun CuestionarioOscuroPreview() {
+    CliniMedikTheme {
+        CuestionarioScreen(
+            state = CuestionarioUiState(
+                nombre = "Lucía Ajú",
+                tieneSeguro = true,
+                aseguradora = "Seguros G&T",
+                errorTelefono = "Ingresa un teléfono de 8 dígitos"
+            ),
             onEvent = {}
         )
     }

@@ -115,11 +115,24 @@ class CuestionarioViewModel(
 
             CuestionarioEvent.Reintentar -> citaId?.let { cargarCita(it) }
 
-            CuestionarioEvent.Regresar -> {
-                if (!_state.value.guardando) {
-                    enviar(CuestionarioEfecto.Regresar)
-                }
+            CuestionarioEvent.Regresar -> solicitarSalida()
+
+            CuestionarioEvent.ConfirmarSalida -> {
+                _state.update { it.copy(confirmandoSalida = false) }
+                enviar(CuestionarioEfecto.Regresar)
             }
+
+            CuestionarioEvent.CancelarSalida ->
+                _state.update { it.copy(confirmandoSalida = false) }
+        }
+    }
+
+    private fun solicitarSalida() {
+        val actual = _state.value
+        when {
+            actual.guardando -> Unit
+            actual.registroParcial -> _state.update { it.copy(confirmandoSalida = true) }
+            else -> enviar(CuestionarioEfecto.Regresar)
         }
     }
 
@@ -260,22 +273,30 @@ class CuestionarioViewModel(
                 }
 
                 if (citaOrigen != null) {
-                    val visita = visitaRepositorio.visitaActivaDeHoy(pacienteId, medicoId)
-                        ?: throw IllegalStateException("No se encontró la visita del paciente")
-                    citaRepositorio.enlazarPaciente(citaOrigen.id, pacienteId, visita.id)
+                    val vigente = citaRepositorio.obtenerCita(citaOrigen.id)
+                    val sigueLibre = vigente != null &&
+                            vigente.estado == EstadoCita.PROGRAMADA &&
+                            vigente.pacienteId == null
+                    if (sigueLibre) {
+                        val visita = visitaRepositorio.visitaActivaDeHoy(pacienteId, medicoId)
+                            ?: throw IllegalStateException("No se encontró la visita del paciente")
+                        citaRepositorio.enlazarPaciente(citaOrigen.id, pacienteId, visita.id)
+                    }
                 }
 
+                _state.update { it.copy(registroParcial = false) }
                 _efectos.send(CuestionarioEfecto.IrACodigoQr(pacienteId))
 
             } catch (error: CancellationException) {
                 throw error
             } catch (error: Exception) {
-                val mensaje = if (pacienteRegistradoId != null) {
-                    MENSAJE_ERROR_ENLACE
-                } else {
-                    MENSAJE_ERROR_REGISTRO
+                val parcial = pacienteRegistradoId != null
+                _state.update {
+                    it.copy(
+                        mensajeError = if (parcial) MENSAJE_ERROR_ENLACE else MENSAJE_ERROR_REGISTRO,
+                        registroParcial = parcial
+                    )
                 }
-                _state.update { it.copy(mensajeError = mensaje) }
             } finally {
                 _state.update { it.copy(guardando = false) }
             }
