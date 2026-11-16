@@ -7,5 +7,6 @@ sealed interface ResultadoEvent {
     data object ConfirmarAgregarAFila : ResultadoEvent
     data object CancelarAgregarAFila : ResultadoEvent
     data object EscanearOtro : ResultadoEvent
+    data object Reintentar : ResultadoEvent
     data object Regresar : ResultadoEvent
 }
