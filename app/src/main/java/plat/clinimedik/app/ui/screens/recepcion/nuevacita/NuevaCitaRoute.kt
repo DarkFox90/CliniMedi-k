@@ -8,6 +8,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import plat.clinimedik.app.ui.components.LocalMensajes
 import plat.clinimedik.app.ui.navigation.NuevaCita
 
 @Composable
@@ -18,11 +19,16 @@ fun NuevaCitaRoute(
     )
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val mensajes = LocalMensajes.current
 
     LaunchedEffect(viewModel) {
         viewModel.efectos.collect { efecto ->
             when (efecto) {
                 NuevaCitaEfecto.Regresar -> onRegresar()
+                NuevaCitaEfecto.CitaGuardada -> {
+                    mensajes.mostrar("Cita guardada")
+                    onRegresar()
+                }
             }
         }
     }
