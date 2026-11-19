@@ -38,6 +38,14 @@
           }
         },
         {
+          "client_id": "690816020489-pamavgpilbevubi7jpqi7l01gl0md7it.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "plat.clinimedik.app",
+            "certificate_hash": "677e69646fa6ecb21baa91141c3a946380974223"
+          }
+        },
+        {
           "client_id": "690816020489-uphduklg2qoak1jalt10cu79vt609ird.apps.googleusercontent.com",
           "client_type": 3
         }
