@@ -95,7 +95,7 @@ fun LoginScreen(
             }
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "La configuración se realiza una sola vez por dispositivo",
+                text = "El rol de este teléfono se elige una sola vez y se puede cambiar desde el menú",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center

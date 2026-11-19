@@ -3,6 +3,7 @@ package plat.clinimedik.app.ui.screens.medico.fila
 import java.time.LocalDateTime
 import plat.clinimedik.app.data.model.EstadoVisita
 import plat.clinimedik.app.data.model.VisitaConPaciente
+import plat.clinimedik.app.ui.components.MenuSesionUiState
 import plat.clinimedik.app.ui.components.formatearHora
 import plat.clinimedik.app.ui.screens.recepcion.fila.aPacienteEnFila
 
@@ -20,7 +21,8 @@ data class FilaMedicoUiState(
     val cargando: Boolean = true,
     val subtitulo: String = "",
     val ultimaActualizacion: String = "",
-    val pacientes: List<PacienteEnFilaMedico> = emptyList()
+    val pacientes: List<PacienteEnFilaMedico> = emptyList(),
+    val menuSesion: MenuSesionUiState = MenuSesionUiState()
 )
 
 fun calcularFilaMedico(

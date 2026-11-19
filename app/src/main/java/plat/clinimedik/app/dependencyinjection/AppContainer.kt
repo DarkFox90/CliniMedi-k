@@ -1,9 +1,11 @@
 package plat.clinimedik.app.dependencyinjection
 
 import android.content.Context
+import androidx.credentials.CredentialManager
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -18,6 +20,7 @@ import plat.clinimedik.app.data.repository.CitaRepositorio
 import plat.clinimedik.app.data.repository.MedicoRepositorio
 import plat.clinimedik.app.data.repository.NotificacionRepositorio
 import plat.clinimedik.app.data.repository.PacienteRepositorio
+import plat.clinimedik.app.data.repository.SesionRepositorio
 import plat.clinimedik.app.data.repository.VisitaRepositorio
 import plat.clinimedik.app.data.sincronizacion.Sincronizador
 import plat.clinimedik.app.data.sincronizacion.SincronizadorLocal
@@ -72,6 +75,14 @@ class AppContainer(context: Context) {
     )
 
     val configuracionRepositorio = ConfiguracionRepositorio(context.configuracionDataStore)
+
+    // Va después de configuracionRepositorio: Kotlin crea las propiedades en orden.
+    val sesionRepositorio = SesionRepositorio(
+        sincronizador,
+        FirebaseAuth.getInstance(),
+        CredentialManager.create(context.applicationContext),
+        configuracionRepositorio
+    )
 
     val cargaInicial = CargaInicial(database)
 }

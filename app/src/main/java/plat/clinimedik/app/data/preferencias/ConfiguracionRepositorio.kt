@@ -34,6 +34,13 @@ class ConfiguracionRepositorio(private val dataStore: DataStore<Preferences>) {
         }
     }
 
+    suspend fun limpiar() {
+        dataStore.edit { preferencias ->
+            preferencias.remove(CLAVE_ROL)
+            preferencias.remove(CLAVE_MEDICO_ID)
+        }
+    }
+
     private companion object {
         val CLAVE_ROL = stringPreferencesKey("rol")
         val CLAVE_MEDICO_ID = stringPreferencesKey("medico_id")
