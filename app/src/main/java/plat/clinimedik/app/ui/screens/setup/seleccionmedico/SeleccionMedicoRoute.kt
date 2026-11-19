@@ -10,14 +10,10 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import plat.clinimedik.app.data.fake.FakeDataSource
 import plat.clinimedik.app.data.model.RolDispositivo
-import plat.clinimedik.app.ui.navigation.AgendaMedico
-import plat.clinimedik.app.ui.navigation.AgendaRecepcion
-import plat.clinimedik.app.ui.navigation.Buscar
-import plat.clinimedik.app.ui.navigation.Fila
 import plat.clinimedik.app.ui.navigation.FilaMedico
 import plat.clinimedik.app.ui.navigation.Inicio
-import plat.clinimedik.app.ui.navigation.PacientesMedico
 import plat.clinimedik.app.ui.navigation.SeleccionMedico
+import plat.clinimedik.app.ui.navigation.borrarHistorialDePestanas
 
 fun seleccionMedicoUiStateDePrueba(eleccion: MedicoElegido? = null): SeleccionMedicoUiState =
     SeleccionMedicoUiState(
@@ -54,14 +50,4 @@ fun NavGraphBuilder.seleccionMedicoDestino(navController: NavController) {
             }
         )
     }
-}
-
-private fun NavController.borrarHistorialDePestanas() {
-    clearBackStack<Inicio>()
-    clearBackStack<Fila>()
-    clearBackStack<AgendaRecepcion>()
-    clearBackStack<Buscar>()
-    clearBackStack<FilaMedico>()
-    clearBackStack<AgendaMedico>()
-    clearBackStack<PacientesMedico>()
 }

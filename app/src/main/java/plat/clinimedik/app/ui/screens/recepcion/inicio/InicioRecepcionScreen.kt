@@ -16,10 +16,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -35,6 +33,8 @@ import plat.clinimedik.app.ui.components.BotonNuevoPaciente
 import plat.clinimedik.app.ui.components.CitaItem
 import plat.clinimedik.app.ui.components.ContenedorRecepcion
 import plat.clinimedik.app.ui.components.EncabezadoPantalla
+import plat.clinimedik.app.ui.components.MenuSesion
+import plat.clinimedik.app.ui.components.MenuSesionUiState
 import plat.clinimedik.app.ui.components.PacienteItem
 import plat.clinimedik.app.ui.components.PestanaRecepcion
 import plat.clinimedik.app.ui.components.TarjetaMetrica
@@ -86,13 +86,15 @@ fun InicioRecepcionScreen(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                    IconButton(onClick = { onEvent(InicioRecepcionEvent.CambiarConfiguracion) }) {
-                        Icon(
-                            imageVector = Icons.Filled.Settings,
-                            contentDescription = "Cambiar configuración",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
+                    MenuSesion(
+                        state = state.menuSesion,
+                        onAbrirMenu = { onEvent(InicioRecepcionEvent.AbrirMenu) },
+                        onCerrarMenu = { onEvent(InicioRecepcionEvent.CerrarMenu) },
+                        onCambiarConfiguracion = { onEvent(InicioRecepcionEvent.CambiarConfiguracion) },
+                        onSolicitarCierre = { onEvent(InicioRecepcionEvent.SolicitarCierreSesion) },
+                        onCancelarCierre = { onEvent(InicioRecepcionEvent.CancelarCierreSesion) },
+                        onConfirmarCierre = { onEvent(InicioRecepcionEvent.ConfirmarCierreSesion) }
+                    )
                 }
                 MetricasFila(state = state)
                 SeccionSiguientePaciente(state = state, onEvent = onEvent)
@@ -290,6 +292,22 @@ private fun InicioSinPacientesPreview() {
         ContenedorRecepcion(seleccion = PestanaRecepcion.INICIO) {
             InicioRecepcionScreen(
                 state = inicioRecepcionUiStateDePrueba().copy(pacientes = emptyList()),
+                onEvent = {}
+            )
+        }
+    }
+}
+
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+private fun InicioConfirmandoCierrePreview() {
+    CliniMedikTheme {
+        ContenedorRecepcion(seleccion = PestanaRecepcion.INICIO) {
+            InicioRecepcionScreen(
+                state = inicioRecepcionUiStateDePrueba().copy(
+                    menuSesion = MenuSesionUiState(confirmandoCierre = true)
+                ),
                 onEvent = {}
             )
         }

@@ -6,6 +6,7 @@ import plat.clinimedik.app.data.model.EstadoCita
 import plat.clinimedik.app.data.model.EstadoConfirmacion
 import plat.clinimedik.app.data.model.EstadoVisita
 import plat.clinimedik.app.data.model.VisitaConPaciente
+import plat.clinimedik.app.ui.components.MenuSesionUiState
 import plat.clinimedik.app.ui.components.formatearFechaLarga
 import plat.clinimedik.app.ui.components.formatearHora
 import plat.clinimedik.app.ui.screens.recepcion.fila.PacienteEnFila
@@ -25,7 +26,8 @@ data class InicioRecepcionUiState(
     val saludo: String = "",
     val medicoYRol: String = "",
     val pacientes: List<PacienteEnFila> = emptyList(),
-    val proximaCita: ProximaCita? = null
+    val proximaCita: ProximaCita? = null,
+    val menuSesion: MenuSesionUiState = MenuSesionUiState()
 ) {
     val esperando: Int
         get() = pacientes.count { it.estado == EstadoVisita.ESPERANDO }

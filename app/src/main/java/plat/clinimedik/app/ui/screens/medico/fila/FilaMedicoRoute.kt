@@ -10,9 +10,11 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import plat.clinimedik.app.data.fake.FakeDataSource
 import plat.clinimedik.app.data.model.VisitaConPaciente
+import plat.clinimedik.app.ui.components.LocalMensajes
 import plat.clinimedik.app.ui.navigation.FilaMedico
 import plat.clinimedik.app.ui.navigation.HistorialMedico
 import plat.clinimedik.app.ui.navigation.Rol
+import plat.clinimedik.app.ui.navigation.irALoginSinHistorial
 
 fun filaMedicoUiStateDePrueba(): FilaMedicoUiState {
     val medico = FakeDataSource.medicoActual
@@ -26,14 +28,18 @@ fun filaMedicoUiStateDePrueba(): FilaMedicoUiState {
 fun FilaMedicoRoute(
     onAbrirHistorial: (String) -> Unit,
     onCambiarConfiguracion: () -> Unit,
+    onCerrarSesion: () -> Unit,
     viewModel: FilaMedicoViewModel = viewModel(factory = FilaMedicoViewModel.Factory)
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val mensajes = LocalMensajes.current
     LaunchedEffect(viewModel) {
         viewModel.efectos.collect { efecto ->
             when (efecto) {
                 is FilaMedicoEfecto.AbrirHistorial -> onAbrirHistorial(efecto.pacienteId)
                 FilaMedicoEfecto.IrARol -> onCambiarConfiguracion()
+                FilaMedicoEfecto.IrALogin -> onCerrarSesion()
+                is FilaMedicoEfecto.MostrarMensaje -> mensajes.mostrar(efecto.texto)
             }
         }
     }
@@ -44,7 +50,8 @@ fun NavGraphBuilder.filaMedicoDestino(navController: NavController) {
     composable<FilaMedico> {
         FilaMedicoRoute(
             onAbrirHistorial = { pacienteId -> navController.navigate(HistorialMedico(pacienteId)) },
-            onCambiarConfiguracion = { navController.navigate(Rol) }
+            onCambiarConfiguracion = { navController.navigate(Rol) },
+            onCerrarSesion = { navController.irALoginSinHistorial() }
         )
     }
 }

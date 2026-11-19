@@ -11,11 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -28,6 +24,8 @@ import androidx.compose.ui.unit.dp
 import plat.clinimedik.app.ui.components.ContenedorMedico
 import plat.clinimedik.app.ui.components.EncabezadoPantalla
 import plat.clinimedik.app.ui.components.EtiquetaChip
+import plat.clinimedik.app.ui.components.MenuSesion
+import plat.clinimedik.app.ui.components.MenuSesionUiState
 import plat.clinimedik.app.ui.components.PacienteItem
 import plat.clinimedik.app.ui.components.PestanaMedico
 import plat.clinimedik.app.ui.theme.CliniMedikTheme
@@ -58,13 +56,15 @@ fun FilaMedicoScreen(
                     subtitulo = state.subtitulo,
                     modifier = Modifier.weight(1f)
                 )
-                IconButton(onClick = { onEvent(FilaMedicoEvent.CambiarConfiguracion) }) {
-                    Icon(
-                        imageVector = Icons.Filled.Settings,
-                        contentDescription = "Cambiar configuración",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+                MenuSesion(
+                    state = state.menuSesion,
+                    onAbrirMenu = { onEvent(FilaMedicoEvent.AbrirMenu) },
+                    onCerrarMenu = { onEvent(FilaMedicoEvent.CerrarMenu) },
+                    onCambiarConfiguracion = { onEvent(FilaMedicoEvent.CambiarConfiguracion) },
+                    onSolicitarCierre = { onEvent(FilaMedicoEvent.SolicitarCierreSesion) },
+                    onCancelarCierre = { onEvent(FilaMedicoEvent.CancelarCierreSesion) },
+                    onConfirmarCierre = { onEvent(FilaMedicoEvent.ConfirmarCierreSesion) }
+                )
             }
             AvisoSoloLectura(
                 ultimaActualizacion = state.ultimaActualizacion,
@@ -181,6 +181,22 @@ private fun FilaMedicoSinPacientesPreview() {
         ContenedorMedico(seleccion = PestanaMedico.FILA) {
             FilaMedicoScreen(
                 state = filaMedicoUiStateDePrueba().copy(pacientes = emptyList()),
+                onEvent = {}
+            )
+        }
+    }
+}
+
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+private fun FilaMedicoConfirmandoCierrePreview() {
+    CliniMedikTheme {
+        ContenedorMedico(seleccion = PestanaMedico.FILA) {
+            FilaMedicoScreen(
+                state = filaMedicoUiStateDePrueba().copy(
+                    menuSesion = MenuSesionUiState(confirmandoCierre = true)
+                ),
                 onEvent = {}
             )
         }

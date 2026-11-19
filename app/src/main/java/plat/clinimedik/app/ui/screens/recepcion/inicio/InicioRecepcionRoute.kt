@@ -10,6 +10,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import plat.clinimedik.app.data.fake.FakeDataSource
 import plat.clinimedik.app.data.model.VisitaConPaciente
+import plat.clinimedik.app.ui.components.LocalMensajes
 import plat.clinimedik.app.ui.navigation.AgendaRecepcion
 import plat.clinimedik.app.ui.navigation.Detalle
 import plat.clinimedik.app.ui.navigation.Escaneo
@@ -17,6 +18,7 @@ import plat.clinimedik.app.ui.navigation.Inicio
 import plat.clinimedik.app.ui.navigation.Registro
 import plat.clinimedik.app.ui.navigation.Resumen
 import plat.clinimedik.app.ui.navigation.Rol
+import plat.clinimedik.app.ui.navigation.irALoginSinHistorial
 import plat.clinimedik.app.ui.navigation.irAPestana
 
 fun inicioRecepcionUiStateDePrueba(): InicioRecepcionUiState {
@@ -35,9 +37,11 @@ fun InicioRecepcionRoute(
     onVerResumen: () -> Unit,
     onVerAgenda: () -> Unit,
     onCambiarConfiguracion: () -> Unit,
+    onCerrarSesion: () -> Unit,
     viewModel: InicioRecepcionViewModel = viewModel(factory = InicioRecepcionViewModel.Factory)
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val mensajes = LocalMensajes.current
     LaunchedEffect(viewModel) {
         viewModel.efectos.collect { efecto ->
             when (efecto) {
@@ -47,6 +51,8 @@ fun InicioRecepcionRoute(
                 InicioRecepcionEfecto.IrAResumen -> onVerResumen()
                 InicioRecepcionEfecto.IrAAgenda -> onVerAgenda()
                 InicioRecepcionEfecto.IrARol -> onCambiarConfiguracion()
+                InicioRecepcionEfecto.IrALogin -> onCerrarSesion()
+                is InicioRecepcionEfecto.MostrarMensaje -> mensajes.mostrar(efecto.texto)
             }
         }
     }
@@ -61,7 +67,8 @@ fun NavGraphBuilder.inicioRecepcionDestino(navController: NavController) {
             onEscanearQr = { navController.navigate(Escaneo) },
             onVerResumen = { navController.navigate(Resumen) },
             onVerAgenda = { navController.irAPestana(AgendaRecepcion) },
-            onCambiarConfiguracion = { navController.navigate(Rol) }
+            onCambiarConfiguracion = { navController.navigate(Rol) },
+            onCerrarSesion = { navController.irALoginSinHistorial() }
         )
     }
 }
