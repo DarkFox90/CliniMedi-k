@@ -23,6 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import plat.clinimedik.app.ui.components.ContenedorMedico
 import plat.clinimedik.app.ui.components.EncabezadoPantalla
+import plat.clinimedik.app.ui.components.EstadoError
 import plat.clinimedik.app.ui.components.EtiquetaChip
 import plat.clinimedik.app.ui.components.MenuSesion
 import plat.clinimedik.app.ui.components.MenuSesionUiState
@@ -77,6 +78,12 @@ fun FilaMedicoScreen(
                 ) {
                     CircularProgressIndicator()
                 }
+            } else if (state.mensajeError != null) {
+                EstadoError(
+                    mensaje = state.mensajeError,
+                    onReintentar = { onEvent(FilaMedicoEvent.Reintentar) },
+                    modifier = Modifier.fillMaxSize()
+                )
             } else if (state.pacientes.isEmpty()) {
                 FilaVacia(modifier = Modifier.fillMaxSize())
             } else {
@@ -197,6 +204,20 @@ private fun FilaMedicoConfirmandoCierrePreview() {
                 state = filaMedicoUiStateDePrueba().copy(
                     menuSesion = MenuSesionUiState(confirmandoCierre = true)
                 ),
+                onEvent = {}
+            )
+        }
+    }
+}
+
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+private fun FilaMedicoErrorPreview() {
+    CliniMedikTheme {
+        ContenedorMedico(seleccion = PestanaMedico.FILA) {
+            FilaMedicoScreen(
+                state = FilaMedicoUiState(cargando = false, mensajeError = "No se pudo cargar la fila de pacientes"),
                 onEvent = {}
             )
         }

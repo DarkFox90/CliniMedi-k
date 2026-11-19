@@ -19,7 +19,8 @@ data class SeleccionMedicoUiState(
     val cargando: Boolean = true,
     val guardando: Boolean = false,
     val medicos: List<Medico> = emptyList(),
-    val eleccion: MedicoElegido? = null
+    val eleccion: MedicoElegido? = null,
+    val mensajeError: String? = null
 ) {
     val medicoSeleccionadoId: String?
         get() = (eleccion as? MedicoElegido.Existente)?.medicoId

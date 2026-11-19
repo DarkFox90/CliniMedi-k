@@ -33,6 +33,7 @@ import plat.clinimedik.app.ui.components.BotonNuevoPaciente
 import plat.clinimedik.app.ui.components.CitaItem
 import plat.clinimedik.app.ui.components.ContenedorRecepcion
 import plat.clinimedik.app.ui.components.EncabezadoPantalla
+import plat.clinimedik.app.ui.components.EstadoError
 import plat.clinimedik.app.ui.components.MenuSesion
 import plat.clinimedik.app.ui.components.MenuSesionUiState
 import plat.clinimedik.app.ui.components.PacienteItem
@@ -62,6 +63,14 @@ fun InicioRecepcionScreen(
             ) {
                 CircularProgressIndicator()
             }
+        } else if (state.mensajeError != null) {
+            EstadoError(
+                mensaje = state.mensajeError,
+                onReintentar = { onEvent(InicioRecepcionEvent.Reintentar) },
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            )
         } else {
             Column(
                 verticalArrangement = Arrangement.spacedBy(24.dp),
@@ -308,6 +317,20 @@ private fun InicioConfirmandoCierrePreview() {
                 state = inicioRecepcionUiStateDePrueba().copy(
                     menuSesion = MenuSesionUiState(confirmandoCierre = true)
                 ),
+                onEvent = {}
+            )
+        }
+    }
+}
+
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+private fun InicioErrorPreview() {
+    CliniMedikTheme {
+        ContenedorRecepcion(seleccion = PestanaRecepcion.INICIO) {
+            InicioRecepcionScreen(
+                state = InicioRecepcionUiState(cargando = false, mensajeError = "No se pudo cargar el inicio"),
                 onEvent = {}
             )
         }

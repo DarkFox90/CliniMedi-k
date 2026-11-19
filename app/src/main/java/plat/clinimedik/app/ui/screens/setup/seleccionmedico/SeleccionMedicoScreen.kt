@@ -39,6 +39,7 @@ import plat.clinimedik.app.data.model.Medico
 import plat.clinimedik.app.ui.components.AvatarIniciales
 import plat.clinimedik.app.ui.components.CampoTexto
 import plat.clinimedik.app.ui.components.EncabezadoPantalla
+import plat.clinimedik.app.ui.components.EstadoError
 import plat.clinimedik.app.ui.theme.CliniMedikTheme
 
 @Composable
@@ -81,6 +82,11 @@ fun SeleccionMedicoScreen(
                     ) {
                         CircularProgressIndicator()
                     }
+                } else if (state.mensajeError != null) {
+                    EstadoError(
+                        mensaje = state.mensajeError,
+                        onReintentar = { onEvent(SeleccionMedicoEvent.Reintentar) }
+                    )
                 } else {
                     Column(
                         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -283,6 +289,21 @@ private fun SeleccionMedicoErrorPreview() {
                         errorNombre = "El nombre es obligatorio"
                     )
                 )
+            ),
+            onEvent = {}
+        )
+    }
+}
+
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+private fun SeleccionMedicoErrorCargaPreview() {
+    CliniMedikTheme {
+        SeleccionMedicoScreen(
+            state = SeleccionMedicoUiState(
+                cargando = false,
+                mensajeError = "No se pudo cargar la lista de médicos"
             ),
             onEvent = {}
         )

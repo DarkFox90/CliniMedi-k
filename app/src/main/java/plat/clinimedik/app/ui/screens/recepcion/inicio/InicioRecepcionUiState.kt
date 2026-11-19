@@ -27,7 +27,8 @@ data class InicioRecepcionUiState(
     val medicoYRol: String = "",
     val pacientes: List<PacienteEnFila> = emptyList(),
     val proximaCita: ProximaCita? = null,
-    val menuSesion: MenuSesionUiState = MenuSesionUiState()
+    val menuSesion: MenuSesionUiState = MenuSesionUiState(),
+    val mensajeError: String? = null
 ) {
     val esperando: Int
         get() = pacientes.count { it.estado == EstadoVisita.ESPERANDO }

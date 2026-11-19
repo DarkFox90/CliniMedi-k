@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
@@ -39,6 +40,8 @@ class FilaMedicoViewModel(
     private val _efectos = Channel<FilaMedicoEfecto>()
     val efectos: Flow<FilaMedicoEfecto> = _efectos.receiveAsFlow()
 
+    private val reintentos = MutableStateFlow(0)
+
     init {
         observarFila()
     }
@@ -57,21 +60,30 @@ class FilaMedicoViewModel(
             }
             FilaMedicoEvent.CancelarCierreSesion -> actualizarMenu { it.copy(confirmandoCierre = false) }
             FilaMedicoEvent.ConfirmarCierreSesion -> cerrarSesion()
+            FilaMedicoEvent.Reintentar -> {
+                _state.update { it.copy(cargando = true, mensajeError = null) }
+                reintentos.update { it + 1 }
+            }
         }
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun observarFila() {
         viewModelScope.launch {
-            configuracionRepositorio.configuracion
-                .filterNotNull()
-                .flatMapLatest { configuracion ->
-                    combine(
-                        visitaRepositorio.observarFilaDelDia(configuracion.medicoId),
-                        medicoRepositorio.observarMedico(configuracion.medicoId)
-                    ) { fila, medico ->
-                        calcularFilaMedico(fila, medico?.nombre.orEmpty(), LocalDateTime.now())
-                    }
+            // Cada "Reintentar" cambia el número y vuelve a empezar la carga.
+            reintentos
+                .flatMapLatest {
+                    configuracionRepositorio.configuracion
+                        .filterNotNull()
+                        .flatMapLatest { configuracion ->
+                            combine(
+                                visitaRepositorio.observarFilaDelDia(configuracion.medicoId),
+                                medicoRepositorio.observarMedico(configuracion.medicoId)
+                            ) { fila, medico ->
+                                calcularFilaMedico(fila, medico?.nombre.orEmpty(), LocalDateTime.now())
+                            }
+                        }
+                        .catch { emit(FilaMedicoUiState(cargando = false, mensajeError = MENSAJE_ERROR_CARGA)) }
                 }
                 .collect { fila ->
                     // Los datos nuevos no deben cerrar el menú ni el diálogo que el usuario tiene abiertos.
@@ -106,6 +118,7 @@ class FilaMedicoViewModel(
 
     companion object {
         private const val MENSAJE_ERROR_CIERRE = "No se pudo cerrar la sesión. Intenta de nuevo."
+        private const val MENSAJE_ERROR_CARGA = "No se pudo cargar la fila de pacientes"
 
         val Factory = viewModelFactory {
             initializer {
