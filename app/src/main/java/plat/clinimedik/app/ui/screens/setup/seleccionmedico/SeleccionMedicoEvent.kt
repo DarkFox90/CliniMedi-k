@@ -6,4 +6,5 @@ sealed interface SeleccionMedicoEvent {
     data class CambiarNombre(val texto: String) : SeleccionMedicoEvent
     data class CambiarEspecialidad(val texto: String) : SeleccionMedicoEvent
     data object Continuar : SeleccionMedicoEvent
+    data object Reintentar : SeleccionMedicoEvent
 }

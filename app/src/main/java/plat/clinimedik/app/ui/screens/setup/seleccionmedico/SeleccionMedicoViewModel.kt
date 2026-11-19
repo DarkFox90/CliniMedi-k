@@ -8,11 +8,15 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.toRoute
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -36,6 +40,8 @@ class SeleccionMedicoViewModel(
     private val _efectos = Channel<SeleccionMedicoEfecto>()
     val efectos: Flow<SeleccionMedicoEfecto> = _efectos.receiveAsFlow()
 
+    private val reintentos = MutableStateFlow(0)
+
     init {
         observarMedicos()
     }
@@ -55,14 +61,29 @@ class SeleccionMedicoViewModel(
                 it.copy(especialidad = event.texto, errorEspecialidad = null)
             }
             SeleccionMedicoEvent.Continuar -> continuar()
+            SeleccionMedicoEvent.Reintentar -> {
+                _state.update { it.copy(cargando = true, mensajeError = null) }
+                reintentos.update { it + 1 }
+            }
         }
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     private fun observarMedicos() {
         viewModelScope.launch {
-            medicoRepositorio.observarMedicos().collect { medicos ->
-                _state.update { it.copy(cargando = false, medicos = medicos) }
-            }
+            // Cada "Reintentar" cambia el número y vuelve a empezar la carga.
+            reintentos
+                .flatMapLatest {
+                    medicoRepositorio.observarMedicos()
+                        .catch {
+                            _state.update { actual ->
+                                actual.copy(cargando = false, mensajeError = MENSAJE_ERROR_CARGA)
+                            }
+                        }
+                }
+                .collect { medicos ->
+                    _state.update { it.copy(cargando = false, mensajeError = null, medicos = medicos) }
+                }
         }
     }
 
@@ -76,7 +97,7 @@ class SeleccionMedicoViewModel(
     private fun continuar() {
         if (_state.value.guardando) return
         when (val eleccion = _state.value.eleccion) {
-            is MedicoElegido.Existente -> guardarConfiguracion(eleccion.medicoId)
+            is MedicoElegido.Existente -> guardar { terminar(eleccion.medicoId) }
             is MedicoElegido.Nuevo -> crearMedico(eleccion)
             null -> Unit
         }
@@ -96,16 +117,27 @@ class SeleccionMedicoViewModel(
             }
             return
         }
-        _state.update { it.copy(guardando = true) }
-        viewModelScope.launch {
+        guardar {
             val medicoId = medicoRepositorio.crear(formulario.nombre, formulario.especialidad)
+            // Si después falla guardar la configuración, "Continuar" reintenta sin crear otro médico.
+            _state.update { it.copy(eleccion = MedicoElegido.Existente(medicoId)) }
             terminar(medicoId)
         }
     }
 
-    private fun guardarConfiguracion(medicoId: String) {
+    /** Bloquea el botón mientras guarda y lo libera si algo falla. */
+    private fun guardar(accion: suspend () -> Unit) {
         _state.update { it.copy(guardando = true) }
-        viewModelScope.launch { terminar(medicoId) }
+        viewModelScope.launch {
+            try {
+                accion()
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Exception) {
+                _state.update { it.copy(guardando = false) }
+                _efectos.send(SeleccionMedicoEfecto.MostrarMensaje(MENSAJE_ERROR_GUARDAR))
+            }
+        }
     }
 
     private suspend fun terminar(medicoId: String) {
@@ -114,6 +146,9 @@ class SeleccionMedicoViewModel(
     }
 
     companion object {
+        private const val MENSAJE_ERROR_CARGA = "No se pudo cargar la lista de médicos"
+        private const val MENSAJE_ERROR_GUARDAR = "No se pudo guardar la configuración. Intenta de nuevo."
+
         val Factory = viewModelFactory {
             initializer {
                 val app = this[APPLICATION_KEY] as CliniMedikApp
@@ -129,4 +164,5 @@ class SeleccionMedicoViewModel(
 
 sealed interface SeleccionMedicoEfecto {
     data class ConfiguracionGuardada(val rol: RolDispositivo) : SeleccionMedicoEfecto
+    data class MostrarMensaje(val texto: String) : SeleccionMedicoEfecto
 }

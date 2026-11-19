@@ -22,7 +22,8 @@ data class FilaMedicoUiState(
     val subtitulo: String = "",
     val ultimaActualizacion: String = "",
     val pacientes: List<PacienteEnFilaMedico> = emptyList(),
-    val menuSesion: MenuSesionUiState = MenuSesionUiState()
+    val menuSesion: MenuSesionUiState = MenuSesionUiState(),
+    val mensajeError: String? = null
 )
 
 fun calcularFilaMedico(

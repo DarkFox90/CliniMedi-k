@@ -12,4 +12,5 @@ sealed interface InicioRecepcionEvent {
     data object SolicitarCierreSesion : InicioRecepcionEvent
     data object CancelarCierreSesion : InicioRecepcionEvent
     data object ConfirmarCierreSesion : InicioRecepcionEvent
+    data object Reintentar : InicioRecepcionEvent
 }

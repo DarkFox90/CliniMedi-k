@@ -8,4 +8,5 @@ sealed interface FilaMedicoEvent {
     data object SolicitarCierreSesion : FilaMedicoEvent
     data object CancelarCierreSesion : FilaMedicoEvent
     data object ConfirmarCierreSesion : FilaMedicoEvent
+    data object Reintentar : FilaMedicoEvent
 }

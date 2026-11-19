@@ -10,6 +10,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import plat.clinimedik.app.data.fake.FakeDataSource
 import plat.clinimedik.app.data.model.RolDispositivo
+import plat.clinimedik.app.ui.components.LocalMensajes
 import plat.clinimedik.app.ui.navigation.FilaMedico
 import plat.clinimedik.app.ui.navigation.Inicio
 import plat.clinimedik.app.ui.navigation.SeleccionMedico
@@ -28,10 +29,12 @@ fun SeleccionMedicoRoute(
     viewModel: SeleccionMedicoViewModel = viewModel(factory = SeleccionMedicoViewModel.Factory)
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val mensajes = LocalMensajes.current
     LaunchedEffect(viewModel) {
         viewModel.efectos.collect { efecto ->
             when (efecto) {
                 is SeleccionMedicoEfecto.ConfiguracionGuardada -> onConfiguracionGuardada(efecto.rol)
+                is SeleccionMedicoEfecto.MostrarMensaje -> mensajes.mostrar(efecto.texto)
             }
         }
     }
