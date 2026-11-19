@@ -16,7 +16,7 @@ Esta es la entrega final del curso Programación de Plataformas Móviles (UVG).
 
 ## Descarga
 
-La app se distribuye con Firebase App Distribution: https://appdistribution.firebase.dev/i/ea2bbff1986eb256
+La app se distribuye con Firebase App Distribution: https://appdistribution.firebase.dev/i/d7905da4b058916a
 
 Al abrir el enlace, escribe tu correo y sigue las instrucciones para instalar la app. El mismo APK firmado está en `APK/CliniMedi-k.apk` para instalarlo directamente.
 
